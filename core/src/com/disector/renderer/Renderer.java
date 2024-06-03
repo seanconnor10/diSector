@@ -1,9 +1,7 @@
 package com.disector.renderer;
 
 import com.badlogic.gdx.graphics.Pixmap;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.Array;
 import com.disector.App;
 import com.disector.Sector;
@@ -19,6 +17,13 @@ public abstract class Renderer {
 
     Pixmap buffer;
 
+    int frameWidth, frameHeight;
+    float halfWidth, halfHeight;
+
+    float camX, camY, camZ, camR;
+    float camFOV = 100.f;
+    int camCurrentSector;
+
     public Renderer(App app) {
         this.app = app;
         this.batch = app.batch;
@@ -29,16 +34,18 @@ public abstract class Renderer {
 
     public abstract void renderWorld();
 
-    public void drawFrame() {
-        batch.begin();
-        TextureRegion frame = new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
-        frame.flip(false, true);
-        batch.draw(frame, 0, 0);
-        batch.end();
-        frame.getTexture().dispose();
-    }
+    public abstract void drawFrame();
 
     public void resizeFrame(int w, int h) {
         buffer = new Pixmap(w, h, pixelFormat);
+        frameWidth = w;
+        frameHeight = h;
+        halfWidth = w / 2.f;
+        halfHeight = h /2.f;
+    }
+
+    public void placeCamera(float x, float y, float z, float r, int camCurrentSector) {
+        camX = x; camY = y; camZ = z; camR = r;
+        this.camCurrentSector = camCurrentSector;
     }
 }

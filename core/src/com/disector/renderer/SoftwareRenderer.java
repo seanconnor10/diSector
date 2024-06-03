@@ -2,7 +2,6 @@ package com.disector.renderer;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.utils.IntArray;
 import com.disector.App;
 import com.disector.Sector;
 import com.disector.Wall;
@@ -11,8 +10,8 @@ import java.util.HashSet;
 import java.util.Stack;
 
 public class SoftwareRenderer extends Renderer {
-    private IntArray occlusionBottom = new IntArray(app.frameWidth);
-    private IntArray occlusionTop = new IntArray(app.frameWidth);
+    private int[] occlusionBottom = new int[app.frameWidth];
+    private int[] occlusionTop = new int[app.frameWidth];
     private Stack<Integer> drawnPortals = new Stack<>();
     private HashSet<Integer> transformedWalls = new HashSet<>();
     private HashSet<Integer> transformedSectors = new HashSet<>();
@@ -42,12 +41,23 @@ public class SoftwareRenderer extends Renderer {
     @Override
     public void resizeFrame(int w, int h) {
         super.resizeFrame(w, h);
-        occlusionBottom.setSize(w);
-        occlusionTop.setSize(w);
+        reInitDrawData(w);
+    }
+
+    private void reInitDrawData(int newFrameWidth) {
+        occlusionBottom = new int[newFrameWidth];
+        occlusionTop = new int[newFrameWidth];
+        drawnPortals = new Stack<>();
+        transformedWalls = new HashSet<>();
+        transformedSectors = new HashSet<>();
     }
 
     private void drawSector(int secInd, int spanStart, int spanEnd) {
         Sector sec = sectors.get(secInd);
+
+        for (int wInd : sec.walls.toArray()) {
+            drawWall(wInd, camCurrentSector, spanStart, spanEnd);
+        }
     }
 
     private void drawWall(int wInd, int currentSectorIndex, int spanStart, int spanEnd) {
@@ -107,9 +117,35 @@ public class SoftwareRenderer extends Renderer {
 
         if (leftEdgeX > spanEnd) return; //Avoid more processing if out of span
         if (rightEdgeX < spanStart) return;
-
         //if ( spanFilled(spanStart, spanEnd) ) return;
 
+        Sector currentSector = sectors.get(currentSectorIndex);
+        float secFloorZ = currentSector.floorZ, secCeilZ = currentSector.ceilZ;
 
+        float p1_plotLow = halfHeight + fov*(secFloorZ-camZ)/x1; //Plot wall points vertically
+        float p1_plotHigh = halfHeight + fov*(secCeilZ-camZ)/x1;
+        float p2_plotLow = halfHeight + fov*(secFloorZ-camZ)/x2;
+        float p2_plotHigh = halfHeight + fov*(secCeilZ-camZ)/x2;
+
+        float hProgress; //Horizontal per-pixel progress for this wall
+        float quadBottom, quadTop, quadHeight; //Stores the top and bottom of the wall for each pixel column
+        int rasterBottom, rasterTop; //Where to stop and start drawing for this pixel column
+
+        for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
+            hProgress = (drawX-p1_plotX) / (p2_plotX-p1_plotX);
+
+            /*if (hProgress<0) hProgress = 0.0f;
+            if (hProgress>1.0) hProgress = 1.0f;*/
+
+            quadBottom = p1_plotLow + hProgress*(p2_plotLow-p1_plotLow);
+            quadTop = p1_plotHigh + hProgress*(p2_plotHigh-p1_plotHigh);
+
+            rasterBottom = (int) quadBottom;
+            rasterTop = (int) quadTop;
+
+            for (int drawY = rasterBottom; drawY < rasterTop; drawY++) {
+                buffer.drawPixel(drawX, drawY, 0xFF1010);
+            }
+        }
     }
 }

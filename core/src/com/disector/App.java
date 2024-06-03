@@ -12,7 +12,7 @@ import com.disector.renderer.SoftwareRenderer;
 
 public class App extends ApplicationAdapter {
     private GameWorld gameWorld;
-    private Renderer renderer = new SoftwareRenderer(this);
+    private Renderer renderer;
     private EditorInterface editor;
 
     public final Array<Wall> walls = new Array<>();
@@ -32,9 +32,9 @@ public class App extends ApplicationAdapter {
     @Override
     public void render () {
         ScreenUtils.clear(0.1f, 0, 0, 1);
-        renderer.placeCamera(50, 50, 20, 0, 0);
-        renderer.renderWorld();
-        renderer.drawFrame();
+        //renderer.placeCamera(50, 50, 20, 0, 0);
+        //renderer.renderWorld();
+        //renderer.drawFrame();
     }
 
     @Override

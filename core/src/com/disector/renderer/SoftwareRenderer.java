@@ -10,8 +10,8 @@ import java.util.HashSet;
 import java.util.Stack;
 
 public class SoftwareRenderer extends Renderer {
-    private int[] occlusionBottom = new int[app.frameWidth];
-    private int[] occlusionTop = new int[app.frameWidth];
+    private int[] occlusionBottom;
+    private int[] occlusionTop;
     private Stack<Integer> drawnPortals = new Stack<>();
     private HashSet<Integer> transformedWalls = new HashSet<>();
     private HashSet<Integer> transformedSectors = new HashSet<>();
@@ -41,7 +41,7 @@ public class SoftwareRenderer extends Renderer {
     @Override
     public void resizeFrame(int w, int h) {
         super.resizeFrame(w, h);
-        reInitDrawData(w);
+        //reInitDrawData(w);
     }
 
     private void reInitDrawData(int newFrameWidth) {

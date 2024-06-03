@@ -11,7 +11,7 @@ import com.disector.Sector;
 import com.disector.Wall;
 
 public abstract class Renderer {
-    final static Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888;
+    final Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888;
 
     final App app;
     final Array<Wall> walls;

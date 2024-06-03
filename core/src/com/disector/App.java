@@ -7,21 +7,24 @@ import com.badlogic.gdx.utils.ScreenUtils;
 
 import com.disector.gameworld.GameWorld;
 import com.disector.editor.EditorInterface;
-import com.disector.renderer.RendererInterface;
+import com.disector.renderer.Renderer;
 
 public class App extends ApplicationAdapter {
-    GameWorld gameWorld;
-    RendererInterface Renderer;
-    EditorInterface Editor;
+    private GameWorld gameWorld;
+    private Renderer renderer;
+    private EditorInterface editor;
 
-    Array<Wall> walls = new Array<>();
-    Array<Sector> sectors = new Array<>();
+    public final Array<Wall> walls = new Array<>();
+    public final Array<Sector> sectors = new Array<>();
 
-    SpriteBatch batch;
+    public int frameWidth = 400;
+    public int frameHeight = 300;
+
+    public SpriteBatch batch;
 
     @Override
     public void create () {
-
+        batch = new SpriteBatch();
     }
 
     @Override

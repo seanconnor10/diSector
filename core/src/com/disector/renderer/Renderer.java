@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
 import com.disector.App;
@@ -25,7 +26,7 @@ public abstract class Renderer {
     float halfWidth, halfHeight;
 
     float camX, camY, camZ, camR;
-    float camFOV = 100.f;
+    float camFOV = 250.f;
     int camCurrentSector;
 
     public Renderer(App app) {
@@ -52,6 +53,11 @@ public abstract class Renderer {
 
     public void placeCamera(float x, float y, float z, float r, int camCurrentSector) {
         camX = x; camY = y; camZ = z; camR = r;
+        this.camCurrentSector = camCurrentSector;
+    }
+
+    public void placeCamera(Vector4 pos, int camCurrentSector) {
+        camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w;
         this.camCurrentSector = camCurrentSector;
     }
 }

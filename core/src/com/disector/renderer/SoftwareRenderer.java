@@ -1,5 +1,6 @@
 package com.disector.renderer;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.disector.App;
@@ -60,6 +61,14 @@ public class SoftwareRenderer extends Renderer {
         }
     }
 
+    private boolean spanFilled(int spanStart, int spanEnd) {
+        for (int i=spanStart; i<spanEnd; i++) {
+            if (occlusionBottom[i] >= occlusionTop[i]-1)
+                return true;
+        }
+        return false;
+    }
+
     private void drawSector(int secInd, int spanStart, int spanEnd) {
         Sector sec = sectors.get(secInd);
 
@@ -113,7 +122,7 @@ public class SoftwareRenderer extends Renderer {
         float p1_plotX = halfWidth - fov*y1/x1; //Plot edges of wall onto screen space
         float p2_plotX = halfWidth - fov*y2/x2;
 
-        //if (p1_plotX > p2_plotX) return; //Avoid drawing backside of wall
+        if (p1_plotX > p2_plotX) return; //Avoid drawing backside of wall
 
         int leftEdgeX = (int) p1_plotX; //Snap plots to integer representing pixel column
         if (leftEdgeX < 0)
@@ -125,7 +134,7 @@ public class SoftwareRenderer extends Renderer {
 
         if (leftEdgeX > spanEnd) return; //Avoid more processing if out of span
         if (rightEdgeX < spanStart) return;
-        //if ( spanFilled(spanStart, spanEnd) ) return;
+        if ( spanFilled(spanStart, spanEnd)) return;
 
         Sector currentSector = sectors.get(currentSectorIndex);
         float secFloorZ = currentSector.floorZ, secCeilZ = currentSector.ceilZ;
@@ -139,20 +148,26 @@ public class SoftwareRenderer extends Renderer {
         float quadBottom, quadTop, quadHeight; //Stores the top and bottom of the wall for each pixel column
         int rasterBottom, rasterTop; //Where to stop and start drawing for this pixel column
 
-        for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
+                                        //SHOULD PROBABLY BE <= rightEdgeX
+        for (int drawX = leftEdgeX; drawX < rightEdgeX; drawX++) { //Per draw column loop
+            if (occlusionTop[drawX] -1 <= occlusionBottom[drawX] ) continue;
+
             hProgress = (drawX-p1_plotX) / (p2_plotX-p1_plotX);
 
-            /*if (hProgress<0) hProgress = 0.0f;
-            if (hProgress>1.0) hProgress = 1.0f;*/
+            if (hProgress<0) hProgress = 0.0f;
+            if (hProgress>1.0) hProgress = 1.0f;
 
             quadBottom = p1_plotLow + hProgress*(p2_plotLow-p1_plotLow);
             quadTop = p1_plotHigh + hProgress*(p2_plotHigh-p1_plotHigh);
 
-            rasterBottom = (int) quadBottom;
-            rasterTop = (int) quadTop;
+            float fog = (x1 + hProgress*(x2-x1)) / 300.0f;
+
+            rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
+            rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) {
-                buffer.drawPixel(drawX, drawY, 0xA01010FF);
+                //
+                buffer.drawPixel(drawX, drawY, new Color(0xFFA0FF00).lerp(0f,0f,0f,1f,fog).toIntBits() );
             }
         }
     }

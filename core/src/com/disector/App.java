@@ -21,8 +21,8 @@ public class App extends ApplicationAdapter {
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
 
-    public int frameWidth = 400;
-    public int frameHeight = 300;
+    public int frameWidth = 320;
+    public int frameHeight = 180;
 
     public SpriteBatch batch;
 
@@ -47,7 +47,7 @@ public class App extends ApplicationAdapter {
 
         gameWorld.step(deltaTime);
 
-        renderer.placeCamera(50, 50, 20, 0, 0);
+        renderer.placeCamera(gameWorld.getPlayerPosition(), 0);
         renderer.renderWorld();
         renderer.drawFrame();
     }
@@ -79,7 +79,8 @@ public class App extends ApplicationAdapter {
     private void createTestMap() {
         Sector s = new Sector(); s.floorZ = 0; s.ceilZ = 50;
         walls.add(new Wall( 20, 20, 100, 20 )); s.walls.add(walls.size-1);
-        walls.add(new Wall( 120, 50, 100, 20 )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 100, 20, 100, 80 )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 100, 80, 0, 80 )); s.walls.add(walls.size-1);
         sectors.add(s);
     }
 

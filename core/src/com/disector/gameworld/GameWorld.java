@@ -4,6 +4,7 @@ import com.disector.App;
 
 public class GameWorld {
     private final App app;
+
     private Player player1;
 
     public GameWorld(App app) {

@@ -4,10 +4,10 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 import com.disector.gameworld.GameWorld;
 import com.disector.editor.EditorInterface;
+import com.disector.inputrecorder.InputRecorder;
 import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
 
@@ -31,13 +31,20 @@ public class App extends ApplicationAdapter {
         batch = new SpriteBatch();
         renderer = new SoftwareRenderer(this);
         gameWorld = new GameWorld(this);
+
+        repopulateInputKeyMapSafe();
+
         createTestMap();
     }
 
     @Override
     public void render () {
         //ScreenUtils.clear(0, 0, 0, 1);
+
         updateDeltaTime();
+
+        InputRecorder.updateKeys();
+
         gameWorld.step(deltaTime);
 
         renderer.placeCamera(50, 50, 20, 0, 0);
@@ -48,6 +55,18 @@ public class App extends ApplicationAdapter {
     @Override
     public void dispose () {
         batch.dispose();
+    }
+
+    private void repopulateInputKeyMapSafe() {
+        try {
+            InputRecorder.repopulateKeyCodeMap();
+        } catch (Exception e) {
+            System.out.println(" -=== ERROR ===-");
+            System.out.println("InputRecorder failed to repopulate KeyCodeMap via Reflection");
+            System.out.println("  Exception Type: " + e.getClass().getName() );
+            System.out.println(" -=============-");
+            System.exit(1);
+        }
     }
 
     private void updateDeltaTime() {

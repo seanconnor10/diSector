@@ -6,6 +6,7 @@ import com.disector.App;
 import com.disector.Sector;
 import com.disector.Wall;
 
+import java.awt.*;
 import java.util.HashSet;
 import java.util.Stack;
 
@@ -22,17 +23,16 @@ public class SoftwareRenderer extends Renderer {
 
     @Override
     public void renderWorld() {
-        //Clear drawing Data
-        transformedWalls.clear();
-        transformedSectors.clear();
-        drawnPortals.clear();
+        resetDrawData();
+        buffer.fill();
+        drawSector(0, 0, frameWidth-1);
     }
 
     @Override
     public void drawFrame() {
-        batch.begin();
         TextureRegion frame = new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
         frame.flip(false, true);
+        batch.begin();
         batch.draw(frame, 0, 0);
         batch.end();
         frame.getTexture().dispose();
@@ -41,15 +41,23 @@ public class SoftwareRenderer extends Renderer {
     @Override
     public void resizeFrame(int w, int h) {
         super.resizeFrame(w, h);
-        //reInitDrawData(w);
+        reInitDrawData(w);
     }
 
     private void reInitDrawData(int newFrameWidth) {
         occlusionBottom = new int[newFrameWidth];
         occlusionTop = new int[newFrameWidth];
-        drawnPortals = new Stack<>();
-        transformedWalls = new HashSet<>();
-        transformedSectors = new HashSet<>();
+    }
+
+    private void resetDrawData() {
+        transformedWalls.clear();
+        transformedSectors.clear();
+        drawnPortals.clear();
+
+        for (int i=0; i<frameWidth; i++) {
+            occlusionBottom[i] = 0;
+            occlusionTop[i] = frameHeight;
+        }
     }
 
     private void drawSector(int secInd, int spanStart, int spanEnd) {
@@ -105,7 +113,7 @@ public class SoftwareRenderer extends Renderer {
         float p1_plotX = halfWidth - fov*y1/x1; //Plot edges of wall onto screen space
         float p2_plotX = halfWidth - fov*y2/x2;
 
-        if (p1_plotX > p2_plotX) return; //Avoid drawing backside of wall
+        //if (p1_plotX > p2_plotX) return; //Avoid drawing backside of wall
 
         int leftEdgeX = (int) p1_plotX; //Snap plots to integer representing pixel column
         if (leftEdgeX < 0)
@@ -144,7 +152,7 @@ public class SoftwareRenderer extends Renderer {
             rasterTop = (int) quadTop;
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) {
-                buffer.drawPixel(drawX, drawY, 0xFF1010);
+                buffer.drawPixel(drawX, drawY, 0xA01010FF);
             }
         }
     }

@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 
 import com.disector.App;
@@ -41,10 +42,12 @@ public abstract class Renderer {
 
     public void resizeFrame(int w, int h) {
         buffer = new Pixmap(w, h, pixelFormat);
+        buffer.setColor(0x000000FF);
         frameWidth = w;
         frameHeight = h;
         halfWidth = w / 2.f;
         halfHeight = h /2.f;
+        batch.setProjectionMatrix( new Matrix4().setToOrtho2D(0,0,frameWidth,frameHeight) );
     }
 
     public void placeCamera(float x, float y, float z, float r, int camCurrentSector) {

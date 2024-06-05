@@ -11,15 +11,15 @@ public class GameWorld {
     public GameWorld(App app) {
         this.app = app;
         player1 = new Player(this);
-        player1.z = 20.f;
+        player1.z = 100.f;
     }
 
     public void step(float dt) {
-        player1.step(dt);
+        player1.step(dt, app.walls, app.sectors);
     }
 
     public Vector4 getPlayerPosition() {
-        return new Vector4(player1.x, player1.y, player1.z, player1.r);
+        return new Vector4(player1.x, player1.y, player1.z+player1.HEIGHT, player1.r);
     }
 
     public float getPlayerVLook() {

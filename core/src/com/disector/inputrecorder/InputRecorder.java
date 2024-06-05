@@ -11,7 +11,7 @@ public class InputRecorder {
     public static Map<String, Integer> keyBinds = new HashMap<>();
     public static Map<Integer, keyPressData> keyPressMap = new HashMap<>();
     public static int keyCount;
-    public static float mouseDeltaX;
+    public static float mouseDeltaX, mouseDeltaY;
 
     @KeyCode
     public static int FORWARD = Input.Keys.W;
@@ -32,6 +32,7 @@ public class InputRecorder {
 
     public static void updateKeys() {
         mouseDeltaX = Gdx.input.getDeltaX();
+        mouseDeltaY = Gdx.input.getDeltaY();
 
         for (Map.Entry<Integer, keyPressData> keyEntry : keyPressMap.entrySet()) {
             keyEntry.getValue().justReleased = keyEntry.getValue().isDown && !Gdx.input.isKeyPressed(keyEntry.getKey());

@@ -22,8 +22,8 @@ public class App extends ApplicationAdapter {
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
 
-    public int frameWidth = 400;
-    public int frameHeight = 225;
+    public int frameWidth = 320;
+    public int frameHeight = 180;
 
     public SpriteBatch batch;
 
@@ -89,7 +89,8 @@ public class App extends ApplicationAdapter {
         walls.add(new Wall( 100, 80, 175, 80 )); s.walls.add(walls.size-1);
         walls.add(new Wall( 175, 80, 175, -20)); s.walls.add(walls.size-1);
         walls.add(new Wall( 175, -20, 75, -125)); s.walls.add(walls.size-1);
-
+        walls.add(new Wall(75, -125, 20, -125 )); s.walls.add(walls.size-1);
+        walls.add(new Wall(20, -125, 20, 20 )); s.walls.add(walls.size-1);
         sectors.add(s);
     }
 

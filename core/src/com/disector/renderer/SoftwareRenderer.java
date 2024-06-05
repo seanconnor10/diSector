@@ -141,7 +141,7 @@ public class SoftwareRenderer extends Renderer {
         float p1_plotLow = halfHeight - camVLook + fov*(secFloorZ-camZ)/x1; //Plot wall points vertically
         float p1_plotHigh = halfHeight - camVLook + fov*(secCeilZ-camZ)/x1;
         float p2_plotLow = halfHeight - camVLook + fov*(secFloorZ-camZ)/x2;
-        float p2_plotHigh = halfHeight - camVLook cd + fov*(secCeilZ-camZ)/x2;
+        float p2_plotHigh = halfHeight - camVLook + fov*(secCeilZ-camZ)/x2;
 
         float hProgress; //Horizontal per-pixel progress for this wall
         float quadBottom, quadTop, quadHeight; //Stores the top and bottom of the wall for each pixel column
@@ -164,7 +164,7 @@ public class SoftwareRenderer extends Renderer {
 
             rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
-            
+
             float u =  ((1 - hProgress)*(leftClipU/x1) + hProgress*(rightClipU/x2)) / ( (1-hProgress)*(1/x1) + hProgress*(1/ x2));
             if (u<0.0001f) u = 0.0001f; if (u>0.9999) u = 0.9999f;
 
@@ -179,11 +179,11 @@ public class SoftwareRenderer extends Renderer {
             //Draw Floor
             final float scaleFactor = 32.f;
             float floorXOffset = camX/scaleFactor, floorYOffset = camY/scaleFactor;
+            int vOffset = (int) camVLook;
             if (occlusionBottom[drawX] < quadBottom) {
                 float heightOffset = (camZ - secFloorZ) / scaleFactor;
                 int floorEndScreenY = (int)(quadBottom);
-
-                for (int drawY = occlusionBottom[drawX]; drawY<floorEndScreenY; drawY++) {
+                for (int drawY = occlusionBottom[drawX] + vOffset; drawY<floorEndScreenY + vOffset; drawY++) {
                     float floorX = heightOffset * (drawX-halfWidth) / (drawY-halfHeight);
                     float floorY = heightOffset * fov / (drawY-halfHeight);
 
@@ -207,7 +207,37 @@ public class SoftwareRenderer extends Renderer {
                     boolean checkerBoard = ( (int)(rotFloorX*8%2) == (int)(rotFloorY*8%2) );
                     Color drawColor = new Color( checkerBoard ? 0xFFD08010 : 0xFF10D080 );
                     drawColor.lerp( Color.BLACK, (1.f - ( (halfHeight-heightOffset-drawY)/(halfHeight-heightOffset))));
-                    buffer.drawPixel(drawX, drawY, drawColor.toIntBits() );
+                    buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
+                }
+            }
+            if (occlusionTop[drawX] > quadTop) {
+                float heightOffset = (secCeilZ-camZ) / scaleFactor;
+                int ceilEndScreenY = occlusionTop[drawX] + vOffset;
+                for (int drawY = rasterTop + vOffset; drawY < ceilEndScreenY; drawY++) {
+                    float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);
+                    float ceilY = heightOffset * fov / (drawY - halfHeight);
+
+                    float rotX = ceilX * playerSin - ceilY * playerCos - floorXOffset;
+                    float rotY = ceilX * playerCos + ceilY * playerSin - floorYOffset;
+
+                    if (rotX <= 0) rotX = -rotX;
+                    if (rotY < 0) rotY = -rotY;
+
+                    rotX /= 4f;
+                    rotY /= 4f;
+
+                    rotX = rotX % 1;
+                    rotY = rotY % 1;
+
+                    while (rotX < 0.0) rotX += 1.0f;
+                    while (rotX > 1.0f) rotX -= 1.0f;
+                    while (rotY < 0.0) rotY += 1.0f;
+                    while (rotY > 1.0f) rotY -= 1.0f;
+
+                    boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
+                    Color drawColor = new Color( checkerBoard ? 0xFF302005 : 0xFF251503 );
+                    drawColor.lerp( Color.BLACK, 1.0f - (((-halfHeight + drawY) / halfHeight)));
+                    buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
                 }
             }
 

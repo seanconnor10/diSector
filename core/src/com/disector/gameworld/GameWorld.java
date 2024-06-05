@@ -21,4 +21,8 @@ public class GameWorld {
     public Vector4 getPlayerPosition() {
         return new Vector4(player1.x, player1.y, player1.z, player1.r);
     }
+
+    public float getPlayerVLook() {
+        return player1.vLook;
+    }
 }

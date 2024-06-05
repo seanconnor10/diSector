@@ -7,7 +7,6 @@ import com.disector.App;
 import com.disector.Sector;
 import com.disector.Wall;
 
-import java.awt.*;
 import java.util.HashSet;
 import java.util.Stack;
 
@@ -63,10 +62,10 @@ public class SoftwareRenderer extends Renderer {
 
     private boolean spanFilled(int spanStart, int spanEnd) {
         for (int i=spanStart; i<spanEnd; i++) {
-            if (occlusionBottom[i] >= occlusionTop[i]-1)
-                return true;
+            if (occlusionBottom[i] < occlusionTop[i]-1)
+                return false;
         }
-        return false;
+        return true;
     }
 
     private void drawSector(int secInd, int spanStart, int spanEnd) {
@@ -139,16 +138,16 @@ public class SoftwareRenderer extends Renderer {
         Sector currentSector = sectors.get(currentSectorIndex);
         float secFloorZ = currentSector.floorZ, secCeilZ = currentSector.ceilZ;
 
-        float p1_plotLow = halfHeight + fov*(secFloorZ-camZ)/x1; //Plot wall points vertically
-        float p1_plotHigh = halfHeight + fov*(secCeilZ-camZ)/x1;
-        float p2_plotLow = halfHeight + fov*(secFloorZ-camZ)/x2;
-        float p2_plotHigh = halfHeight + fov*(secCeilZ-camZ)/x2;
+        float p1_plotLow = halfHeight - camVLook + fov*(secFloorZ-camZ)/x1; //Plot wall points vertically
+        float p1_plotHigh = halfHeight - camVLook + fov*(secCeilZ-camZ)/x1;
+        float p2_plotLow = halfHeight - camVLook + fov*(secFloorZ-camZ)/x2;
+        float p2_plotHigh = halfHeight - camVLook cd + fov*(secCeilZ-camZ)/x2;
 
         float hProgress; //Horizontal per-pixel progress for this wall
         float quadBottom, quadTop, quadHeight; //Stores the top and bottom of the wall for each pixel column
         int rasterBottom, rasterTop; //Where to stop and start drawing for this pixel column
 
-                                        //SHOULD PROBABLY BE <= rightEdgeX
+                                //SHOULD PROBABLY BE <= rightEdgeX
         for (int drawX = leftEdgeX; drawX < rightEdgeX; drawX++) { //Per draw column loop
             if (occlusionTop[drawX] -1 <= occlusionBottom[drawX] ) continue;
 
@@ -159,16 +158,66 @@ public class SoftwareRenderer extends Renderer {
 
             quadBottom = p1_plotLow + hProgress*(p2_plotLow-p1_plotLow);
             quadTop = p1_plotHigh + hProgress*(p2_plotHigh-p1_plotHigh);
+            quadHeight = quadTop - quadBottom;
 
             float fog = (x1 + hProgress*(x2-x1)) / 300.0f;
 
             rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
+            
+            float u =  ((1 - hProgress)*(leftClipU/x1) + hProgress*(rightClipU/x2)) / ( (1-hProgress)*(1/x1) + hProgress*(1/ x2));
+            if (u<0.0001f) u = 0.0001f; if (u>0.9999) u = 0.9999f;
 
-            for (int drawY = rasterBottom; drawY < rasterTop; drawY++) {
-                //
-                buffer.drawPixel(drawX, drawY, new Color(0xFFA0FF00).lerp(0f,0f,0f,1f,fog).toIntBits() );
+            for (int drawY = rasterBottom; drawY < rasterTop; drawY++) { //Per Pixel draw loop
+                float v = (drawY - quadBottom) /quadHeight;
+                boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
+                Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB);
+                pixelColor.lerp(0f,0f,0f,1f,fog);
+                buffer.drawPixel(drawX, drawY, pixelColor.toIntBits() );
+            } //End Per Pixel Loop
+
+            //Draw Floor
+            final float scaleFactor = 32.f;
+            float floorXOffset = camX/scaleFactor, floorYOffset = camY/scaleFactor;
+            if (occlusionBottom[drawX] < quadBottom) {
+                float heightOffset = (camZ - secFloorZ) / scaleFactor;
+                int floorEndScreenY = (int)(quadBottom);
+
+                for (int drawY = occlusionBottom[drawX]; drawY<floorEndScreenY; drawY++) {
+                    float floorX = heightOffset * (drawX-halfWidth) / (drawY-halfHeight);
+                    float floorY = heightOffset * fov / (drawY-halfHeight);
+
+                    float rotFloorX = floorX*playerSin - floorY*playerCos + floorXOffset;
+                    float rotFloorY = floorX*playerCos + floorY*playerSin + floorYOffset;
+
+                    if (rotFloorX<=0) rotFloorX = -rotFloorX;
+                    if (rotFloorY<0) rotFloorY = -rotFloorY;
+
+                    rotFloorX /= 4;
+                    rotFloorY /= 4;
+
+                    rotFloorX = rotFloorX%1;
+                    rotFloorY = rotFloorY%1;
+
+                    while(rotFloorX<0.0) rotFloorX+=1.0f;
+                    while(rotFloorX>1.0f) rotFloorX-=1.0f;
+                    while(rotFloorY<0.0) rotFloorY+=1.0f;
+                    while(rotFloorY>1.0f) rotFloorY-=1.0f;
+
+                    boolean checkerBoard = ( (int)(rotFloorX*8%2) == (int)(rotFloorY*8%2) );
+                    Color drawColor = new Color( checkerBoard ? 0xFFD08010 : 0xFF10D080 );
+                    drawColor.lerp( Color.BLACK, (1.f - ( (halfHeight-heightOffset-drawY)/(halfHeight-heightOffset))));
+                    buffer.drawPixel(drawX, drawY, drawColor.toIntBits() );
+                }
             }
-        }
+
+            //Update Occlusion Matrix
+            int meetingPoint = (rasterTop + rasterBottom) / 2;
+            if (occlusionBottom[drawX] < meetingPoint)
+                occlusionBottom[drawX] = meetingPoint;
+            if (occlusionTop[drawX] > meetingPoint)
+                occlusionTop[drawX] = meetingPoint;
+
+        } //End Per Column Loop
     }
 }

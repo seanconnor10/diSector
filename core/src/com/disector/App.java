@@ -2,6 +2,7 @@ package com.disector;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.Array;
 
@@ -21,8 +22,8 @@ public class App extends ApplicationAdapter {
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
 
-    public int frameWidth = 320;
-    public int frameHeight = 180;
+    public int frameWidth = 400;
+    public int frameHeight = 225;
 
     public SpriteBatch batch;
 
@@ -31,6 +32,8 @@ public class App extends ApplicationAdapter {
         batch = new SpriteBatch();
         renderer = new SoftwareRenderer(this);
         gameWorld = new GameWorld(this);
+
+        Gdx.input.setCursorCatched(true);
 
         repopulateInputKeyMapSafe();
 
@@ -45,9 +48,12 @@ public class App extends ApplicationAdapter {
 
         InputRecorder.updateKeys();
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) //Toggle Mouse Locking
+            Gdx.input.setCursorCatched( !Gdx.input.isCursorCatched() );
+
         gameWorld.step(deltaTime);
 
-        renderer.placeCamera(gameWorld.getPlayerPosition(), 0);
+        renderer.placeCamera(gameWorld.getPlayerPosition(), gameWorld.getPlayerVLook(), 0);
         renderer.renderWorld();
         renderer.drawFrame();
     }
@@ -80,7 +86,10 @@ public class App extends ApplicationAdapter {
         Sector s = new Sector(); s.floorZ = 0; s.ceilZ = 50;
         walls.add(new Wall( 20, 20, 100, 20 )); s.walls.add(walls.size-1);
         walls.add(new Wall( 100, 20, 100, 80 )); s.walls.add(walls.size-1);
-        walls.add(new Wall( 100, 80, 0, 80 )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 100, 80, 175, 80 )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 175, 80, 175, -20)); s.walls.add(walls.size-1);
+        walls.add(new Wall( 175, -20, 75, -125)); s.walls.add(walls.size-1);
+
         sectors.add(s);
     }
 

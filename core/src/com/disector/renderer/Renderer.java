@@ -1,7 +1,5 @@
 package com.disector.renderer;
 
-import java.nio.ByteBuffer;
-
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
@@ -13,7 +11,7 @@ import com.disector.Sector;
 import com.disector.Wall;
 
 public abstract class Renderer {
-    final Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888;
+    final Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888; //RGBA8888 is faster than RGBA4444
 
     final App app;
     final Array<Wall> walls;
@@ -25,7 +23,7 @@ public abstract class Renderer {
     int frameWidth, frameHeight;
     float halfWidth, halfHeight;
 
-    float camX, camY, camZ, camR;
+    float camX, camY, camZ, camR, camVLook;
     float camFOV = 250.f;
     int camCurrentSector;
 
@@ -51,13 +49,8 @@ public abstract class Renderer {
         batch.setProjectionMatrix( new Matrix4().setToOrtho2D(0,0,frameWidth,frameHeight) );
     }
 
-    public void placeCamera(float x, float y, float z, float r, int camCurrentSector) {
-        camX = x; camY = y; camZ = z; camR = r;
-        this.camCurrentSector = camCurrentSector;
-    }
-
-    public void placeCamera(Vector4 pos, int camCurrentSector) {
-        camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w;
+    public void placeCamera(Vector4 pos, float vLook, int camCurrentSector) {
+        camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w; camVLook = vLook;
         this.camCurrentSector = camCurrentSector;
     }
 }

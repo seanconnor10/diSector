@@ -14,17 +14,21 @@ public class InputRecorder {
     public static float mouseDeltaX;
 
     @KeyCode
-    public static int P1_FORWARD = Input.Keys.W;
+    public static int FORWARD = Input.Keys.W;
     @KeyCode
-    public static int P1_LEFT = Input.Keys.A;
+    public static int LEFT = Input.Keys.A;
     @KeyCode
-    public static int P1_BACKWARD = Input.Keys.S;
+    public static int BACKWARD = Input.Keys.S;
     @KeyCode
-    public static int P1_RIGHT = Input.Keys.D;
+    public static int RIGHT = Input.Keys.D;
     @KeyCode
-    public static int P1_TURN_LEFT = Input.Keys.LEFT;
+    public static int TURN_LEFT = Input.Keys.LEFT;
     @KeyCode
-    public static int P1_TURN_RIGHT = Input.Keys.RIGHT;
+    public static int TURN_RIGHT = Input.Keys.RIGHT;
+    @KeyCode
+    public static int LOOK_UP = Input.Keys.UP;
+    @KeyCode
+    public static int LOOK_DOWN = Input.Keys.DOWN;
 
     public static void updateKeys() {
         mouseDeltaX = Gdx.input.getDeltaX();

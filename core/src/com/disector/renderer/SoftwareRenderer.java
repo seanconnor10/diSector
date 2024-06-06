@@ -160,7 +160,7 @@ public class SoftwareRenderer extends Renderer {
             quadTop = p1_plotHigh + hProgress*(p2_plotHigh-p1_plotHigh);
             quadHeight = quadTop - quadBottom;
 
-            float fog = (x1 + hProgress*(x2-x1)) / 300.0f;
+            float fog = (x1 + hProgress*(x2-x1)) / 600.0f;
 
             rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
@@ -206,7 +206,9 @@ public class SoftwareRenderer extends Renderer {
 
                     boolean checkerBoard = ( (int)(rotFloorX*8%2) == (int)(rotFloorY*8%2) );
                     Color drawColor = new Color( checkerBoard ? 0xFFD08010 : 0xFF10D080 );
-                    drawColor.lerp( Color.BLACK, (1.f - ( (halfHeight-heightOffset-drawY)/(halfHeight-heightOffset))));
+                    float floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
+                    Math.clamp(floorFogValue, 0.f, 1.f);
+                    drawColor.lerp( Color.BLACK, floorFogValue);
                     buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
                 }
             }
@@ -236,7 +238,9 @@ public class SoftwareRenderer extends Renderer {
 
                     boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
                     Color drawColor = new Color( checkerBoard ? 0xFF302005 : 0xFF251503 );
-                    drawColor.lerp( Color.BLACK, 1.0f - (((-halfHeight + drawY) / halfHeight)));
+                    float ceilFogValue = 1.0f - (((-halfHeight + drawY) / halfHeight));
+                    Math.clamp(ceilFogValue, 0.f, 1.f);
+                    drawColor.lerp( Color.BLACK, ceilFogValue);
                     buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
                 }
             }

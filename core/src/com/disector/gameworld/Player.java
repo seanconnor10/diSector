@@ -19,6 +19,10 @@ public class Player implements Positionable{
     float zSpeed;
     int currentSectorIndex;
 
+    final float MAX_SPEED = 150.f, ACCEL = 2.0f;
+    final float MOUSE_SENS_X = 0.01f, MOUSE_SENS_Y = 1.0f;
+    final float TURN_SPEED = 4.0f, VLOOK_SPEED = 150.0f;
+    final float VLOOK_CLAMP = 275.f;
     final int HEIGHT = 20;
 
     Player(GameWorld world) {
@@ -31,10 +35,6 @@ public class Player implements Positionable{
     }
 
     private Vector2 movementInput(float dt) {
-        final float MAX_SPEED = 150.f, ACCEL = 2.0f;
-        final float TURN_SPEED = 4.0f, VLOOK_SPEED = 150.0f;
-        final float MOUSE_SENS_X = 0.01f, MOUSE_SENS_Y = 1.0f;
-
         Vector2 startingPosition = new Vector2(x, y);
 
         //Record needed button presses
@@ -77,7 +77,7 @@ public class Player implements Positionable{
         if (turnRightDown) r -= TURN_SPEED*dt;
         if (lookUpDown) vLook += VLOOK_SPEED*dt;
         if (lookDownDown) vLook -= VLOOK_SPEED*dt;
-
+        vLook = Math.min( Math.max(vLook, -VLOOK_CLAMP), VLOOK_CLAMP );
 
         //Return starting position for collision function to use
         return startingPosition;

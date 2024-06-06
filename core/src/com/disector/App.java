@@ -22,8 +22,8 @@ public class App extends ApplicationAdapter {
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
 
-    public int frameWidth = 320;
-    public int frameHeight = 180;
+    public int frameWidth = 480;
+    public int frameHeight = 270;
 
     public SpriteBatch batch;
 

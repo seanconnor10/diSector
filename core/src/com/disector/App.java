@@ -22,8 +22,8 @@ public class App extends ApplicationAdapter {
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
 
-    public int frameWidth = 320;
-    public int frameHeight = 180;
+    public int frameWidth = 400;
+    public int frameHeight = 225;
 
     public SpriteBatch batch;
 
@@ -33,9 +33,8 @@ public class App extends ApplicationAdapter {
         renderer = new SoftwareRenderer(this);
         gameWorld = new GameWorld(this);
 
+        InputRecorder.repopulateKeyCodeMap();
         Gdx.input.setCursorCatched(true);
-
-        repopulateInputKeyMapSafe();
 
         createTestMap();
     }
@@ -63,34 +62,22 @@ public class App extends ApplicationAdapter {
         batch.dispose();
     }
 
-    private void repopulateInputKeyMapSafe() {
-        try {
-            InputRecorder.repopulateKeyCodeMap();
-        } catch (Exception e) {
-            System.out.println(" -=== ERROR ===-");
-            System.out.println("InputRecorder failed to repopulate KeyCodeMap via Reflection");
-            System.out.println("  Exception Type: " + e.getClass().getName() );
-            System.out.println(" -=============-");
-            System.exit(1);
-        }
-    }
-
     private void updateDeltaTime() {
         deltaTime = Gdx.graphics.getDeltaTime();
-        int fps = (int) ( 1.f / deltaTime );
-        System.out.println("Fps: " + fps);
+        //int fps = (int) ( 1.f / deltaTime );
+        //System.out.println("Fps: " + fps);
         if (deltaTime > 0.04f) deltaTime = 0.04f; //If below 25 frames/second only advance time as if it were running at 25fps
     }
 
     private void createTestMap() {
         Sector s = new Sector(); s.floorZ = 0; s.ceilZ = 50;
-        walls.add(new Wall( 20, 20, 100, 20 )); s.walls.add(walls.size-1);
-        walls.add(new Wall( 100, 20, 100, 80 )); s.walls.add(walls.size-1);
-        walls.add(new Wall( 100, 80, 175, 80 )); s.walls.add(walls.size-1);
-        walls.add(new Wall( 175, 80, 175, -20)); s.walls.add(walls.size-1);
-        walls.add(new Wall( 175, -20, 75, -125)); s.walls.add(walls.size-1);
-        walls.add(new Wall(75, -125, 20, -125 )); s.walls.add(walls.size-1);
-        walls.add(new Wall(20, -125, 20, 20 )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 20, 20, 100, 20     )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 100, 20, 100, 80    )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 100, 80, 175, 80    )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 175, 80, 175, -20   )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 175, -20, 75, -125  )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 75, -125, 20, -125  )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 20, -125, 20, 20    )); s.walls.add(walls.size-1);
         sectors.add(s);
     }
 

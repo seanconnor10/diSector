@@ -41,15 +41,22 @@ public class InputRecorder {
         }
     }
 
-    public static void repopulateKeyCodeMap() throws Exception {
+    public static void repopulateKeyCodeMap() {
         Field[] fields = InputRecorder.class.getFields();
 
         keyBinds.clear(); //Map of 'Action Names' and the keyCode they're assign to
         for (Field field : fields) {
             if (!field.isAnnotationPresent(KeyCode.class)) continue;;
             String fieldName = field.getName();
-            int fieldValue = field.getInt(InputRecorder.class);
-            keyBinds.put(fieldName, fieldValue);
+            try {
+                keyBinds.put(fieldName, field.getInt(InputRecorder.class));
+            } catch (Exception e) {
+                System.out.println(" -=== ERROR ===-");
+                System.out.println("InputRecorder failed to repopulate KeyCodeMap via Reflection");
+                System.out.println("  Exception Type: " + e.getClass().getName() );
+                System.out.println(" -=============-");
+                System.exit(1);
+            }
         }
         System.out.println("InputRecorder::KeyCodeMap = " + keyBinds.toString());
 

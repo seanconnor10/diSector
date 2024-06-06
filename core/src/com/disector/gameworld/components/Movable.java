@@ -14,4 +14,5 @@ public interface Movable extends Positionable{
     Vector2 getVelocity();
     float getZSpeed();
     void setPos(Vector3 pos);
+
 }

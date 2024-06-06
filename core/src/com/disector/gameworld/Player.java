@@ -62,8 +62,8 @@ public class Player implements Movable {
         if (currentSpeed > MAX_SPEED) vel.setLength(MAX_SPEED);
 
         //Update position with velocity
-        x += vel.x * dt;
-        y += vel.y * dt;
+//        x += vel.x * dt; Now happens when calling moveObj() in GameWorld
+//        y += vel.y * dt;
 
         //Friction when not inputting
         if (inputVector.isZero(0.05f)) vel.scl( 1.f - 5.f*dt);
@@ -89,7 +89,6 @@ public class Player implements Movable {
 
         //Crouching
         height = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) ? CROUCHING_HEIGHT : STANDING_HEIGHT;
-
 
         //Grav
         if (z > secFloor) zSpeed -= 200.0 *dt; if (zSpeed < -100.0f) zSpeed = -100.0f;

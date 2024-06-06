@@ -172,6 +172,7 @@ public class SoftwareRenderer extends Renderer {
                 float v = (drawY - quadBottom) /quadHeight;
                 boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
                 Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB);
+                pixelColor.b =  (((float)wInd/(float)app.walls.size)*8.0f)%2;
                 pixelColor.lerp(0f,0f,0f,1f,fog);
                 buffer.drawPixel(drawX, drawY, pixelColor.toIntBits() );
             } //End Per Pixel Loop

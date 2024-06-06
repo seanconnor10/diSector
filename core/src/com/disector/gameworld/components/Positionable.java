@@ -10,6 +10,8 @@ public interface Positionable {
      ************************* D: ******/
 
     Vector3 getPos();
+    float getHeight();
+    float getRadius();
     int getCurrentSector();
     void setCurrentSector(int sInd);
 

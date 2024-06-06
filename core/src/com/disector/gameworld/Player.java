@@ -9,14 +9,14 @@ import com.badlogic.gdx.utils.Array;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.gameworld.components.Movable;
-import com.disector.gameworld.components.Positionable;
 import com.disector.inputrecorder.InputRecorder;
 
-public class Player implements Positionable, Movable {
+public class Player implements Movable {
     private final GameWorld world;
 
     float x, y, z, r;
     float vLook; // 'Angle' of vertical view direction
+    float height;
     Vector2 vel = new Vector2(0.f, 0.f);
     float zSpeed;
     int currentSectorIndex;
@@ -25,18 +25,16 @@ public class Player implements Positionable, Movable {
     final float MOUSE_SENS_X = 0.002f, MOUSE_SENS_Y = 0.5f;
     final float TURN_SPEED = 3.0f, VLOOK_SPEED = 200.0f;
     final float VLOOK_CLAMP = 275.f;
-    final int HEIGHT = 20;
+    final int STANDING_HEIGHT = 20;
+    final int CROUCHING_HEIGHT = 5;
+    final int HEAD_SPACE = 0;
+    final float RADIUS = 10.f;
 
     Player(GameWorld world) {
         this.world = world;
     }
 
-    void step(float dt, Array<Wall> walls, Array<Sector> sectors) {
-        Vector2 lastPosition = movementInput(dt);
-        verticalMovement(dt, walls, sectors);
-    }
-
-    private Vector2 movementInput(float dt) {
+    public Vector2 movementInput(float dt) {
         Vector2 startingPosition = new Vector2(x, y);
 
         //Record needed button presses
@@ -85,9 +83,13 @@ public class Player implements Positionable, Movable {
         return startingPosition;
     }
 
-    private void verticalMovement(float dt, Array<Wall> walls, Array<Sector> sectors) {
+    public void verticalMovement(float dt, Array<Wall> walls, Array<Sector> sectors) {
         Sector currentSector = sectors.get(currentSectorIndex);
         float secFloor = currentSector.floorZ, secCeil = currentSector.ceilZ;
+
+        //Crouching
+        height = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) ? CROUCHING_HEIGHT : STANDING_HEIGHT;
+
 
         //Grav
         if (z > secFloor) zSpeed -= 200.0 *dt; if (zSpeed < -100.0f) zSpeed = -100.0f;
@@ -118,6 +120,16 @@ public class Player implements Positionable, Movable {
         currentSectorIndex = sInd;
     }
 
+    @Override
+    public float getHeight() {
+        return height;
+    }
+
+    @Override
+    public float getRadius() {
+        return RADIUS;
+    }
+
     //Movable Implementations ////////////////
     @Override
     public Vector2 getVelocity() {
@@ -128,4 +140,12 @@ public class Player implements Positionable, Movable {
     public float getZSpeed() {
         return  zSpeed;
     }
+
+    @Override
+    public void setPos(Vector3 pos) {
+        x = pos.x;
+        y = pos.y;
+        z = pos.z;
+    }
+
 }

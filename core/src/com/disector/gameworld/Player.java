@@ -8,9 +8,11 @@ import com.badlogic.gdx.utils.Array;
 
 import com.disector.Sector;
 import com.disector.Wall;
+import com.disector.gameworld.components.Movable;
+import com.disector.gameworld.components.Positionable;
 import com.disector.inputrecorder.InputRecorder;
 
-public class Player implements Positionable{
+public class Player implements Positionable, Movable {
     private final GameWorld world;
 
     float x, y, z, r;
@@ -19,9 +21,9 @@ public class Player implements Positionable{
     float zSpeed;
     int currentSectorIndex;
 
-    final float MAX_SPEED = 150.f, ACCEL = 2.0f;
-    final float MOUSE_SENS_X = 0.01f, MOUSE_SENS_Y = 1.0f;
-    final float TURN_SPEED = 4.0f, VLOOK_SPEED = 150.0f;
+    final float MAX_SPEED = 150.f, ACCEL = 4.0f;
+    final float MOUSE_SENS_X = 0.002f, MOUSE_SENS_Y = 0.5f;
+    final float TURN_SPEED = 3.0f, VLOOK_SPEED = 200.0f;
     final float VLOOK_CLAMP = 275.f;
     final int HEIGHT = 20;
 
@@ -61,12 +63,12 @@ public class Player implements Positionable{
         float currentSpeed = vel.len();
         if (currentSpeed > MAX_SPEED) vel.setLength(MAX_SPEED);
 
-        //Update postion with velocity
+        //Update position with velocity
         x += vel.x * dt;
         y += vel.y * dt;
 
         //Friction when not inputting
-        if (inputVector.isZero(0.05f)) vel.scl( 1.f - 10.f*dt);
+        if (inputVector.isZero(0.05f)) vel.scl( 1.f - 5.f*dt);
 
         //Rotate player + look up and down
         if (Gdx.input.isCursorCatched()) {
@@ -96,10 +98,11 @@ public class Player implements Positionable{
 
         z += zSpeed * dt;
 
-        if (z<secFloor) z = secFloor;
+        if (z<secFloor) {z = secFloor; zSpeed = 0.f;}
 
     }
 
+    //Positionable Implementations //////////////
     @Override
     public Vector3 getPos() {
         return new Vector3(x,y,z);
@@ -113,5 +116,16 @@ public class Player implements Positionable{
     @Override
     public void setCurrentSector(int sInd) {
         currentSectorIndex = sInd;
+    }
+
+    //Movable Implementations ////////////////
+    @Override
+    public Vector2 getVelocity() {
+        return vel;
+    }
+
+    @Override
+    public float getZSpeed() {
+        return  zSpeed;
     }
 }

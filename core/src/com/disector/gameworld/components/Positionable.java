@@ -1,4 +1,4 @@
-package com.disector.gameworld;
+package com.disector.gameworld.components;
 
 import com.badlogic.gdx.math.Vector3;
 

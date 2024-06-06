@@ -75,10 +75,9 @@ public class InputRecorder {
 
         @Override
         public String toString() {
-            String str = "" + (isDown ? "CurrentlyPressed " : "") + (justPressed ? "NewlyPressed " : "") + (justReleased ? "NewlyReleased " : "");
+            String str = (isDown ? "CurrentlyPressed " : "") + (justPressed ? "NewlyPressed " : "") + (justReleased ? "NewlyReleased " : "");
             if (str.isEmpty()) str = "none";
             return str;
-            //return  "Pressed:" + isDown + "  JustPressed:" + justPressed + "  JustReleased:" + justReleased;
         }
     }
 

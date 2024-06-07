@@ -64,8 +64,8 @@ public class App extends ApplicationAdapter {
 
     private void updateDeltaTime() {
         deltaTime = Gdx.graphics.getDeltaTime();
-        //int fps = (int) ( 1.f / deltaTime );
-        //System.out.println("Fps: " + fps);
+        int fps = (int) ( 1.f / deltaTime );
+        System.out.println("Fps: " + fps);
         if (deltaTime > 0.04f) deltaTime = 0.04f; //If below 25 frames/second only advance time as if it were running at 25fps
     }
 

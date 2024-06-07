@@ -80,23 +80,36 @@ public class GameWorld {
 
         obj.setPos( new Vector3( prevPosition.x + velocity.x*dt, prevPosition.y + velocity.y*dt, prevPosition.z) );
 
-        Array<WallInfoPack> wallsToCheck = new Array<>(); //First Stores what walls collide by BoundingBox
+        Array<WallInfoPack> wallsCollided = new Array<>();
 
+        //For every wall in sector, check collision by bounding box, if collided check collision accurately
+        //and to list of collidedWalls
         for (int wInd : currentSector.walls.toArray()) {
             Wall w = walls.get(wInd);
             if (boundingBoxCheck(w, obj.getPos(), obj.getRadius())) {
-                //Add the wall that already collided by bounding box
-                //to a list to be checked accurately
-                WallInfoPack wallInfo = new WallInfoPack(w, wInd, new Vector2(prevPosition.x, prevPosition.y))
-                //if (wallInfo)
-                //wallsToCheck.add( );
+                WallInfoPack wallInfo = new WallInfoPack(w, wInd, new Vector2(prevPosition.x, prevPosition.y));
+                if (wallInfo.distToNearest < obj.getRadius())
+                    wallsCollided.add(wallInfo);
             }
         }
 
-        wallsToCheck.
-                /*sort( //Sort by shortest distance to object's starting position
+        if (wallsCollided.isEmpty()) return;
+
+        wallsCollided.sort( //Sort collided walls to get the first one we should collide with
                 (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
-        );*/
+        );
+
+        WallInfoPack closestCollsion = wallsCollided.get(0);
+
+        Vector3 positionAfterResolution = new Vector3( obj.getPos() );
+        float resolutionDistance = obj.getRadius() - closestCollsion.distToNearest;
+        positionAfterResolution.add(
+            (float) Math.cos( closestCollsion.w.normalAngle ) * resolutionDistance,
+            (float) Math.sin( closestCollsion.w.normalAngle ) * resolutionDistance,
+            0.0f
+        );
+        obj.setPos(positionAfterResolution);
+        velocity.rotateRad((float)Math.PI); //Bounces actor away
 
     }
 

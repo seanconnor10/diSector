@@ -34,8 +34,8 @@ public class GameWorld {
         Vector2 playerLastPosition = player1.movementInput(dt);
         player1.verticalMovement(dt, walls, sectors);
 
-        //boolean colliding = boundingBoxCheck( walls.get(4), player1.getPos(), player1.getRadius() );
-        //System.out.println(colliding);
+        boolean colliding = boundingBoxCheck( walls.get(1), player1.getPos(), player1.getRadius() );
+        System.out.println(colliding);
         moveObjSimple(player1);
     }
 
@@ -74,6 +74,10 @@ public class GameWorld {
 
     //WIP
     private void moveObjSimple(Movable obj) {
+        /**
+         * Takes any game object with a position and velocity and moves it,
+         * colliding it against walls and updating its currentSectorIndex
+         */
         Vector3 prevPosition = obj.getPos();
         Vector2 velocity = obj.getVelocity();
         Sector currentSector = sectors.get( obj.getCurrentSector() );
@@ -99,37 +103,33 @@ public class GameWorld {
                 (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
         );
 
-        WallInfoPack closestCollsion = wallsCollided.get(0);
+        WallInfoPack closestCollision = wallsCollided.get(0);
 
         Vector3 positionAfterResolution = new Vector3( obj.getPos() );
-        float resolutionDistance = obj.getRadius() - closestCollsion.distToNearest;
+        float resolutionDistance = obj.getRadius() - closestCollision.distToNearest;
         positionAfterResolution.add(
-            (float) Math.cos( closestCollsion.w.normalAngle ) * resolutionDistance,
-            (float) Math.sin( closestCollsion.w.normalAngle ) * resolutionDistance,
+            (float) Math.cos( closestCollision.w.normalAngle ) * resolutionDistance,
+            (float) Math.sin( closestCollision.w.normalAngle ) * resolutionDistance,
             0.0f
         );
         obj.setPos(positionAfterResolution);
-        velocity.rotateRad((float)Math.PI); //Bounces actor away
+        velocity.rotateRad((float)Math.PI); //Bounces actor away sort of...
 
     }
 
     private boolean boundingBoxCheck(Wall w, Vector3 objPos, float objRadius) {
-        Rectangle boundingBox = new Rectangle(
-          Math.min(w.x1, w.x2)-objRadius,
-          Math.min(w.y1, w.y2)-objRadius,
-          Math.max(w.x1, w.x2)+objRadius - (Math.min(w.x1, w.x2)-objRadius),
-          Math.max(w.y1, w.y1)+objRadius - (Math.min(w.y1, w.y2)-objRadius)
-        );
+        float leftBound = Math.min(w.x1, w.x2) - objRadius;
+        float rightBound = Math.max(w.x1, w.x2) + objRadius;
+        float topBound = Math.min(w.y1, w.y2) - objRadius;
+        float bottomBound = Math.max(w.y1, w.y2) + objRadius;
 
-        if (objPos.x > boundingBox.x+boundingBox.width) return false;
-        if (objPos.x < boundingBox.x) return false;
-        if (objPos.y > boundingBox.y +boundingBox.height) return false;
-        if (objPos.y < boundingBox.y) return false;
-
-        return true;
+        if (objPos.x > rightBound) return false;
+        if (objPos.x < leftBound) return false;
+        if (objPos.y > bottomBound) return false;
+        return !(objPos.y < topBound);
     }
 
-    private class WallInfoPack {
+    private static class WallInfoPack {
         private final Wall w;
         private final int wInd;
         private final Vector2 nearestPoint;

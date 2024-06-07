@@ -18,19 +18,23 @@ public class Wall {
 
     public float length() {
         if (x1 == x2)
-            return (y2 > y1) ? y2-y1 : y1-y2;
+            return Math.abs(y2-y1); //(y2 > y1) ? y2-y1 : y1-y2;
         else if (y1 == y2)
-            return (x2 > x1) ? x2-x1 : x1-x2;
+            return Math.abs(x2-x1); //(x2 > x1) ? x2-x1 : x1-x2;
 
         return (float) Math.sqrt( (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) );
     }
 
     public void setNormalAngle() {
-        float nX1, nY1, nX2, nY2;
-        nX1 = (x1+x2)/2.0f; nY1 = (y1+y2)/2.0f;
+        if (x1 == x2) {
+            normalAngle = (y2>y1) ? 0.f : (float) Math.PI;
+            return;
+        }
+        if (y1 == y2) {
+            normalAngle = (x2>x1) ? (float) Math.PI*1.5f : (float) Math.PI*0.5f;
+            return;
+        }
         normalAngle = (float) -Math.atan2(x2-x1, y2-y1);
-        nX2 = nX1 + 5.0f * (float) Math.cos(normalAngle);
-        nY2 = nY1 + 5.0f * (float) Math.sin(normalAngle);
     }
 
     public Vector2 findNearestTo(Vector2 point) {

@@ -77,7 +77,12 @@ public class App extends ApplicationAdapter {
         walls.add(new Wall( 175, 80, 175, -20   )); s.walls.add(walls.size-1);
         walls.add(new Wall( 175, -20, 75, -125  )); s.walls.add(walls.size-1);
         walls.add(new Wall( 75, -125, 20, -125  )); s.walls.add(walls.size-1);
-        walls.add(new Wall( 20, -125, 20, 20    )); s.walls.add(walls.size-1);
+
+        walls.add(new Wall( 20, -125, 20, -80   )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 20, -80, 50, -80    )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 50, -80, 50, -50    )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 50, -50, 20, 20     )); s.walls.add(walls.size-1);
+
         sectors.add(s);
     }
 

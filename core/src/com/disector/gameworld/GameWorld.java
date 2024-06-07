@@ -87,15 +87,16 @@ public class GameWorld {
             if (boundingBoxCheck(w, obj.getPos(), obj.getRadius())) {
                 //Add the wall that already collided by bounding box
                 //to a list to be checked accurately
-                wallsToCheck.add( new WallInfoPack(w, wInd, new Vector2(prevPosition.x, prevPosition.y)));
+                WallInfoPack wallInfo = new WallInfoPack(w, wInd, new Vector2(prevPosition.x, prevPosition.y))
+                //if (wallInfo)
+                //wallsToCheck.add( );
             }
         }
 
-        wallsToCheck.sort( //Sort by shortest distance to object's starting position
+        wallsToCheck.
+                /*sort( //Sort by shortest distance to object's starting position
                 (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
-        );
-
-
+        );*/
 
     }
 

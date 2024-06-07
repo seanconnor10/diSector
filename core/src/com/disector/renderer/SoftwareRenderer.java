@@ -208,7 +208,7 @@ public class SoftwareRenderer extends Renderer {
                     boolean checkerBoard = ( (int)(rotFloorX*8%2) == (int)(rotFloorY*8%2) );
                     Color drawColor = new Color( checkerBoard ? 0xFFD08010 : 0xFF10D080 );
                     float floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
-                    Math.clamp(floorFogValue, 0.f, 1.f);
+                    floorFogValue = (float) Math.min(1.0, Math.max(0.0,floorFogValue));
                     drawColor.lerp( Color.BLACK, floorFogValue);
                     buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
                 }
@@ -240,7 +240,7 @@ public class SoftwareRenderer extends Renderer {
                     boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
                     Color drawColor = new Color( checkerBoard ? 0xFF302005 : 0xFF251503 );
                     float ceilFogValue = 1.0f - (((-halfHeight + drawY) / halfHeight));
-                    Math.clamp(ceilFogValue, 0.f, 1.f);
+                    ceilFogValue = (float) Math.min(1.0, Math.max(0.0,ceilFogValue));
                     drawColor.lerp( Color.BLACK, ceilFogValue);
                     buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
                 }

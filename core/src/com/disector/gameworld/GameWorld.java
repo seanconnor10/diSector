@@ -1,6 +1,5 @@
 package com.disector.gameworld;
 
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.Vector4;
@@ -34,64 +33,41 @@ public class GameWorld {
         Vector2 playerLastPosition = player1.movementInput(dt);
         player1.verticalMovement(dt, walls, sectors);
 
-        boolean colliding = boundingBoxCheck( walls.get(1), player1.getPos(), player1.getRadius() );
-        System.out.println(colliding);
-        moveObjSimple(player1);
+        //boolean colliding = boundingBoxCheck( walls.get(1), player1.snagPosition(), player1.getRadius() );
+        //System.out.println(colliding);
+
+        moveObj(player1);
     }
 
     public Vector4 getPlayerPosition() {
-        return new Vector4(player1.x, player1.y, player1.z+player1.height, player1.r);
+        return new Vector4(player1.copyPosition(), player1.z+player1.height, player1.r);
     }
 
     public float getPlayerVLook() {
         return player1.vLook;
     }
 
-    //WIP
     private void moveObj(Movable obj) {
-        Vector3 prevPosition = obj.getPos();
-        Vector2 velocity = obj.getVelocity();
-        boolean[] checkedSectors = new boolean[app.sectors.size]; //Actually only init if we've gone through portal
-
-        Sector currentSector = app.sectors.get( obj.getCurrentSector() );
-        Array<WallInfoPack> currentSectorWalls = new Array<>();
-        for (int wInd : currentSector.walls.toArray()) {
-            //currentSectorWalls.add( new WallInfoPack(walls.get(wInd), wInd) );
-        }
-
-        //For each wall in current Sector
-            //If within wall's bounding box (with added padding equal to obj's radius)
-            //Set wall's Nearest Point relative to obj
-            //If there is, add to a list of collisions for this frame
-        //Order this list starting with collision nearest to starting point
-        //Check and resolve only that collision, resolving away from wall? or back towards prevPosition?
-
-        //Check for collisions again until there are none
-
-        //If colliding with a portal and we fit vertically..
-        // add the already checked sector to checkedSectors
-    }
-
-    //WIP
-    private void moveObjSimple(Movable obj) {
         /**
          * Takes any game object with a position and velocity and moves it,
          * colliding it against walls and updating its currentSectorIndex
          */
-        Vector3 prevPosition = obj.getPos();
-        Vector2 velocity = obj.getVelocity();
+        Vector2 objPos = obj.snagPosition(); //Snag grabs a reference to the Vector so we can change it
+        Vector2 velocity = obj.snagVelocity();
+
         Sector currentSector = sectors.get( obj.getCurrentSector() );
 
-        obj.setPos( new Vector3( prevPosition.x + velocity.x*dt, prevPosition.y + velocity.y*dt, prevPosition.z) );
+        objPos.x += velocity.x * dt;
+        objPos.y += velocity.y * dt;
 
         Array<WallInfoPack> wallsCollided = new Array<>();
 
         //For every wall in sector, check collision by bounding box, if collided check collision accurately
-        //and to list of collidedWalls
+        //and if colliding, add to list of collidedWalls
         for (int wInd : currentSector.walls.toArray()) {
             Wall w = walls.get(wInd);
-            if (boundingBoxCheck(w, obj.getPos(), obj.getRadius())) {
-                WallInfoPack wallInfo = new WallInfoPack(w, wInd, new Vector2(prevPosition.x, prevPosition.y));
+            if (boundingBoxCheck(w, objPos, obj.getRadius())) {
+                WallInfoPack wallInfo = new WallInfoPack(w, wInd, objPos);
                 if (wallInfo.distToNearest < obj.getRadius())
                     wallsCollided.add(wallInfo);
             }
@@ -103,21 +79,17 @@ public class GameWorld {
                 (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
         );
 
-        WallInfoPack closestCollision = wallsCollided.get(0);
+        WallInfoPack closestCollision = wallsCollided.get(0); //Get reference to closest collision
 
-        Vector3 positionAfterResolution = new Vector3( obj.getPos() );
         float resolutionDistance = obj.getRadius() - closestCollision.distToNearest;
-        positionAfterResolution.add(
-            (float) Math.cos( closestCollision.w.normalAngle ) * resolutionDistance,
-            (float) Math.sin( closestCollision.w.normalAngle ) * resolutionDistance,
-            0.0f
-        );
-        obj.setPos(positionAfterResolution);
+        objPos.x += (float) Math.cos( closestCollision.w.normalAngle ) * resolutionDistance;
+        objPos.y += (float) Math.sin( closestCollision.w.normalAngle ) * resolutionDistance;
+
         velocity.rotateRad((float)Math.PI); //Bounces actor away sort of...
 
     }
 
-    private boolean boundingBoxCheck(Wall w, Vector3 objPos, float objRadius) {
+    private boolean boundingBoxCheck(Wall w, Vector2 objPos, float objRadius) {
         float leftBound = Math.min(w.x1, w.x2) - objRadius;
         float rightBound = Math.max(w.x1, w.x2) + objRadius;
         float topBound = Math.min(w.y1, w.y2) - objRadius;

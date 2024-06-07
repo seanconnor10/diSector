@@ -14,10 +14,11 @@ import com.disector.inputrecorder.InputRecorder;
 public class Player implements Movable {
     private final GameWorld world;
 
-    float x, y, z, r;
+    Vector2 position = new Vector2(0.f, 0.f);
+    float z, r;
     float vLook; // 'Angle' of vertical view direction
     float height;
-    Vector2 vel = new Vector2(0.f, 0.f);
+    Vector2 velocity = new Vector2(0.f, 0.f);
     float zSpeed;
     int currentSectorIndex;
 
@@ -35,7 +36,7 @@ public class Player implements Movable {
     }
 
     public Vector2 movementInput(float dt) {
-        Vector2 startingPosition = new Vector2(x, y);
+        Vector2 startingPosition = copyPosition();
 
         //Record needed button presses
         boolean forwardDown = InputRecorder.getKeyInfo("FORWARD").isDown;
@@ -57,16 +58,16 @@ public class Player implements Movable {
         inputVector.nor();
 
         //Update velocity with input vector
-        vel.add( new Vector2(inputVector).scl(ACCEL) );
-        float currentSpeed = vel.len();
-        if (currentSpeed > MAX_SPEED) vel.setLength(MAX_SPEED);
+        velocity.add( new Vector2(inputVector).scl(ACCEL) );
+        float currentSpeed = velocity.len();
+        if (currentSpeed > MAX_SPEED) velocity.setLength(MAX_SPEED);
 
         //Update position with velocity
 //        x += vel.x * dt; Now happens when calling moveObj() in GameWorld
 //        y += vel.y * dt;
 
         //Friction when not inputting
-        if (inputVector.isZero(0.05f)) vel.scl( 1.f - 5.f*dt);
+        if (inputVector.isZero(0.05f)) velocity.scl( 1.f - 5.f*dt);
 
         //Rotate player + look up and down
         if (Gdx.input.isCursorCatched()) {
@@ -91,7 +92,7 @@ public class Player implements Movable {
         height = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) ? CROUCHING_HEIGHT : STANDING_HEIGHT;
 
         //Grav
-        if (z > secFloor) zSpeed -= 200.0 *dt; if (zSpeed < -100.0f) zSpeed = -100.0f;
+        if (z > secFloor) zSpeed -= 200.f * dt; if (zSpeed < -100.0f) zSpeed = -100.0f;
 
         //Jump
         if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && z < secFloor+0.5f)
@@ -105,8 +106,18 @@ public class Player implements Movable {
 
     //Positionable Implementations //////////////
     @Override
-    public Vector3 getPos() {
-        return new Vector3(x,y,z);
+    public Vector2 copyPosition() {
+        return new Vector2(position);
+    }
+
+    @Override
+    public Vector3 copyPosition3D() {
+        return new Vector3(position.x, position.y, z);
+    }
+
+    @Override
+    public float getZ() {
+        return z;
     }
 
     @Override
@@ -131,8 +142,8 @@ public class Player implements Movable {
 
     //Movable Implementations ////////////////
     @Override
-    public Vector2 getVelocity() {
-        return vel;
+    public Vector2 snagVelocity() {
+        return velocity;
     }
 
     @Override
@@ -141,10 +152,22 @@ public class Player implements Movable {
     }
 
     @Override
-    public void setPos(Vector3 pos) {
-        x = pos.x;
-        y = pos.y;
-        z = pos.z;
+    public Vector2 snagPosition() {
+        return position;
     }
 
+    @Override
+    public Vector2 copyVelocity() {
+        return null;
+    }
+
+    @Override
+    public void setZSpeed(float zSpeed) {
+        this.zSpeed = zSpeed;
+    }
+
+    @Override
+    public void setZ(float z) {
+        this.z = z;
+    }
 }

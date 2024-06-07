@@ -1,5 +1,6 @@
 package com.disector.gameworld.components;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 
 public interface Positionable {
@@ -9,7 +10,9 @@ public interface Positionable {
      * and find it's currentSector
      ************************* D: ******/
 
-    Vector3 getPos();
+    Vector2 copyPosition();
+    Vector3 copyPosition3D();
+    float getZ();
     float getHeight();
     float getRadius();
     int getCurrentSector();

@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.disector.App;
 import com.disector.Sector;
 import com.disector.Wall;
+import com.disector.WallInfoPack;
 import com.disector.gameworld.components.Movable;
 
 
@@ -124,27 +125,6 @@ public class GameWorld {
         if (objPos.x < leftBound) return false;
         if (objPos.y > bottomBound) return false;
         return !(objPos.y < topBound);
-    }
-
-    private static class WallInfoPack {
-        private final Wall w;
-        private final int wInd;
-        private final Vector2 nearestPoint;
-        private final float distToNearest;  //WARNING: This is be the actual distance squared
-                                            //We spare ourselves the sqrt for performance
-
-        private WallInfoPack(Wall w, int wInd, Vector2 point) {
-            this.w = w;
-            this.wInd = wInd;
-            this.nearestPoint = new Vector2( w.findNearestTo(point) );
-            this.distToNearest = (float) Math.abs( Math.pow(nearestPoint.x-point.x, 2) + Math.pow(nearestPoint.y-point.y, 2) );
-        }
-
-        @Override
-        public String toString() {
-            return wInd + ") Dist: " + distToNearest;
-        }
-
     }
 
 }

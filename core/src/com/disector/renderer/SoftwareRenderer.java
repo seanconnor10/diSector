@@ -71,6 +71,8 @@ public class SoftwareRenderer extends Renderer {
     private void drawSector(int secInd, int spanStart, int spanEnd) {
         Sector sec = sectors.get(secInd);
 
+
+
         for (int wInd : sec.walls.toArray()) {
             drawWall(wInd, secInd, spanStart, spanEnd);
         }

@@ -73,7 +73,6 @@ public class App extends ApplicationAdapter {
         Sector s = new Sector(); s.floorZ = 0; s.ceilZ = 50;
         walls.add(new Wall( 20, 20, 100, 20     )); s.walls.add(walls.size-1);
         walls.add(new Wall( 100, 20, 100, 80    )); s.walls.add(walls.size-1);
-
         Wall firstPortal = new Wall( 100, 80, 175, 80 );
             firstPortal.isPortal = true;
             firstPortal.linkA = 1;
@@ -83,14 +82,13 @@ public class App extends ApplicationAdapter {
         walls.add(new Wall( 175, 80, 175, -20   )); s.walls.add(walls.size-1);
         walls.add(new Wall( 175, -20, 75, -125  )); s.walls.add(walls.size-1);
         walls.add(new Wall( 75, -125, 20, -125  )); s.walls.add(walls.size-1);
-
         walls.add(new Wall( 20, -125, 20, -80   )); s.walls.add(walls.size-1);
         walls.add(new Wall( 20, -80, 50, -80    )); s.walls.add(walls.size-1);
         walls.add(new Wall( 50, -80, 50, -50    )); s.walls.add(walls.size-1);
         walls.add(new Wall( 50, -50, 20, 20     )); s.walls.add(walls.size-1);
         sectors.add(s);
 
-        s = new Sector(); s.floorZ = 25; s.ceilZ = 40;
+        s = new Sector(); s.floorZ = -25; s.ceilZ = 40;
         s.walls.add(2); //Index 2 is First Portal
         walls.add(new Wall(100, 80, 90, 125 )); s.walls.add(walls.size-1);
         walls.add(new Wall(90, 125, 185, 125 )); s.walls.add(walls.size-1);

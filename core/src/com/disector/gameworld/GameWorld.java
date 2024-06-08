@@ -30,7 +30,8 @@ public class GameWorld {
 
     public void step(float dt) {
         this.dt = dt;
-        Vector2 playerLastPosition = player1.movementInput(dt);
+
+        player1.movementInput(dt);
         player1.verticalMovement(dt, walls, sectors);
 
         //boolean colliding = boundingBoxCheck( walls.get(1), player1.snagPosition(), player1.getRadius() );
@@ -62,30 +63,47 @@ public class GameWorld {
 
         Array<WallInfoPack> wallsCollided = new Array<>();
 
-        //For every wall in sector, check collision by bounding box, if collided check collision accurately
-        //and if colliding, add to list of collidedWalls
-        for (int wInd : currentSector.walls.toArray()) {
-            Wall w = walls.get(wInd);
-            if (boundingBoxCheck(w, objPos, obj.getRadius())) {
-                WallInfoPack wallInfo = new WallInfoPack(w, wInd, objPos);
-                if (wallInfo.distToNearest < obj.getRadius())
-                    wallsCollided.add(wallInfo);
+        do {
+            wallsCollided.clear();
+
+            //For every wall in sector, check collision by bounding box, if collided check collision accurately
+            //and if colliding, add to list of collidedWalls
+            for (int wInd : currentSector.walls.toArray()) {
+                Wall w = walls.get(wInd);
+                if (boundingBoxCheck(w, objPos, obj.getRadius())) {
+                    WallInfoPack wallInfo = new WallInfoPack(w, wInd, objPos);
+                    if (wallInfo.distToNearest < obj.getRadius())
+                        wallsCollided.add(wallInfo);
+                }
             }
-        }
 
-        if (wallsCollided.isEmpty()) return;
+            if (wallsCollided.isEmpty()) return;
 
-        wallsCollided.sort( //Sort collided walls to get the first one we should collide with
-                (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
-        );
+            wallsCollided.sort( //Sort collided walls to get the first one we should collide with
+                    (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
+            );
 
-        WallInfoPack closestCollision = wallsCollided.get(0); //Get reference to closest collision
+            WallInfoPack closestCollision = wallsCollided.get(0); //Get reference to closest collision
 
-        float resolutionDistance = obj.getRadius() - closestCollision.distToNearest;
-        objPos.x += (float) Math.cos( closestCollision.w.normalAngle ) * resolutionDistance;
-        objPos.y += (float) Math.sin( closestCollision.w.normalAngle ) * resolutionDistance;
+            //Resolve Collision
+            float resolutionDistance = obj.getRadius() - closestCollision.distToNearest;
+            objPos.x += (float) Math.cos(closestCollision.w.normalAngle) * resolutionDistance;
+            objPos.y += (float) Math.sin(closestCollision.w.normalAngle) * resolutionDistance;
 
-        velocity.rotateRad((float)Math.PI); //Bounces actor away sort of...
+            //Bounce off of wall
+            float wallXNormal = (float) Math.cos(closestCollision.w.normalAngle);
+            float wallYNormal = (float) Math.sin(closestCollision.w.normalAngle);
+            float proj_norm = velocity.x * wallXNormal + velocity.y * wallYNormal;
+            float perpendicularVelX = proj_norm * wallXNormal;
+            float perpendicularVelY = proj_norm * wallYNormal;
+            float parallelVelX = velocity.x - perpendicularVelX;
+            float parallelVelY = velocity.y - perpendicularVelY;
+            final float elasticity = 0.2f;
+            final float restitution = 0.9f;
+            velocity.x = ( parallelVelX * restitution - perpendicularVelX * elasticity);
+            velocity.y = ( parallelVelY * restitution - perpendicularVelY * elasticity);
+
+        } while (!wallsCollided.isEmpty());
 
     }
 

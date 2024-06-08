@@ -72,7 +72,7 @@ public class SoftwareRenderer extends Renderer {
         Sector sec = sectors.get(secInd);
 
         for (int wInd : sec.walls.toArray()) {
-            drawWall(wInd, camCurrentSector, spanStart, spanEnd);
+            drawWall(wInd, secInd, spanStart, spanEnd);
         }
     }
 
@@ -207,18 +207,23 @@ public class SoftwareRenderer extends Renderer {
                 drawCeiling(w, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos);
 
             //Update Occlusion Matrix
-            int meetingPoint = (rasterTop + rasterBottom) / 2;
-            if (occlusionBottom[drawX] < meetingPoint)
-                occlusionBottom[drawX] = meetingPoint;
-            if (occlusionTop[drawX] > meetingPoint)
-                occlusionTop[drawX] = meetingPoint;
-
-            if (isPortal) {
-                drawSector(portalDestIndex, Math.max(leftEdgeX, spanStart), Math.min(rightEdgeX, spanEnd));
-                drawnPortals.pop();
+            if (!isPortal) {
+                if (occlusionBottom[drawX] < quadTop) occlusionBottom[drawX] = (int) quadTop;
+                if (occlusionTop[drawX] > quadBottom) occlusionTop[drawX] = (int) quadBottom;
+            } else {
+                occlusionTop[drawX] = (int) Math.min(quadBottom + (quadHeight * upperWallCutoffV), occlusionTop[drawX]);
+                occlusionBottom[drawX] = (int) Math.max(quadBottom + (quadHeight * lowerWallCutoffV), occlusionBottom[drawX]);
             }
 
         } //End Per Column Loop
+
+        //Render Through Portal
+        if (isPortal) {
+            //drawSector(portalDestIndex, Math.max(leftEdgeX, spanStart), Math.min(rightEdgeX, spanEnd));
+            drawSector(portalDestIndex, leftEdgeX, rightEdgeX);
+            drawnPortals.pop();
+        }
+
     }
 
     private void drawFloor(Wall w, int drawX, float fov, int rasterBottom, float secFloorZ, float playerSin, float playerCos ) {

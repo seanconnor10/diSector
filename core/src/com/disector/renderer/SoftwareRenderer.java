@@ -3,9 +3,12 @@ package com.disector.renderer;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.disector.App;
 import com.disector.Sector;
 import com.disector.Wall;
+import com.disector.WallInfoPack;
 
 import java.util.HashSet;
 import java.util.Stack;
@@ -71,10 +74,20 @@ public class SoftwareRenderer extends Renderer {
     private void drawSector(int secInd, int spanStart, int spanEnd) {
         Sector sec = sectors.get(secInd);
 
-
-
+        //Get all walls of the sector, finding their nearest point to the camera
+        Array<WallInfoPack> wallsToDraw = new Array<>();
         for (int wInd : sec.walls.toArray()) {
-            drawWall(wInd, secInd, spanStart, spanEnd);
+            wallsToDraw.add( new WallInfoPack(walls.get(wInd), wInd, new Vector2(camX, camY)) );
+        }
+
+        wallsToDraw.sort( //Sort wallsToDraw with nearest to camera first
+                (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
+        );
+
+
+        for (WallInfoPack wallInfo : wallsToDraw) {
+            drawWall(wallInfo.wInd, secInd, spanStart, spanEnd);
+            if (spanFilled(spanStart, spanEnd)) return;
         }
     }
 

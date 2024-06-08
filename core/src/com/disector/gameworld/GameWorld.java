@@ -1,5 +1,7 @@
 package com.disector.gameworld;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.Vector4;
@@ -34,6 +36,12 @@ public class GameWorld {
 
         player1.movementInput(dt);
         player1.verticalMovement(dt, walls, sectors);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
+            player1.currentSectorIndex++;
+            if (player1.currentSectorIndex == sectors.size)
+                player1.currentSectorIndex = 0;
+        }
 
         //boolean colliding = boundingBoxCheck( walls.get(1), player1.snagPosition(), player1.getRadius() );
         //System.out.println(colliding);

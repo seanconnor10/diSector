@@ -81,7 +81,7 @@ public class SoftwareRenderer extends Renderer {
         }
 
         wallsToDraw.sort( //Sort wallsToDraw with nearest to camera first
-                (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
+            (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
         );
 
 
@@ -174,7 +174,7 @@ public class SoftwareRenderer extends Renderer {
         int rasterBottom, rasterTop; //Where to stop and start drawing for this pixel column
 
         //Variables needed if portal
-        int portalDestIndex = w.linkA;
+        int portalDestIndex = w.linkA == currentSectorIndex ? w.linkB : w.linkA;
         float destCeiling = 100.f, destFloor = 0.f, upperWallCutoffV = 1.001f, lowerWallCutoffV = -0.001f;
 
         if (isPortal) {
@@ -216,8 +216,8 @@ public class SoftwareRenderer extends Renderer {
                     continue;
 
                 boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
-                Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB);
-                pixelColor.b =  (((float)wInd/(float)app.walls.size)*8.0f)%2;
+                Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB );
+                pixelColor.b =  (((float)wInd/(float)app.walls.size)*8.0f)%2; //Make blue vary between wall
                 pixelColor.lerp(0f,0f,0f,1f,fog);
 
                 buffer.drawPixel(drawX, drawY, pixelColor.toIntBits() );

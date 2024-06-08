@@ -78,6 +78,10 @@ public class SoftwareRenderer extends Renderer {
 
     private void drawWall(int wInd, int currentSectorIndex, int spanStart, int spanEnd) {
         Wall w = walls.get(wInd);
+        boolean isPortal = w.isPortal;
+
+        if (w.isPortal && drawnPortals.contains(wInd))
+            return;
 
         float x1, y1, x2, y2; //Transform wall points relative to camera and store on stack
         x1 = w.x1 - camX;
@@ -150,8 +154,9 @@ public class SoftwareRenderer extends Renderer {
         //Variables needed if portal
         int portalDestIndex = w.linkA;
         float destCeiling = 100.f, destFloor = 0.f, upperWallCutoffV = 1.001f, lowerWallCutoffV = -0.001f;
-        boolean isPortal = w.isPortal;
+
         if (isPortal) {
+            drawnPortals.push(wInd); // !!
             destCeiling = sectors.get(portalDestIndex).ceilZ;
             destFloor = sectors.get(portalDestIndex).floorZ;
             float thisSectorCeilingHeight = secCeilZ - secFloorZ;
@@ -185,6 +190,8 @@ public class SoftwareRenderer extends Renderer {
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) { //Per Pixel draw loop
                 float v = (drawY - quadBottom) /quadHeight;
+                if (isPortal && (v > lowerWallCutoffV && v < upperWallCutoffV) )
+                    continue;
                 boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
                 Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB);
                 pixelColor.b =  (((float)wInd/(float)app.walls.size)*8.0f)%2;
@@ -205,6 +212,11 @@ public class SoftwareRenderer extends Renderer {
                 occlusionBottom[drawX] = meetingPoint;
             if (occlusionTop[drawX] > meetingPoint)
                 occlusionTop[drawX] = meetingPoint;
+
+            if (isPortal) {
+                drawSector(portalDestIndex, Math.max(leftEdgeX, spanStart), Math.min(rightEdgeX, spanEnd));
+                drawnPortals.pop();
+            }
 
         } //End Per Column Loop
     }

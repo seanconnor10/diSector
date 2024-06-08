@@ -62,6 +62,7 @@ public class GameWorld {
         objPos.y += velocity.y * dt;
 
         Array<WallInfoPack> wallsCollided = new Array<>();
+        int collisionsProcessed = 0;
 
         do {
             wallsCollided.clear();
@@ -80,12 +81,12 @@ public class GameWorld {
             if (wallsCollided.isEmpty()) return;
 
             wallsCollided.sort( //Sort collided walls to get the first one we should collide with
-                    (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
+                (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
             );
 
             WallInfoPack closestCollision = wallsCollided.get(0); //Get reference to closest collision
 
-            //Resolve Collision
+            //Resolve Collision away from wall
             float resolutionDistance = obj.getRadius() - closestCollision.distToNearest;
             objPos.x += (float) Math.cos(closestCollision.w.normalAngle) * resolutionDistance;
             objPos.y += (float) Math.sin(closestCollision.w.normalAngle) * resolutionDistance;
@@ -103,7 +104,9 @@ public class GameWorld {
             velocity.x = ( parallelVelX * restitution - perpendicularVelX * elasticity);
             velocity.y = ( parallelVelY * restitution - perpendicularVelY * elasticity);
 
-        } while (!wallsCollided.isEmpty());
+            collisionsProcessed++;
+
+        } while ( collisionsProcessed < 100 ); //Above, we return when there are no collisions
 
     }
 

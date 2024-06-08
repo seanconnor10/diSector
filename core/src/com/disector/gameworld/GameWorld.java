@@ -44,6 +44,10 @@ public class GameWorld {
         return new Vector4(player1.copyPosition(), player1.z+player1.height, player1.r);
     }
 
+    public int getPlayerSectorIndex() {
+        return player1.currentSectorIndex;
+    }
+
     public float getPlayerVLook() {
         return player1.vLook;
     }

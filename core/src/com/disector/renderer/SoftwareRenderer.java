@@ -25,7 +25,7 @@ public class SoftwareRenderer extends Renderer {
     public void renderWorld() {
         resetDrawData();
         buffer.fill();
-        drawSector(0, 0, frameWidth-1);
+        drawSector(camCurrentSector, 0, frameWidth-1);
     }
 
     @Override
@@ -84,10 +84,17 @@ public class SoftwareRenderer extends Renderer {
             return;
 
         float x1, y1, x2, y2; //Transform wall points relative to camera and store on stack
-        x1 = w.x1 - camX;
-        y1 = w.y1 - camY;
-        x2 = w.x2 - camX;
-        y2 = w.y2 - camY;
+        if (isPortal && w.linkA == currentSectorIndex) {
+            x1 = w.x2 - camX;
+            y1 = w.y2 - camY;
+            x2 = w.x1 - camX;
+            y2 = w.y1 - camY;
+        } else {
+            x1 = w.x1 - camX;
+            y1 = w.y1 - camY;
+            x2 = w.x2 - camX;
+            y2 = w.y2 - camY;
+        }
         float playerCos = (float) Math.cos(-camR) , playerSin = (float) Math.sin(-camR);
         float tempX = x1;
         x1 = x1 * playerCos - y1 * playerSin;
@@ -125,7 +132,7 @@ public class SoftwareRenderer extends Renderer {
         float p1_plotX = halfWidth - fov*y1/x1; //Plot edges of wall onto screen space
         float p2_plotX = halfWidth - fov*y2/x2;
 
-        if (p1_plotX > p2_plotX) return; //Avoid drawing backside of wall
+        if (!isPortal && p1_plotX > p2_plotX) return; //Avoid drawing backside of non portal wall
 
         int leftEdgeX = (int) p1_plotX; //Snap plots to integer representing pixel column
         if (leftEdgeX < 0)
@@ -166,9 +173,8 @@ public class SoftwareRenderer extends Renderer {
                 lowerWallCutoffV = (destFloor - secFloorZ) / thisSectorCeilingHeight;
         }
 
-
                                 //SHOULD PROBABLY BE <= rightEdgeX
-        for (int drawX = leftEdgeX; drawX < rightEdgeX; drawX++) { //Per draw column loop
+        for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
             if (occlusionTop[drawX] -1 <= occlusionBottom[drawX] ) continue;
 
             hProgress = (drawX-p1_plotX) / (p2_plotX-p1_plotX);
@@ -190,12 +196,15 @@ public class SoftwareRenderer extends Renderer {
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) { //Per Pixel draw loop
                 float v = (drawY - quadBottom) /quadHeight;
+
                 if (isPortal && (v > lowerWallCutoffV && v < upperWallCutoffV) )
                     continue;
+
                 boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
                 Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB);
                 pixelColor.b =  (((float)wInd/(float)app.walls.size)*8.0f)%2;
                 pixelColor.lerp(0f,0f,0f,1f,fog);
+
                 buffer.drawPixel(drawX, drawY, pixelColor.toIntBits() );
             } //End Per Pixel Loop
 
@@ -272,7 +281,7 @@ public class SoftwareRenderer extends Renderer {
 
         float heightOffset = (secCeilZ-camZ) / scaleFactor;
         int ceilEndScreenY = occlusionTop[drawX] + vOffset;
-        for (int drawY = rasterTop + vOffset; drawY < ceilEndScreenY; drawY++) {
+        for (int drawY = Math.max(rasterTop, occlusionBottom[drawX]) + vOffset; drawY < ceilEndScreenY; drawY++) {
             float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);
             float ceilY = heightOffset * fov / (drawY - halfHeight);
 

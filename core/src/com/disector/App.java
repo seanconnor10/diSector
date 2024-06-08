@@ -52,7 +52,7 @@ public class App extends ApplicationAdapter {
 
         gameWorld.step(deltaTime);
 
-        renderer.placeCamera(gameWorld.getPlayerPosition(), gameWorld.getPlayerVLook(), 0);
+        renderer.placeCamera(gameWorld.getPlayerPosition(), gameWorld.getPlayerVLook(), gameWorld.getPlayerSectorIndex());
         renderer.renderWorld();
         renderer.drawFrame();
     }

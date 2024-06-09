@@ -3,7 +3,6 @@ package com.disector.gameworld;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
@@ -49,17 +48,6 @@ public class GameWorld {
         moveObj(player1);
     }
 
-    public Vector4 getPlayerPosition() {
-        return new Vector4(player1.copyPosition(), player1.z+player1.height, player1.r);
-    }
-
-    public int getPlayerSectorIndex() {
-        return player1.currentSectorIndex;
-    }
-
-    public float getPlayerVLook() {
-        return player1.vLook;
-    }
 
     private void moveObj(Movable obj) {
         /**
@@ -85,9 +73,18 @@ public class GameWorld {
             for (int wInd : currentSector.walls.toArray()) {
                 Wall w = walls.get(wInd);
                 if (boundingBoxCheck(w, objPos, obj.getRadius())) {
-                    WallInfoPack wallInfo = new WallInfoPack(w, wInd, objPos);
-                    if (wallInfo.distToNearest < obj.getRadius())
-                        wallsCollided.add(wallInfo);
+                    WallInfoPack info = new WallInfoPack(w, wInd, objPos);
+                    if (info.distToNearest < obj.getRadius()) {
+                        if (!info.w.isPortal) {
+                            wallsCollided.add(info);
+                        } else {
+                            //Avoid adding a portal wall to collisions if we can fit through vertically
+                            float floorMax = Math.max(sectors.get(info.w.linkA).floorZ, sectors.get(info.w.linkB).floorZ);
+                            float ceilMin = Math.min(sectors.get(info.w.linkA).ceilZ, sectors.get(info.w.linkB).ceilZ);
+                            if (obj.getZ() < floorMax || obj.getZ()+obj.getHeight() > ceilMin)
+                                wallsCollided.add(info);
+                        }
+                    }
                 }
             }
 
@@ -101,6 +98,8 @@ public class GameWorld {
 
             //Resolve Collision away from wall
             float resolutionDistance = obj.getRadius() - closestCollision.distToNearest;
+            if (closestCollision.w.isPortal && closestCollision.w.linkA == obj.getCurrentSector())
+                resolutionDistance *= -1;
             objPos.x += (float) Math.cos(closestCollision.w.normalAngle) * resolutionDistance;
             objPos.y += (float) Math.sin(closestCollision.w.normalAngle) * resolutionDistance;
 
@@ -133,6 +132,92 @@ public class GameWorld {
         if (objPos.x < leftBound) return false;
         if (objPos.y > bottomBound) return false;
         return !(objPos.y < topBound);
+    }
+
+    private boolean isBetween(float var, float bound1, float bound2) {
+        if (bound2 > bound1)
+            return (var > bound1 && var < bound2);
+        return (var > bound2 && var < bound1);
+        //return (var > bound1) ^ (var > bound2); //May or may not include bounds
+    }
+
+    private Vector2 rayWallIntersection(Wall w, float angle, float rayX, float rayY, boolean allowBehind) {
+        /*
+         * Returns the position of an intersection between a ray and a Wall
+         * If allowBehind is enabled, the ray is cast backwards as well
+         */
+        float raySlope = (float) ( Math.sin(angle) / Math.cos(angle) );
+
+        //If wall is horizontal
+        if (w.y1 == w.y2) {
+            if (!allowBehind) {
+                if (Math.sin(angle) > 0 && rayY > w.y1) return null;
+                if (Math.sin(angle) < 0 && rayY < w.y1) return null;
+            }
+            float deltaY = w.y1-rayY;
+            float intersectX = rayX + deltaY/raySlope;
+            if (!isBetween(intersectX, w.x1, w.x2)) return null;
+            return new Vector2(intersectX, w.y1);
+        }
+
+        //Is wall is vertical
+        if (w.x1 == w.x2) {
+            if (!allowBehind) {
+                if (Math.cos(angle) > 0.0 && rayX > w.x1) return null;
+                if (Math.cos(angle) < 0.0 && rayY < w.x1) return null;
+            }
+
+            float deltaX = w.x1-rayX;
+            float intersectY = rayY + deltaX*raySlope;
+            if (!isBetween(intersectY, w.y1,w.y2)) return null;
+            return new Vector2(w.x1, intersectY);
+        }
+
+        //If wall is neither vertical nor horizontal
+        // "Given two line equations" Method from Wikipedia
+        //ax+c=bx+d // a=wallSlope c=wallIntercept b=raySlope d=rayIntercept // iX = (d-c)/(a-b)
+        float wallSlope = (w.y2-w.y1) / (w.x2-w.x1);
+        float wallYIntercept = w.y1 - wallSlope*w.x1;
+        float rayYIntercept = rayY - raySlope*rayX;
+        float iX = (rayYIntercept-wallYIntercept) / (wallSlope-raySlope);
+        float iY = (wallSlope*iX) + wallYIntercept;
+
+        if ( ! (isBetween(iX,w.x1, w.x2) && isBetween(iY,w.y1,w.y2)) ) return null;
+
+        //Check if actually behind
+        if (!allowBehind) {
+            if (Math.sin(angle) > 0.0 && iY < rayY) return null;
+            if (Math.sin(angle) < 0.0 && iY > rayY) return null;
+        }
+
+        return new Vector2(iX,iY);
+
+    }
+
+    private boolean containsPoint(Sector sec, float x, float y) {
+        /**
+         * For each wall in Sector, casts a ray, if an odd number of walls were contacted,
+         * the point is within the sector
+         */
+        int intersections = 0;
+        for (Integer wInd : sec.walls.toArray()) {
+            if (rayWallIntersection(walls.get(wInd), 0.f, x, y, true) != null)
+                intersections++;
+        }
+
+        return (intersections%2 == 1);
+    }
+
+    public Vector4 getPlayerPosition() {
+        return new Vector4(player1.copyPosition(), player1.z+player1.height, player1.r);
+    }
+
+    public int getPlayerSectorIndex() {
+        return player1.currentSectorIndex;
+    }
+
+    public float getPlayerVLook() {
+        return player1.vLook;
     }
 
 }

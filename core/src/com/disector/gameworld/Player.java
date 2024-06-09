@@ -148,7 +148,7 @@ public class Player implements Movable {
 
     @Override
     public float getZSpeed() {
-        return  zSpeed;
+        return zSpeed;
     }
 
     @Override
@@ -158,7 +158,7 @@ public class Player implements Movable {
 
     @Override
     public Vector2 copyVelocity() {
-        return null;
+        return new Vector2(velocity);
     }
 
     @Override

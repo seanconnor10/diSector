@@ -150,17 +150,17 @@ public class SoftwareRenderer extends Renderer {
         if (!isPortal && p1_plotX > p2_plotX) return; //Avoid drawing backside of non portal wall
 
         int leftEdgeX = (int) p1_plotX; //Snap plots to integer representing pixel column
-        if (leftEdgeX < 0)
-            leftEdgeX = 0;
+        if (leftEdgeX < 0) leftEdgeX = 0;
+        if (leftEdgeX < spanStart) leftEdgeX = spanStart;
 
         int rightEdgeX = (int) p2_plotX;
-        if (rightEdgeX > frameWidth-1)
-            rightEdgeX = frameWidth-1;
+        if (rightEdgeX > frameWidth-1) rightEdgeX = frameWidth-1;
+        if (rightEdgeX > spanEnd) rightEdgeX = spanEnd;
 
         if (leftEdgeX > spanEnd) return; //Avoid more processing if out of span
         if (rightEdgeX < spanStart) return;
         if (spanFilled(spanStart, spanEnd)) return;
-
+        
         Sector currentSector = sectors.get(currentSectorIndex);
         float secFloorZ = currentSector.floorZ, secCeilZ = currentSector.ceilZ;
 

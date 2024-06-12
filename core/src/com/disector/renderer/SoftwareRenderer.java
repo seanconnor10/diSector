@@ -17,8 +17,8 @@ public class SoftwareRenderer extends Renderer {
     private int[] occlusionBottom;
     private int[] occlusionTop;
     private Stack<Integer> drawnPortals = new Stack<>();
-    private HashSet<Integer> transformedWalls = new HashSet<>();
-    private HashSet<Integer> transformedSectors = new HashSet<>();
+    //private HashSet<Integer> transformedWalls = new HashSet<>();
+    //private HashSet<Integer> transformedSectors = new HashSet<>();
 
     public SoftwareRenderer(App app) {
         super(app);
@@ -53,8 +53,8 @@ public class SoftwareRenderer extends Renderer {
     }
 
     private void resetDrawData() {
-        transformedWalls.clear();
-        transformedSectors.clear();
+        //transformedWalls.clear();
+        //transformedSectors.clear();
         drawnPortals.clear();
 
         for (int i=0; i<frameWidth; i++) {
@@ -83,7 +83,6 @@ public class SoftwareRenderer extends Renderer {
         wallsToDraw.sort( //Sort wallsToDraw with nearest to camera first
             (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
         );
-
 
         for (WallInfoPack wallInfo : wallsToDraw) {
             drawWall(wallInfo.wInd, secInd, spanStart, spanEnd);

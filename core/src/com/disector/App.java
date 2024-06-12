@@ -3,7 +3,9 @@ package com.disector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 
 import com.disector.gameworld.GameWorld;
@@ -13,6 +15,8 @@ import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
 
 public class App extends ApplicationAdapter {
+    private static final boolean printFPS = false;
+
     private GameWorld gameWorld;
     private Renderer renderer;
     private EditorInterface editor;
@@ -26,10 +30,13 @@ public class App extends ApplicationAdapter {
     public int frameHeight = 225;
 
     public SpriteBatch batch;
+    public ShapeRenderer shape;
 
     @Override
     public void create () {
         batch = new SpriteBatch();
+        shape = new ShapeRenderer();
+        shape.setColor(Color.RED);
         renderer = new SoftwareRenderer(this);
         gameWorld = new GameWorld(this);
 
@@ -41,8 +48,6 @@ public class App extends ApplicationAdapter {
 
     @Override
     public void render () {
-        //ScreenUtils.clear(0, 0, 0, 1);
-
         updateDeltaTime();
 
         InputRecorder.updateKeys();
@@ -55,6 +60,8 @@ public class App extends ApplicationAdapter {
         renderer.placeCamera(gameWorld.getPlayerPosition(), gameWorld.getPlayerVLook(), gameWorld.getPlayerSectorIndex());
         renderer.renderWorld();
         renderer.drawFrame();
+
+        drawOverlay();
     }
 
     @Override
@@ -64,8 +71,10 @@ public class App extends ApplicationAdapter {
 
     private void updateDeltaTime() {
         deltaTime = Gdx.graphics.getDeltaTime();
-        int fps = (int) ( 1.f / deltaTime );
-        System.out.println("Fps: " + fps);
+        if (printFPS) {
+            int fps = (int) (1.f / deltaTime);
+            System.out.println("Fps: " + fps);
+        }
         if (deltaTime > 0.04f) deltaTime = 0.04f; //If below 25 frames/second only advance time as if it were running at 25fps
     }
 
@@ -88,13 +97,21 @@ public class App extends ApplicationAdapter {
         walls.add(new Wall( 50, -50, 20, 20     )); s.walls.add(walls.size-1);
         sectors.add(s);
 
-        s = new Sector(); s.floorZ = -25; s.ceilZ = 40;
+        s = new Sector(); s.floorZ = -15; s.ceilZ = 40;
         s.walls.add(2); //Index 2 is First Portal
         walls.add(new Wall(100, 80, 90, 125 )); s.walls.add(walls.size-1);
         walls.add(new Wall(90, 125, 185, 125 )); s.walls.add(walls.size-1);
         walls.add(new Wall(185, 125,  175, 80 )); s.walls.add(walls.size-1);
         sectors.add(s);
 
+    }
+
+    private void drawOverlay() {
+        shape.begin(ShapeRenderer.ShapeType.Line);
+        for (Wall w : walls) {
+            shape.line(w.x1+200, w.y1+200, w.x2+200, w.y2+200);
+        }
+        shape.end();
     }
 
 }

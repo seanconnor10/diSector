@@ -11,7 +11,7 @@ import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.WallInfoPack;
 import com.disector.gameworld.components.Movable;
-
+import com.disector.gameworld.components.Positionable;
 
 public class GameWorld {
     private final App app;
@@ -42,84 +42,131 @@ public class GameWorld {
                 player1.currentSectorIndex = 0;
         }
 
-        //boolean colliding = boundingBoxCheck( walls.get(1), player1.snagPosition(), player1.getRadius() );
-        //System.out.println(colliding);
-
         moveObj(player1);
     }
 
+    //*****************************************************
+
+    public Vector4 getPlayerPosition() {
+        return new Vector4(player1.copyPosition(), player1.z+player1.height, player1.r);
+    }
+
+    public int getPlayerSectorIndex() {
+        return player1.currentSectorIndex;
+    }
+
+    public float getPlayerVLook() {
+        return player1.vLook;
+    }
+
+    //*****************************************************
 
     private void moveObj(Movable obj) {
         /**
          * Takes any game object with a position and velocity and moves it,
          * colliding it against walls and updating its currentSectorIndex
          */
+        Sector currentSector = sectors.get( obj.getCurrentSector() );
+
         Vector2 objPos = obj.snagPosition(); //Snag grabs a reference to the Vector so we can change it
         Vector2 velocity = obj.snagVelocity();
-
-        Sector currentSector = sectors.get( obj.getCurrentSector() );
 
         objPos.x += velocity.x * dt;
         objPos.y += velocity.y * dt;
 
-        Array<WallInfoPack> wallsCollided = new Array<>();
+        Array<WallInfoPack> wallsCollided;
         int collisionsProcessed = 0;
 
-        do {
-            wallsCollided.clear();
+        while (collisionsProcessed < 100) {
+            wallsCollided = findCollisions(currentSector, obj);
 
-            //For every wall in sector, check collision by bounding box, if collided check collision accurately
-            //and if colliding, add to list of collidedWalls
-            for (int wInd : currentSector.walls.toArray()) {
-                Wall w = walls.get(wInd);
-                if (boundingBoxCheck(w, objPos, obj.getRadius())) {
-                    WallInfoPack info = new WallInfoPack(w, wInd, objPos);
-                    if (info.distToNearest < obj.getRadius()) {
-                        if (!info.w.isPortal) {
-                            wallsCollided.add(info);
-                        } else {
-                            //Avoid adding a portal wall to collisions if we can fit through vertically
-                            float floorMax = Math.max(sectors.get(info.w.linkA).floorZ, sectors.get(info.w.linkB).floorZ);
-                            float ceilMin = Math.min(sectors.get(info.w.linkA).ceilZ, sectors.get(info.w.linkB).ceilZ);
-                            if (obj.getZ() < floorMax || obj.getZ()+obj.getHeight() > ceilMin)
-                                wallsCollided.add(info);
-                        }
-                    }
-                }
-            }
+            if (wallsCollided.isEmpty()) break;
 
-            if (wallsCollided.isEmpty()) return;
-
-            wallsCollided.sort( //Sort collided walls to get the first one we should collide with
+            wallsCollided.sort( ////Sort collided walls to get the first one we should collide with
                 (WallInfoPack o1, WallInfoPack o2) -> Float.compare(o1.distToNearest, o2.distToNearest)
             );
 
-            WallInfoPack closestCollision = wallsCollided.get(0); //Get reference to closest collision
+            //Get reference to closest collision
+            WallInfoPack closestCollision = wallsCollided.get(0);
 
-            //Resolve Collision away from wall
-            float resolutionDistance = obj.getRadius() - closestCollision.distToNearest;
-            if (closestCollision.w.isPortal && closestCollision.w.linkA == obj.getCurrentSector())
-                resolutionDistance *= -1;
-            objPos.x += (float) Math.cos(closestCollision.w.normalAngle) * resolutionDistance;
-            objPos.y += (float) Math.sin(closestCollision.w.normalAngle) * resolutionDistance;
-
-            //Bounce off of wall
-            float wallXNormal = (float) Math.cos(closestCollision.w.normalAngle);
-            float wallYNormal = (float) Math.sin(closestCollision.w.normalAngle);
-            float proj_norm = velocity.x * wallXNormal + velocity.y * wallYNormal;
-            float perpendicularVelX = proj_norm * wallXNormal;
-            float perpendicularVelY = proj_norm * wallYNormal;
-            float parallelVelX = velocity.x - perpendicularVelX;
-            float parallelVelY = velocity.y - perpendicularVelY;
-            float elasticity = 0.2f;
-            float restitution = 0.9f;
-            velocity.x = ( parallelVelX * restitution - perpendicularVelX * elasticity);
-            velocity.y = ( parallelVelY * restitution - perpendicularVelY * elasticity);
+            if (closestCollision.w.isPortal) {
+                int destSector = closestCollision.w.linkA;
+                if (destSector == obj.getCurrentSector())
+                    destSector = closestCollision.w.linkB;
+                if (heightCheck(sectors.get(destSector), obj, obj.getZSpeed() >= 0.0f ? 10.f : 0.f)) {
+                    if (containsPoint(sectors.get(destSector), objPos.x, objPos.y)) {
+                        System.out.println("HERE!");
+                        obj.setCurrentSector(destSector);
+                    }
+                } else {
+                    resolveCollision(closestCollision, obj);
+                    velocity.set(bounceVector(velocity, closestCollision.w));
+                }
+            } else {
+                resolveCollision(closestCollision, obj);
+                velocity.set(bounceVector(velocity, closestCollision.w));
+            }
 
             collisionsProcessed++;
 
-        } while ( collisionsProcessed < 100 ); //Above, we return when there are no collisions
+        }
 
+    }
+
+    private boolean heightCheck(Sector s, Positionable obj, float stepUpAllowance) {
+        //Return whether the obj can fit the sector height-wise
+        return obj.getZ()+obj.getHeight() < s.ceilZ && obj.getZ() >= s.floorZ-stepUpAllowance;
+    }
+
+    private Array<WallInfoPack> findCollisions(Sector sector, Positionable obj) {
+        Array<WallInfoPack> collisions = new Array<>();
+        Vector2 objPos = obj.copyPosition();
+        //For every wall in sector, check collision by bounding box
+        //If collided, check collision accurately
+        //and if still colliding, add to list of collisions
+        for (int wInd : sector.walls.toArray()) {
+            Wall w = walls.get(wInd);
+            if (boundingBoxCheck(w, obj.copyPosition(), obj.getRadius())) {
+                WallInfoPack info = new WallInfoPack(w, wInd, objPos);
+                if (info.distToNearest < obj.getRadius()) {
+                    /*if (!info.w.isPortal) {*/
+                        collisions.add(info);
+                    /*} else {
+                        //Avoid adding a portal wall to collisions if we can fit through vertically
+                        float floorMax = Math.max(sectors.get(info.w.linkA).floorZ, sectors.get(info.w.linkB).floorZ);
+                        float ceilMin = Math.min(sectors.get(info.w.linkA).ceilZ, sectors.get(info.w.linkB).ceilZ);
+                        if (obj.getZ() < floorMax || obj.getZ()+obj.getHeight() > ceilMin)
+                            collisions.add(info);
+                    }*/
+                }
+            }
+        }
+        return collisions;
+    }
+
+    private void resolveCollision (WallInfoPack collisionInfo, Movable obj) {
+        float resolutionDistance = obj.getRadius() - collisionInfo.distToNearest;
+        if (collisionInfo.w.isPortal && collisionInfo.w.linkA == obj.getCurrentSector())
+            resolutionDistance *= -1;
+        Vector2 objPos = obj.snagPosition();
+        objPos.x += (float) Math.cos(collisionInfo.w.normalAngle) * resolutionDistance;
+        objPos.y += (float) Math.sin(collisionInfo.w.normalAngle) * resolutionDistance;
+    }
+
+    private Vector2 bounceVector(Vector2 velocity, Wall wall) {
+        float wallXNormal = (float) Math.cos(wall.normalAngle);
+        float wallYNormal = (float) Math.sin(wall.normalAngle);
+        float proj_norm = velocity.x * wallXNormal + velocity.y * wallYNormal;
+        float perpendicularVelX = proj_norm * wallXNormal;
+        float perpendicularVelY = proj_norm * wallYNormal;
+        float parallelVelX = velocity.x - perpendicularVelX;
+        float parallelVelY = velocity.y - perpendicularVelY;
+        float elasticity = 0.2f;
+        float restitution = 0.9f;
+        return new Vector2(
+            parallelVelX * restitution - perpendicularVelX * elasticity,
+            parallelVelY * restitution - perpendicularVelY * elasticity
+        );
     }
 
     private boolean boundingBoxCheck(Wall w, Vector2 objPos, float objRadius) {
@@ -127,7 +174,6 @@ public class GameWorld {
         float rightBound = Math.max(w.x1, w.x2) + objRadius;
         float topBound = Math.min(w.y1, w.y2) - objRadius;
         float bottomBound = Math.max(w.y1, w.y2) + objRadius;
-
         if (objPos.x > rightBound) return false;
         if (objPos.x < leftBound) return false;
         if (objPos.y > bottomBound) return false;
@@ -201,23 +247,12 @@ public class GameWorld {
          */
         int intersections = 0;
         for (Integer wInd : sec.walls.toArray()) {
-            if (rayWallIntersection(walls.get(wInd), 0.f, x, y, true) != null)
+            Vector2 intersect = rayWallIntersection(walls.get(wInd), 0.f, x, y, false);
+            if (intersect != null && intersect.x > x)
                 intersections++;
         }
 
         return (intersections%2 == 1);
-    }
-
-    public Vector4 getPlayerPosition() {
-        return new Vector4(player1.copyPosition(), player1.z+player1.height, player1.r);
-    }
-
-    public int getPlayerSectorIndex() {
-        return player1.currentSectorIndex;
-    }
-
-    public float getPlayerVLook() {
-        return player1.vLook;
     }
 
 }

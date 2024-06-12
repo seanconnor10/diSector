@@ -62,12 +62,8 @@ public class Player implements Movable {
         float currentSpeed = velocity.len();
         if (currentSpeed > MAX_SPEED) velocity.setLength(MAX_SPEED);
 
-        //Update position with velocity
-//        x += vel.x * dt; Now happens when calling moveObj() in GameWorld
-//        y += vel.y * dt;
-
         //Friction when not inputting
-        if (inputVector.isZero(0.05f)) velocity.scl( 1.f - 5.f*dt);
+        if (inputVector.isZero(0.05f)) velocity.scl( 1.f - 3.f*dt);
 
         //Rotate player + look up and down
         if (Gdx.input.isCursorCatched()) {

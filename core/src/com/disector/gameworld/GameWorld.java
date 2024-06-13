@@ -6,6 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
+import com.badlogic.gdx.utils.IntArray;
 import com.disector.App;
 import com.disector.Sector;
 import com.disector.Wall;
@@ -74,11 +75,59 @@ public class GameWorld {
         objPos.x += velocity.x * dt;
         objPos.y += velocity.y * dt;
 
+        float stepUpAllowance = obj.isOnGround() && obj.getZSpeed() >= 0.0f ? 10.f : 0.f;
+
         Array<WallInfoPack> wallsCollided;
+        IntArray potentialNewSectors = new IntArray();
+        float teeterHeight = currentSector.floorZ;
         int collisionsProcessed = 0;
 
         while (collisionsProcessed < 100) {
             wallsCollided = findCollisions(currentSector, obj);
+
+            //Remove Portal Walls that we can vertically fit through,
+            //putting the destination sector index into another array
+            for (int i=0; i<wallsCollided.size; i++) {
+                WallInfoPack wallInfo = wallsCollided.get(i);
+                if (wallInfo.w.isPortal) {
+                    int destSector = wallInfo.w.linkA;
+                    if (destSector == obj.getCurrentSector())
+                        destSector = wallInfo.w.linkB;
+                    Sector dest = sectors.get(destSector);
+                    if (heightCheck(dest, obj, stepUpAllowance)) {
+                        teeterHeight = Math.max(teeterHeight, dest.floorZ);
+                        potentialNewSectors.add(destSector);
+                        wallsCollided.removeIndex(i);
+                        i--;
+                    }
+                }
+            }
+
+            for (int sInd : potentialNewSectors.toArray()) {
+                if (containsPoint( sectors.get(sInd), objPos.x, objPos.y)) {
+                    obj.setCurrentSector(sInd);
+                    break;
+                }
+            }
+
+            obj.setOnGround(obj.getZ() < teeterHeight+0.5f);
+
+            //Grav
+            if (obj.getZ() > teeterHeight) obj.setZSpeed(obj.getZSpeed() - 200.f*dt);
+            if (obj.getZSpeed() < -100.0f) obj.setZSpeed(-100.0f);
+            //Enact motion
+            obj.setZ( obj.getZ() + obj.getZSpeed()*dt );
+            //Hit Floor
+            if (obj.getZ()<teeterHeight) {
+                obj.setZ(teeterHeight);
+                if (obj.getZSpeed() < 0) obj.setZSpeed(0);
+            }
+            //HitCeiling
+            //We should find lowest ceiling too!
+            /*if (obj.getZ()<teeterHeight) {
+                obj.setZ(teeterHeight);
+                if (obj.getZSpeed() < 0) obj.setZSpeed(0);
+            }*/
 
             if (wallsCollided.isEmpty()) break;
 
@@ -89,23 +138,8 @@ public class GameWorld {
             //Get reference to closest collision
             WallInfoPack closestCollision = wallsCollided.get(0);
 
-            if (closestCollision.w.isPortal) {
-                int destSector = closestCollision.w.linkA;
-                if (destSector == obj.getCurrentSector())
-                    destSector = closestCollision.w.linkB;
-                if (heightCheck(sectors.get(destSector), obj, obj.getZSpeed() >= 0.0f ? 10.f : 0.f)) {
-                    if (containsPoint(sectors.get(destSector), objPos.x, objPos.y)) {
-                        System.out.println("HERE!");
-                        obj.setCurrentSector(destSector);
-                    }
-                } else {
-                    resolveCollision(closestCollision, obj);
-                    velocity.set(bounceVector(velocity, closestCollision.w));
-                }
-            } else {
-                resolveCollision(closestCollision, obj);
-                velocity.set(bounceVector(velocity, closestCollision.w));
-            }
+            resolveCollision(closestCollision, obj);
+            velocity.set(bounceVector(velocity, closestCollision.w));
 
             collisionsProcessed++;
 
@@ -129,15 +163,7 @@ public class GameWorld {
             if (boundingBoxCheck(w, obj.copyPosition(), obj.getRadius())) {
                 WallInfoPack info = new WallInfoPack(w, wInd, objPos);
                 if (info.distToNearest < obj.getRadius()) {
-                    /*if (!info.w.isPortal) {*/
-                        collisions.add(info);
-                    /*} else {
-                        //Avoid adding a portal wall to collisions if we can fit through vertically
-                        float floorMax = Math.max(sectors.get(info.w.linkA).floorZ, sectors.get(info.w.linkB).floorZ);
-                        float ceilMin = Math.min(sectors.get(info.w.linkA).ceilZ, sectors.get(info.w.linkB).ceilZ);
-                        if (obj.getZ() < floorMax || obj.getZ()+obj.getHeight() > ceilMin)
-                            collisions.add(info);
-                    }*/
+                    collisions.add(info);
                 }
             }
         }

@@ -318,7 +318,7 @@ public class SoftwareRenderer extends Renderer {
 
             boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
             Color drawColor = new Color( checkerBoard ? 0xFF302005 : 0xFF251503 );
-            float ceilFogValue = 1.0f - (((-halfHeight + drawY) / halfHeight));
+            float ceilFogValue = 1.0f - ( ((-halfHeight + drawY) / halfHeight) );
             ceilFogValue = (float) Math.min(1.0, Math.max(0.0,ceilFogValue));
             drawColor.lerp( Color.BLACK, ceilFogValue);
             buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );

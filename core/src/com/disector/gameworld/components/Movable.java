@@ -17,4 +17,6 @@ public interface Movable extends Positionable{
     float getZSpeed();
     void setZSpeed(float zSpeed);
     void setZ(float z);
+    void setOnGround(boolean val);
+    boolean isOnGround();
 }

@@ -24,7 +24,7 @@ public abstract class Renderer {
     float halfWidth, halfHeight;
 
     float camX, camY, camZ, camR, camVLook;
-    float camFOV = 250.f;
+    float camFOV = 150.f;
     int camCurrentSector;
 
     public Renderer(App app) {

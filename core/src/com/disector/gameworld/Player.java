@@ -21,6 +21,7 @@ public class Player implements Movable {
     Vector2 velocity = new Vector2(0.f, 0.f);
     float zSpeed;
     int currentSectorIndex;
+    boolean onGround;
 
     final float MAX_SPEED = 150.f, ACCEL = 4.0f;
     final float MOUSE_SENS_X = 0.002f, MOUSE_SENS_Y = 0.5f;
@@ -87,16 +88,18 @@ public class Player implements Movable {
         //Crouching
         height = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) ? CROUCHING_HEIGHT : STANDING_HEIGHT;
 
-        //Grav
-        if (z > secFloor) zSpeed -= 200.f * dt; if (zSpeed < -100.0f) zSpeed = -100.0f;
+
 
         //Jump
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) && z < secFloor+0.5f)
+        if (onGround && Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
             zSpeed = 100.0f;
 
-        z += zSpeed * dt;
-
-        if (z<secFloor) {z = secFloor; zSpeed = 0.f;}
+//        //Grav
+//        if (z > secFloor) zSpeed -= 200.f * dt; if (zSpeed < -100.0f) zSpeed = -100.0f;
+//        //Enact motion
+//        z += zSpeed * dt;
+//        //Hit Floor
+//        if (z<secFloor) {z = secFloor; zSpeed = 0.f;}
 
     }
 
@@ -165,5 +168,15 @@ public class Player implements Movable {
     @Override
     public void setZ(float z) {
         this.z = z;
+    }
+
+    @Override
+    public void setOnGround(boolean val) {
+        onGround = val;
+    }
+
+    @Override
+    public boolean isOnGround() {
+        return onGround;
     }
 }

@@ -88,8 +88,6 @@ public class Player implements Movable {
         //Crouching
         height = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) ? CROUCHING_HEIGHT : STANDING_HEIGHT;
 
-
-
         //Jump
         if (onGround && Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
             zSpeed = 100.0f;

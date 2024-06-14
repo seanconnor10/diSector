@@ -80,6 +80,7 @@ public class GameWorld {
         Array<WallInfoPack> wallsCollided;
         IntArray potentialNewSectors = new IntArray();
         float teeterHeight = currentSector.floorZ;
+        float lowestCeilHeight = currentSector.ceilZ;
         int collisionsProcessed = 0;
 
         while (collisionsProcessed < 100) {
@@ -96,6 +97,7 @@ public class GameWorld {
                     Sector dest = sectors.get(destSector);
                     if (heightCheck(dest, obj, stepUpAllowance)) {
                         teeterHeight = Math.max(teeterHeight, dest.floorZ);
+                        lowestCeilHeight = Math.min(lowestCeilHeight, dest.ceilZ);
                         potentialNewSectors.add(destSector);
                         wallsCollided.removeIndex(i);
                         i--;
@@ -109,25 +111,6 @@ public class GameWorld {
                     break;
                 }
             }
-
-            obj.setOnGround(obj.getZ() < teeterHeight+0.5f);
-
-            //Grav
-            if (obj.getZ() > teeterHeight) obj.setZSpeed(obj.getZSpeed() - 200.f*dt);
-            if (obj.getZSpeed() < -100.0f) obj.setZSpeed(-100.0f);
-            //Enact motion
-            obj.setZ( obj.getZ() + obj.getZSpeed()*dt );
-            //Hit Floor
-            if (obj.getZ()<teeterHeight) {
-                obj.setZ(teeterHeight);
-                if (obj.getZSpeed() < 0) obj.setZSpeed(0);
-            }
-            //HitCeiling
-            //We should find lowest ceiling too!
-            /*if (obj.getZ()<teeterHeight) {
-                obj.setZ(teeterHeight);
-                if (obj.getZSpeed() < 0) obj.setZSpeed(0);
-            }*/
 
             if (wallsCollided.isEmpty()) break;
 
@@ -143,6 +126,24 @@ public class GameWorld {
 
             collisionsProcessed++;
 
+        }
+
+        obj.setOnGround(obj.getZ() < teeterHeight+0.5f);
+
+        //Grav
+        if (obj.getZ() > teeterHeight) obj.setZSpeed(obj.getZSpeed() - 200.f*dt);
+        if (obj.getZSpeed() < -100.0f) obj.setZSpeed(-100.0f);
+        //Enact motion
+        obj.setZ( obj.getZ() + obj.getZSpeed()*dt );
+        //Hit Floor
+        if (obj.getZ()<teeterHeight) {
+            obj.setZ(teeterHeight);
+            if (obj.getZSpeed() < 0) obj.setZSpeed(0);
+        }
+        //HitCeiling
+        if (obj.getZ()+obj.getHeight()>lowestCeilHeight) {
+            obj.setZ(lowestCeilHeight-obj.getHeight());
+            if (obj.getZSpeed() > 0) obj.setZSpeed(0);
         }
 
     }

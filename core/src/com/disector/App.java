@@ -15,7 +15,7 @@ import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
 
 public class App extends ApplicationAdapter {
-    private static final boolean printFPS = false;
+    private static final boolean printFPS = true;
 
     private GameWorld gameWorld;
     private Renderer renderer;
@@ -26,8 +26,8 @@ public class App extends ApplicationAdapter {
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
 
-    public int frameWidth = 400;
-    public int frameHeight = 225;
+    public int frameWidth = 320;
+    public int frameHeight = 180;
 
     public SpriteBatch batch;
     public ShapeRenderer shape;

@@ -11,15 +11,19 @@ import com.badlogic.gdx.utils.Array;
 import com.disector.gameworld.GameWorld;
 import com.disector.editor.EditorInterface;
 import com.disector.inputrecorder.InputRecorder;
+import com.disector.renderer.MapOverlayRenderer;
 import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
 
-public class App extends ApplicationAdapter {
-    private static final boolean printFPS = true;
+public class Application extends ApplicationAdapter {
+    private static final boolean printFPS = false;
 
     private GameWorld gameWorld;
     private Renderer renderer;
+    private MapOverlayRenderer mapOverlayRenderer;
     private EditorInterface editor;
+
+    private AppFocusTarget focus = AppFocusTarget.GAME;
 
     private float deltaTime;
 
@@ -36,8 +40,9 @@ public class App extends ApplicationAdapter {
     public void create () {
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
-        shape.setColor(Color.RED);
+        shape.setColor(Color.WHITE);
         renderer = new SoftwareRenderer(this);
+        mapOverlayRenderer = new MapOverlayRenderer(this);
         gameWorld = new GameWorld(this);
 
         InputRecorder.repopulateKeyCodeMap();
@@ -52,6 +57,36 @@ public class App extends ApplicationAdapter {
 
         InputRecorder.updateKeys();
 
+        switch(focus) {
+            case MENU:
+                menu();
+                break;
+            case GAME:
+                game();
+                break;
+            case EDITOR:
+                editor();
+                break;
+            default:
+                System.out.println("How did you get here??");
+                break;
+        }
+
+    }
+
+    @Override
+    public void dispose () {
+        batch.dispose();
+    }
+
+    private void swapFocus(AppFocusTarget target) {
+        focus = target;
+
+        if (target != AppFocusTarget.GAME)
+            Gdx.input.setCursorCatched(false);
+    }
+
+    private void game() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) //Toggle Mouse Locking
             Gdx.input.setCursorCatched( !Gdx.input.isCursorCatched() );
 
@@ -61,12 +96,18 @@ public class App extends ApplicationAdapter {
         renderer.renderWorld();
         renderer.drawFrame();
 
-        drawOverlay();
+        if (gameWorld.shouldDisplayMap()) {
+            mapOverlayRenderer.placeCamera(gameWorld.getPlayerPosition(), 0, gameWorld.getPlayerSectorIndex());
+            mapOverlayRenderer.renderWorld();
+        }
     }
 
-    @Override
-    public void dispose () {
-        batch.dispose();
+    private void menu() {
+
+    }
+
+    private void editor(){
+
     }
 
     private void updateDeltaTime() {
@@ -104,14 +145,6 @@ public class App extends ApplicationAdapter {
         walls.add(new Wall(185, 125,  175, 80 )); s.walls.add(walls.size-1);
         sectors.add(s);
 
-    }
-
-    private void drawOverlay() {
-        shape.begin(ShapeRenderer.ShapeType.Line);
-        for (Wall w : walls) {
-            shape.line(w.x1+200, w.y1+200, w.x2+200, w.y2+200);
-        }
-        shape.end();
     }
 
 }

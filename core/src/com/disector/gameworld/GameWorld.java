@@ -1,29 +1,30 @@
 package com.disector.gameworld;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
 import com.badlogic.gdx.utils.IntArray;
-import com.disector.App;
+import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.WallInfoPack;
 import com.disector.gameworld.components.Movable;
 import com.disector.gameworld.components.Positionable;
+import com.disector.inputrecorder.InputRecorder;
+import com.disector.renderer.MapOverlayRenderer;
 
 public class GameWorld {
-    private final App app;
+    private final Application app;
     private final Array<Wall> walls;
     private final Array<Sector> sectors;
 
     private Player player1;
 
     private float dt;
+    private boolean shouldDisplayMap;
 
-    public GameWorld(App app) {
+    public GameWorld(Application app) {
         this.app = app;
         this.walls = app.walls;
         this.sectors = app.sectors;
@@ -34,16 +35,16 @@ public class GameWorld {
     public void step(float dt) {
         this.dt = dt;
 
+        if (InputRecorder.getKeyInfo("DISPLAY_MAP").justPressed)
+            shouldDisplayMap = !shouldDisplayMap;
+
         player1.movementInput(dt);
         player1.verticalMovement(dt, walls, sectors);
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER)) {
-            player1.currentSectorIndex++;
-            if (player1.currentSectorIndex == sectors.size)
-                player1.currentSectorIndex = 0;
-        }
-
         moveObj(player1);
+    }
+
+    public void drawMap() {
     }
 
     //*****************************************************
@@ -58,6 +59,10 @@ public class GameWorld {
 
     public float getPlayerVLook() {
         return player1.vLook;
+    }
+
+    public boolean shouldDisplayMap() {
+        return shouldDisplayMap;
     }
 
     //*****************************************************

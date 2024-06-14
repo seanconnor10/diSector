@@ -1,16 +1,13 @@
 package com.disector.renderer;
 
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.disector.App;
+import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.WallInfoPack;
 
-import java.util.HashSet;
 import java.util.Stack;
 
 public class SoftwareRenderer extends Renderer {
@@ -20,7 +17,7 @@ public class SoftwareRenderer extends Renderer {
     //private HashSet<Integer> transformedWalls = new HashSet<>();
     //private HashSet<Integer> transformedSectors = new HashSet<>();
 
-    public SoftwareRenderer(App app) {
+    public SoftwareRenderer(Application app) {
         super(app);
     }
 
@@ -33,12 +30,7 @@ public class SoftwareRenderer extends Renderer {
 
     @Override
     public void drawFrame() {
-        TextureRegion frame = new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
-        frame.flip(false, true);
-        batch.begin();
-        batch.draw(frame, 0, 0);
-        batch.end();
-        frame.getTexture().dispose();
+        super.drawFrame();
     }
 
     @Override

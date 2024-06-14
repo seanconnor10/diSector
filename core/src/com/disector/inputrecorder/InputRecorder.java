@@ -1,7 +1,6 @@
 package com.disector.inputrecorder;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -12,23 +11,6 @@ public class InputRecorder {
     public static Map<Integer, keyPressData> keyPressMap = new HashMap<>();
     public static int keyCount;
     public static float mouseDeltaX, mouseDeltaY;
-
-    @KeyCode
-    public static int FORWARD = Input.Keys.W;
-    @KeyCode
-    public static int LEFT = Input.Keys.A;
-    @KeyCode
-    public static int BACKWARD = Input.Keys.S;
-    @KeyCode
-    public static int RIGHT = Input.Keys.D;
-    @KeyCode
-    public static int TURN_LEFT = Input.Keys.LEFT;
-    @KeyCode
-    public static int TURN_RIGHT = Input.Keys.RIGHT;
-    @KeyCode
-    public static int LOOK_UP = Input.Keys.UP;
-    @KeyCode
-    public static int LOOK_DOWN = Input.Keys.DOWN;
 
     public static void updateKeys() {
         mouseDeltaX = Gdx.input.getDeltaX();
@@ -42,7 +24,7 @@ public class InputRecorder {
     }
 
     public static void repopulateKeyCodeMap() {
-        Field[] fields = InputRecorder.class.getFields();
+        Field[] fields = KeyMapping.class.getFields();
 
         keyBinds.clear(); //Map of 'Action Names' and the keyCode they're assign to
         for (Field field : fields) {

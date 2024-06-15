@@ -193,8 +193,8 @@ public class GameWorld {
         float perpendicularVelY = proj_norm * wallYNormal;
         float parallelVelX = velocity.x - perpendicularVelX;
         float parallelVelY = velocity.y - perpendicularVelY;
-        float elasticity = 0.2f;
-        float restitution = 0.9f;
+        final float elasticity = 0.2f;
+        final float restitution = 0.9f;
         return new Vector2(
             parallelVelX * restitution - perpendicularVelX * elasticity,
             parallelVelY * restitution - perpendicularVelY * elasticity

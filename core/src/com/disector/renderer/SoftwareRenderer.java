@@ -29,11 +29,6 @@ public class SoftwareRenderer extends Renderer {
     }
 
     @Override
-    public void drawFrame() {
-        super.drawFrame();
-    }
-
-    @Override
     public void resizeFrame(int w, int h) {
         super.resizeFrame(w, h);
         reInitDrawData(w);

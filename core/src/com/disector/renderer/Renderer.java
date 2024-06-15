@@ -13,7 +13,7 @@ import com.disector.Sector;
 import com.disector.Wall;
 
 public abstract class Renderer {
-    final Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888; //RGBA8888 is faster than RGBA4444
+    final Pixmap.Format pixelFormat;
 
     final Application app;
     final Array<Wall> walls;
@@ -31,6 +31,7 @@ public abstract class Renderer {
 
     public Renderer(Application app) {
         this.app = app;
+        this.pixelFormat = app.pixelFormat;
         this.batch = app.batch;
         this.walls = app.walls;
         this.sectors = app.sectors;

@@ -3,25 +3,31 @@ package com.disector.assets;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
 import java.util.Locale;
 
 public class PixmapContainer {
-    public Pixmap[] pixmaps = new Pixmap[0];
+    public Pixmap[] pixmaps;
 
     private static final FileHandle imgDir = Gdx.files.local("assets/img");
 
-    public PixmapContainer() {
-
-    }
-
     public void loadImages() {
-        Array<FileHandle> imgFile = new Array<>();
+        Array<FileHandle> imgFiles = new Array<>();
 
         for (FileHandle file : imgDir.list()) {
             if (handleIsImage(file))
-                imgFile.add(file);
+                imgFiles.add(file);
+        }
+
+        pixmaps = new Pixmap[imgFiles.size];
+
+        for (int i=0; i<imgFiles.size; i++) {
+            Texture temp = new Texture(imgFiles.get(i));
+            if (!temp.getTextureData().isPrepared()) temp.getTextureData().prepare();
+            pixmaps[i] = temp.getTextureData().consumePixmap();
+            temp.dispose();
         }
     }
 

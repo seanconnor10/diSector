@@ -5,10 +5,12 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Array;
 
+import com.disector.assets.PixmapContainer;
 import com.disector.gameworld.GameWorld;
 import com.disector.editor.EditorInterface;
 import com.disector.inputrecorder.InputRecorder;
@@ -17,19 +19,22 @@ import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
 
 public class Application extends ApplicationAdapter {
-    private static final boolean printFPS = false;
+    private static final boolean printFPS = true;
 
     private GameWorld gameWorld;
     private Renderer renderer;
     private MapOverlayRenderer mapOverlayRenderer;
     private EditorInterface editor;
 
-    private AppFocusTarget focus = AppFocusTarget.GAME;
+    private AppFocusTarget focus;
 
     private float deltaTime;
 
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
+
+    public PixmapContainer textures;
+    public Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888;
 
     public int frameWidth = 320;
     public int frameHeight = 180;
@@ -39,6 +44,8 @@ public class Application extends ApplicationAdapter {
 
     @Override
     public void create () {
+        swapFocus(AppFocusTarget.GAME);
+
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
         shape.setColor(Color.WHITE);
@@ -46,12 +53,11 @@ public class Application extends ApplicationAdapter {
         mapOverlayRenderer = new MapOverlayRenderer(this);
         gameWorld = new GameWorld(this);
 
+        textures = new PixmapContainer();
+        textures.loadImages();
+
         InputRecorder.repopulateKeyCodeMap();
         Gdx.input.setCursorCatched(true);
-
-        for (FileHandle h : Gdx.files.local("").list()) {
-            System.out.println(h.toString());
-        }
 
         createTestMap();
     }
@@ -125,6 +131,8 @@ public class Application extends ApplicationAdapter {
     }
 
     private void createTestMap() {
+        walls.clear(); sectors.clear();
+
         Sector s = new Sector(); s.floorZ = 0; s.ceilZ = 50;
         walls.add(new Wall( 20, 20, 100, 20     )); s.walls.add(walls.size-1);
         walls.add(new Wall( 100, 20, 100, 80    )); s.walls.add(walls.size-1);
@@ -146,8 +154,23 @@ public class Application extends ApplicationAdapter {
         s = new Sector(); s.floorZ = -15; s.ceilZ = 40;
         s.walls.add(2); //Index 2 is First Portal
         walls.add(new Wall(100, 80, 90, 125 )); s.walls.add(walls.size-1);
-        walls.add(new Wall(90, 125, 185, 125 )); s.walls.add(walls.size-1);
+        Wall secondPortal = new Wall(90, 125, 185, 125);
+            secondPortal.isPortal = true;
+            secondPortal.linkA = 2;
+            secondPortal.linkB = 1;
+            walls.add(secondPortal);
+            s.walls.add(walls.size-1);
         walls.add(new Wall(185, 125,  175, 80 )); s.walls.add(walls.size-1);
+        sectors.add(s);
+
+        s = new Sector(); s.floorZ = -40; s.ceilZ = 20;
+        s.walls.add(walls.size-2); //Add 'secondPortal'
+        walls.add(new Wall( 90, 125, 90, 145    )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 90, 145, 135, 145   )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 135, 145, 135, 200   )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 135, 200, 150, 200   )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 150, 200, 150, 145   )); s.walls.add(walls.size-1);
+        walls.add(new Wall( 150, 145, 185, 125  )); s.walls.add(walls.size-1);
         sectors.add(s);
 
     }

@@ -1,6 +1,7 @@
 package com.disector.renderer;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.disector.Application;
@@ -174,6 +175,8 @@ public class SoftwareRenderer extends Renderer {
                 lowerWallCutoffV = (destFloor - secFloorZ) / thisSectorCeilingHeight;
         }
 
+        Pixmap tex = app.textures.pixmaps[0];
+
                                 //SHOULD PROBABLY BE <= rightEdgeX
         for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
             if (occlusionTop[drawX] -1 <= occlusionBottom[drawX] ) continue;
@@ -193,20 +196,23 @@ public class SoftwareRenderer extends Renderer {
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
 
             float u =  ((1 - hProgress)*(leftClipU/x1) + hProgress*(rightClipU/x2)) / ( (1-hProgress)*(1/x1) + hProgress*(1/ x2));
-            if (u<0.0001f) u = 0.0001f; if (u>0.9999) u = 0.9999f;
+            if (u<0.01f) u = 0.01f; if (u>0.99) u = 0.99f;
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) { //Per Pixel draw loop
                 float v = (drawY - quadBottom) /quadHeight;
+                if (v<0.01f) v = 0.01f; if (v>0.99) v = 0.99f;
 
                 if (isPortal && (v > lowerWallCutoffV && v < upperWallCutoffV) )
                     continue;
 
                 boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
-                Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB );
-                pixelColor.b =  (((float)wInd/(float)app.walls.size)*8.0f)%2; //Make blue vary between wall
-                pixelColor.lerp(0f,0f,0f,1f,fog);
+                //Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB );
+                int colBits = tex.getPixel( (int)(u*tex.getWidth()), (int)((1.f-v)*tex.getHeight())-1 );
+                Color pixelColor = new Color(colBits);
+                //pixelColor.g =  (((float)wInd/(float)app.walls.size)*8.0f)%2; //Make blue vary between wall
+                pixelColor.lerp(0.1f,0f,0.2f,1f,fog);
 
-                buffer.drawPixel(drawX, drawY, pixelColor.toIntBits() );
+                buffer.drawPixel(drawX, drawY, Color.rgba8888(pixelColor) );
             } //End Per Pixel Loop
 
             //Floor and Ceiling

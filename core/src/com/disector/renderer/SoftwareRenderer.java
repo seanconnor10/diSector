@@ -196,22 +196,20 @@ public class SoftwareRenderer extends Renderer {
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
 
             float u =  ((1 - hProgress)*(leftClipU/x1) + hProgress*(rightClipU/x2)) / ( (1-hProgress)*(1/x1) + hProgress*(1/ x2));
-            if (u<0.01f) u = 0.01f; if (u>0.99) u = 0.99f;
+            //if (u<0.01f) u = 0.01f; if (u>0.99) u = 0.99f;
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) { //Per Pixel draw loop
                 float v = (drawY - quadBottom) /quadHeight;
-                if (v<0.01f) v = 0.01f; if (v>0.99) v = 0.99f;
+                //if (v<0.01f) v = 0.01f; if (v>0.99) v = 0.99f;
 
                 if (isPortal && (v > lowerWallCutoffV && v < upperWallCutoffV) )
                     continue;
 
                 boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
                 //Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB );
-                int colBits = tex.getPixel( (int)(u*tex.getWidth()), (int)((1.f-v)*tex.getHeight())-1 );
-                Color pixelColor = new Color(colBits);
+                Color pixelColor = grabColor(tex, u, v);
                 //pixelColor.g =  (((float)wInd/(float)app.walls.size)*8.0f)%2; //Make blue vary between wall
                 pixelColor.lerp(0.1f,0f,0.2f,1f,fog);
-
                 buffer.drawPixel(drawX, drawY, Color.rgba8888(pixelColor) );
             } //End Per Pixel Loop
 
@@ -316,6 +314,13 @@ public class SoftwareRenderer extends Renderer {
             drawColor.lerp( Color.BLACK, ceilFogValue);
             buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
         }
+
+    }
+
+    private Color grabColor(Pixmap tex, float u, float v) {
+        u = u - (int)u;
+        v = v - (int)v;
+        return new Color(tex.getPixel( (int)(u*tex.getWidth()), (int)((1.f-v)*tex.getHeight()) ));
     }
 
 }

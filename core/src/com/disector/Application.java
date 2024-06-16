@@ -19,7 +19,7 @@ import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
 
 public class Application extends ApplicationAdapter {
-    private static final boolean printFPS = true;
+    private static final boolean printFPS = false;
 
     private GameWorld gameWorld;
     private Renderer renderer;

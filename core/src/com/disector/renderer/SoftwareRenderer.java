@@ -1,5 +1,7 @@
 package com.disector.renderer;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.Vector2;
@@ -18,6 +20,8 @@ public class SoftwareRenderer extends Renderer {
     //private HashSet<Integer> transformedWalls = new HashSet<>();
     //private HashSet<Integer> transformedSectors = new HashSet<>();
 
+    private int MipMapIndex = 0;
+
     public SoftwareRenderer(Application app) {
         super(app);
     }
@@ -27,36 +31,17 @@ public class SoftwareRenderer extends Renderer {
         resetDrawData();
         buffer.fill();
         drawSector(camCurrentSector, 0, frameWidth-1);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
+            MipMapIndex++;
+            if (MipMapIndex >= 5) MipMapIndex = 0;
+        }
     }
 
     @Override
     public void resizeFrame(int w, int h) {
         super.resizeFrame(w, h);
         reInitDrawData(w);
-    }
-
-    private void reInitDrawData(int newFrameWidth) {
-        occlusionBottom = new int[newFrameWidth];
-        occlusionTop = new int[newFrameWidth];
-    }
-
-    private void resetDrawData() {
-        //transformedWalls.clear();
-        //transformedSectors.clear();
-        drawnPortals.clear();
-
-        for (int i=0; i<frameWidth; i++) {
-            occlusionBottom[i] = 0;
-            occlusionTop[i] = frameHeight;
-        }
-    }
-
-    private boolean spanFilled(int spanStart, int spanEnd) {
-        for (int i=spanStart; i<spanEnd; i++) {
-            if (occlusionBottom[i] < occlusionTop[i]-1)
-                return false;
-        }
-        return true;
     }
 
     private void drawSector(int secInd, int spanStart, int spanEnd) {
@@ -175,7 +160,7 @@ public class SoftwareRenderer extends Renderer {
                 lowerWallCutoffV = (destFloor - secFloorZ) / thisSectorCeilingHeight;
         }
 
-        Pixmap tex = app.textures.pixmaps[0];
+        Pixmap textures[] = app.textures.pixmaps[0];
 
                                 //SHOULD PROBABLY BE <= rightEdgeX
         for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
@@ -195,8 +180,17 @@ public class SoftwareRenderer extends Renderer {
             rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
 
-            float u =  ((1 - hProgress)*(leftClipU/x1) + hProgress*(rightClipU/x2)) / ( (1-hProgress)*(1/x1) + hProgress*(1/ x2));
+            float u =  ((1 - hProgress)*(leftClipU/x1) + hProgress*(rightClipU/x2)) / ( (1-hProgress)*(1/x1) + hProgress*(1/x2));
             //if (u<0.01f) u = 0.01f; if (u>0.99) u = 0.99f;
+
+            Pixmap tex;
+            {
+                float hProgressPlusOne = (drawX+1-p1_plotX) / (p2_plotX-p1_plotX);
+                float uPlus1 = ((1 - hProgressPlusOne) * (leftClipU / x1) + hProgressPlusOne * (rightClipU / x2)) / ((1 - hProgressPlusOne) * (1 / x1) + hProgressPlusOne * (1 / x2));
+                float texPixelWidth = 64 * ( (uPlus1-u) / 1.f );
+                int mipMapIndex = Math.max(0, Math.min( (int)(texPixelWidth/1.f), 4));
+                tex = textures[mipMapIndex];
+            }
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) { //Per Pixel draw loop
                 float v = (drawY - quadBottom) /quadHeight;
@@ -205,12 +199,16 @@ public class SoftwareRenderer extends Renderer {
                 if (isPortal && (v > lowerWallCutoffV && v < upperWallCutoffV) )
                     continue;
 
-                boolean checkerboardColor = ( (int)(u*8)%2 == (int)(v*8)%2 );
-                //Color pixelColor = new Color( checkerboardColor ? 0xFFA0BB00 : 0xFF00A0BB );
-                Color pixelColor = grabColor(tex, u, v);
-                //pixelColor.g =  (((float)wInd/(float)app.walls.size)*8.0f)%2; //Make blue vary between wall
-                pixelColor.lerp(0.1f,0f,0.2f,1f,fog);
-                buffer.drawPixel(drawX, drawY, Color.rgba8888(pixelColor) );
+                Color drawColor;
+                if (/*Draw Textures*/ true) {
+                    drawColor = grabColor(tex, u, v);
+                    drawColor.lerp(0.1f,0f,0.2f,1f,fog);
+                } else {
+                    drawColor = getCheckerboardColor(u,v);
+                }
+
+                buffer.drawPixel(drawX, drawY, Color.rgba8888(drawColor));
+
             } //End Per Pixel Loop
 
             //Floor and Ceiling
@@ -221,13 +219,7 @@ public class SoftwareRenderer extends Renderer {
                 drawCeiling(w, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos);
 
             //Update Occlusion Matrix
-            if (!isPortal) {
-                if (occlusionBottom[drawX] < quadTop) occlusionBottom[drawX] = (int) quadTop;
-                if (occlusionTop[drawX] > quadBottom) occlusionTop[drawX] = (int) quadBottom;
-            } else {
-                occlusionTop[drawX] = (int) Math.min(quadBottom + (quadHeight * upperWallCutoffV), occlusionTop[drawX]);
-                occlusionBottom[drawX] = (int) Math.max(quadBottom + (quadHeight * lowerWallCutoffV), occlusionBottom[drawX]);
-            }
+            updateOcclusion(isPortal, drawX, quadTop, quadBottom, quadHeight, upperWallCutoffV, lowerWallCutoffV);
 
         } //End Per Column Loop
 
@@ -317,10 +309,48 @@ public class SoftwareRenderer extends Renderer {
 
     }
 
+    private void updateOcclusion(boolean isPortal, int drawX, float quadTop, float quadBottom, float quadHeight, float upperCutoff, float lowerCutoff) {
+        if (!isPortal) {
+            if (occlusionBottom[drawX] < quadTop) occlusionBottom[drawX] = (int) quadTop;
+            if (occlusionTop[drawX] > quadBottom) occlusionTop[drawX] = (int) quadBottom;
+        } else {
+            occlusionTop[drawX] = (int) Math.min(quadBottom + (quadHeight * upperCutoff), occlusionTop[drawX]);
+            occlusionBottom[drawX] = (int) Math.max(quadBottom + (quadHeight * lowerCutoff), occlusionBottom[drawX]);
+        }
+    }
+
+    private void reInitDrawData(int newFrameWidth) {
+        occlusionBottom = new int[newFrameWidth];
+        occlusionTop = new int[newFrameWidth];
+    }
+
+    private void resetDrawData() {
+        //transformedWalls.clear();
+        //transformedSectors.clear();
+        drawnPortals.clear();
+
+        for (int i=0; i<frameWidth; i++) {
+            occlusionBottom[i] = 0;
+            occlusionTop[i] = frameHeight;
+        }
+    }
+
+    private boolean spanFilled(int spanStart, int spanEnd) {
+        for (int i=spanStart; i<spanEnd; i++) {
+            if (occlusionBottom[i] < occlusionTop[i]-1)
+                return false;
+        }
+        return true;
+    }
+
     private Color grabColor(Pixmap tex, float u, float v) {
         u = u - (int)u;
         v = v - (int)v;
         return new Color(tex.getPixel( (int)(u*tex.getWidth()), (int)((1.f-v)*tex.getHeight()) ));
     }
 
+    private Color getCheckerboardColor(float u, float v) {
+        boolean checker = ( (int)(u*8)%2 == (int)(v*8)%2 );
+        return new Color(checker ? 0xB0_20_30_FF : 0xA0_A0_A0_FF);
+    }
 }

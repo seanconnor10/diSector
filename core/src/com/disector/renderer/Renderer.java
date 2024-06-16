@@ -44,24 +44,11 @@ public abstract class Renderer {
         camFOV = val;
     }
 
-    public void drawFrame() {
-        TextureRegion frame = new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
-        frame.flip(false, true);
-        batch.begin();
-        batch.draw(frame, 0, 0);
-        batch.end();
-        frame.getTexture().dispose();
+    public TextureRegion getPixels() {
+        return new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
     }
 
-    public void resizeFrame(int w, int h) {
-        buffer = new Pixmap(w, h, pixelFormat);
-        buffer.setColor(0x000000FF);
-        frameWidth = w;
-        frameHeight = h;
-        halfWidth = w / 2.f;
-        halfHeight = h /2.f;
-        batch.setProjectionMatrix( new Matrix4().setToOrtho2D(0,0,frameWidth,frameHeight) );
-    }
+    public abstract void resizeFrame(int w, int h);
 
     public void placeCamera(Vector4 pos, float vLook, int camCurrentSector) {
         camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w; camVLook = vLook;

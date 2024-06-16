@@ -31,7 +31,7 @@ public class PixmapContainer {
         pixmaps = new Pixmap[imgFiles.size][MipMapNumber];
 
         for (int i=0; i<imgFiles.size; i++) {
-            Texture temp = new Texture(imgFiles.get(i));
+            Texture temp = new Texture(imgFiles.get(i), Pixmap.Format.RGBA8888, false);
             if (!temp.getTextureData().isPrepared()) temp.getTextureData().prepare();
             pixmaps[i][0] = temp.getTextureData().consumePixmap();
             for (int k=1; k<MipMapNumber; k++) {
@@ -50,7 +50,7 @@ public class PixmapContainer {
     }
 
     private Pixmap halvePixmap(Pixmap pix) {
-        Pixmap newPix = new Pixmap(pix.getWidth()/2, pix.getHeight()/2, Pixmap.Format.RGBA8888);
+        Pixmap newPix = new Pixmap(pix.getWidth()/2, pix.getHeight(), pix.getFormat());
         newPix.setFilter(Pixmap.Filter.BiLinear);
         newPix.drawPixmap(
             pix, 1, 1, pix.getWidth()-1, pix.getHeight()-1, //Source Pixmap The -1's seem to help it align

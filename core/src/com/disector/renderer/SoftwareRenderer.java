@@ -1,7 +1,5 @@
 package com.disector.renderer;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.Vector2;
@@ -13,14 +11,15 @@ import com.disector.WallInfoPack;
 
 import java.util.Stack;
 
-public class SoftwareRenderer extends Renderer {
+public class SoftwareRenderer extends DimensionalRenderer {
     private int[] occlusionBottom;
     private int[] occlusionTop;
     private Stack<Integer> drawnPortals = new Stack<>();
     //private HashSet<Integer> transformedWalls = new HashSet<>();
     //private HashSet<Integer> transformedSectors = new HashSet<>();
 
-    private int MipMapIndex = 0;
+    private final int mipMapZealousnessFactor = 2;
+    private final int mipMapNumber = 5;
 
     public SoftwareRenderer(Application app) {
         super(app);
@@ -31,11 +30,6 @@ public class SoftwareRenderer extends Renderer {
         resetDrawData();
         buffer.fill();
         drawSector(camCurrentSector, 0, frameWidth-1);
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-            MipMapIndex++;
-            if (MipMapIndex >= 5) MipMapIndex = 0;
-        }
     }
 
     @Override
@@ -187,8 +181,8 @@ public class SoftwareRenderer extends Renderer {
             {
                 float hProgressPlusOne = (drawX+1-p1_plotX) / (p2_plotX-p1_plotX);
                 float uPlus1 = ((1 - hProgressPlusOne) * (leftClipU / x1) + hProgressPlusOne * (rightClipU / x2)) / ((1 - hProgressPlusOne) * (1 / x1) + hProgressPlusOne * (1 / x2));
-                float texPixelWidth = 64 * ( (uPlus1-u) / 1.f );
-                int mipMapIndex = Math.max(0, Math.min( (int)(texPixelWidth/1.f), 4));
+                float texPixelWidth = textures[0].getWidth() * ((uPlus1-u) / 1.f);
+                int mipMapIndex = Math.max(0, Math.min( (int)(texPixelWidth/mipMapZealousnessFactor), mipMapNumber-1));
                 tex = textures[mipMapIndex];
             }
 

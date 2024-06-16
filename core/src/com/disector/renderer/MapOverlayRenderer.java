@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.disector.Application;
 import com.disector.Wall;
 
-public class MapOverlayRenderer extends Renderer {
+public class MapOverlayRenderer extends TopDownRenderer {
     private final Color backgroundColor  = new Color(0,0, 0.2f, 0.4f);
 
     public MapOverlayRenderer(Application app) {
@@ -27,20 +27,6 @@ public class MapOverlayRenderer extends Renderer {
             );
         }
         app.shape.end();
-    }
-
-    @Override
-    public void drawFrame() {
-        //Avoid calling super.drawFrame since we aren't currently using the Pixmap buffer
-    }
-
-    @Override
-    public void resizeFrame(int w, int h) {
-        //Avoid work done in super.resizeFrame();
-        frameWidth = Gdx.graphics.getWidth();
-        frameHeight = Gdx.graphics.getHeight();
-        halfWidth = frameWidth / 2.f;
-        halfHeight = frameHeight /2.f;
     }
 
 }

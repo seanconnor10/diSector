@@ -3,7 +3,6 @@ package com.disector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -14,6 +13,7 @@ import com.disector.assets.PixmapContainer;
 import com.disector.gameworld.GameWorld;
 import com.disector.editor.EditorInterface;
 import com.disector.inputrecorder.InputRecorder;
+import com.disector.renderer.DimensionalRenderer;
 import com.disector.renderer.MapOverlayRenderer;
 import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
@@ -22,7 +22,7 @@ public class Application extends ApplicationAdapter {
     private static final boolean printFPS = false;
 
     private GameWorld gameWorld;
-    private Renderer renderer;
+    private DimensionalRenderer renderer;
     private MapOverlayRenderer mapOverlayRenderer;
     private EditorInterface editor;
 
@@ -34,7 +34,7 @@ public class Application extends ApplicationAdapter {
     public final Array<Sector> sectors = new Array<>();
 
     public PixmapContainer textures;
-    public Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888;
+    public Pixmap.Format pixelFormat = Pixmap.Format.RGBA4444;
 
     public int frameWidth = 320;
     public int frameHeight = 180;

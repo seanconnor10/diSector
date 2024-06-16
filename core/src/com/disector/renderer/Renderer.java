@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
@@ -40,15 +39,16 @@ public abstract class Renderer {
 
     public abstract void renderWorld();
 
+    public abstract void resizeFrame(int w, int h);
+
     public void setFov(float val) {
         camFOV = val;
     }
 
-    public TextureRegion getPixels() {
+    public TextureRegion copyPixels() {
+        //Must dispose() the TextureRegion sometime after calling this
         return new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
     }
-
-    public abstract void resizeFrame(int w, int h);
 
     public void placeCamera(Vector4 pos, float vLook, int camCurrentSector) {
         camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w; camVLook = vLook;

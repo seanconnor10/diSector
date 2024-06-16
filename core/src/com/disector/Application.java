@@ -36,8 +36,8 @@ public class Application extends ApplicationAdapter {
     public PixmapContainer textures;
     public Pixmap.Format pixelFormat = Pixmap.Format.RGBA4444;
 
-    public int frameWidth = 320;
-    public int frameHeight = 180;
+    public int frameWidth = 400;
+    public int frameHeight = 225;
 
     public SpriteBatch batch;
     public ShapeRenderer shape;

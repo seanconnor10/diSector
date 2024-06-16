@@ -26,10 +26,9 @@ public class Player implements Movable {
     final float MAX_SPEED = 150.f, ACCEL = 4.0f;
     final float MOUSE_SENS_X = 0.002f, MOUSE_SENS_Y = 0.5f;
     final float TURN_SPEED = 3.0f, VLOOK_SPEED = 200.0f;
-    final float VLOOK_CLAMP = 275.f;
+    final float VLOOK_CLAMP = 300.f;
     final int STANDING_HEIGHT = 20;
     final int CROUCHING_HEIGHT = 5;
-    final int HEAD_SPACE = 0;
     final float RADIUS = 10.f;
 
     Player(GameWorld world) {
@@ -77,14 +76,6 @@ public class Player implements Movable {
         if (lookDownDown) vLook -= VLOOK_SPEED*dt;
         vLook = Math.min( Math.max(vLook, -VLOOK_CLAMP), VLOOK_CLAMP );
 
-        //Return starting position for collision function to use
-        return startingPosition;
-    }
-
-    public void verticalMovement(float dt, Array<Wall> walls, Array<Sector> sectors) {
-        Sector currentSector = sectors.get(currentSectorIndex);
-        float secFloor = currentSector.floorZ, secCeil = currentSector.ceilZ;
-
         //Crouching
         height = (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) ? CROUCHING_HEIGHT : STANDING_HEIGHT;
 
@@ -92,13 +83,8 @@ public class Player implements Movable {
         if (onGround && Gdx.input.isKeyJustPressed(Input.Keys.SPACE))
             zSpeed = 100.0f;
 
-//        //Grav
-//        if (z > secFloor) zSpeed -= 200.f * dt; if (zSpeed < -100.0f) zSpeed = -100.0f;
-//        //Enact motion
-//        z += zSpeed * dt;
-//        //Hit Floor
-//        if (z<secFloor) {z = secFloor; zSpeed = 0.f;}
-
+        //Return starting position for collision function to use
+        return startingPosition;
     }
 
     //Positionable Implementations //////////////

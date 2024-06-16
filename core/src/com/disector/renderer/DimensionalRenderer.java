@@ -11,7 +11,7 @@ public abstract class DimensionalRenderer extends Renderer{
     }
 
     public void drawFrame() {
-        TextureRegion frame = getPixels();
+        TextureRegion frame = copyPixels();
         frame.flip(false, true);
         batch.begin();
         batch.draw(frame, 0, 0);

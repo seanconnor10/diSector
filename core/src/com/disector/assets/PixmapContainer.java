@@ -20,12 +20,9 @@ public class PixmapContainer {
         System.out.println("Pixmap Container Loading Images...");
 
         for (FileHandle file : imgDir.list()) {
-            if (handleIsImage(file)) {
+            if (handleIsImage(file))
                 imgFiles.add(file);
-                System.out.println("   " + file);
-            } else {
-                System.out.println("   REJECTED " + file);
-            }
+            System.out.println(handleIsImage(file) ? "    " + file : "   REJECTED " + file);
         }
 
         pixmaps = new Pixmap[imgFiles.size][MipMapNumber];

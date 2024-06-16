@@ -12,7 +12,6 @@ import com.disector.WallInfoPack;
 import com.disector.gameworld.components.Movable;
 import com.disector.gameworld.components.Positionable;
 import com.disector.inputrecorder.InputRecorder;
-import com.disector.renderer.MapOverlayRenderer;
 
 public class GameWorld {
     private final Application app;
@@ -39,8 +38,6 @@ public class GameWorld {
             shouldDisplayMap = !shouldDisplayMap;
 
         player1.movementInput(dt);
-        player1.verticalMovement(dt, walls, sectors);
-
         moveObj(player1);
     }
 

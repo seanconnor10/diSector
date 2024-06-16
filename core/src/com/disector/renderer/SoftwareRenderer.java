@@ -18,6 +18,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
     //private HashSet<Integer> transformedWalls = new HashSet<>();
     //private HashSet<Integer> transformedSectors = new HashSet<>();
 
+    private final Color depthFogColor = new Color(0.1f,0f,0.2f,1f);
     private final int mipMapZealousnessFactor = 2;
     private final int mipMapNumber = 5;
 
@@ -169,7 +170,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
             quadTop = p1_plotHigh + hProgress*(p2_plotHigh-p1_plotHigh);
             quadHeight = quadTop - quadBottom;
 
-            float fog = (x1 + hProgress*(x2-x1)) / 600.0f;
+            float fog = (x1 + hProgress*(x2-x1)) / 400.0f;
 
             rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
@@ -196,7 +197,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 Color drawColor;
                 if (/*Draw Textures*/ true) {
                     drawColor = grabColor(tex, u, v);
-                    drawColor.lerp(0.1f,0f,0.2f,1f,fog);
+                    drawColor.lerp(depthFogColor,fog);
                 } else {
                     drawColor = getCheckerboardColor(u,v);
                 }
@@ -258,8 +259,8 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 boolean checkerBoard = ( (int)(rotFloorX*8%2) == (int)(rotFloorY*8%2) );
                 Color drawColor = new Color( checkerBoard ? 0xFFD08010 : 0xFF10D080 );
                 float floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
-                floorFogValue = (float) Math.min(1.0, Math.max(0.0,floorFogValue));
-                drawColor.lerp( Color.BLACK, floorFogValue);
+                floorFogValue = (float) Math.min(1.f, Math.max(0.f,floorFogValue));
+                drawColor.lerp(0.1f,0f,0.2f,1f, floorFogValue);
                 buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
             }
         }
@@ -294,10 +295,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
             while (rotY > 1.0f) rotY -= 1.0f;
 
             boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
-            Color drawColor = new Color( checkerBoard ? 0xFF302005 : 0xFF251503 );
-            float ceilFogValue = 1.0f - ( ((-halfHeight + drawY) / halfHeight) );
-            ceilFogValue = (float) Math.min(1.0, Math.max(0.0,ceilFogValue));
-            drawColor.lerp( Color.BLACK, ceilFogValue);
+            Color drawColor = new Color( checkerBoard ? 0xFF_A0_20_50 : 0xFF_20_50_A0 );
+            float ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
+            ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));
+            drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
             buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
         }
 

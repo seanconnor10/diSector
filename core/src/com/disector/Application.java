@@ -150,12 +150,7 @@ public class Application extends ApplicationAdapter {
 
     private void editor(){
         editor.step(deltaTime);
-        
-        renderer.placeCamera(editor.camPos(), 0, 0);
-        renderer.renderWorld();
-        TextureRegion renderView = renderer.copyPixels();
-
-        renderView.getTexture().dispose();
+        editor.draw(batch);
     }
 
     private void updateDeltaTime() {

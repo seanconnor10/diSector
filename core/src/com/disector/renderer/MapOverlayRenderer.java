@@ -3,6 +3,8 @@ package com.disector.renderer;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.disector.Application;
 import com.disector.Wall;
@@ -16,6 +18,7 @@ public class MapOverlayRenderer extends TopDownRenderer {
 
     @Override
     public void renderWorld() {
+        //batch.begin();
         app.shape.begin(ShapeRenderer.ShapeType.Line);
         for (Wall w : walls) {
             app.shape.setColor( w.isPortal ? Color.RED : Color.WHITE );
@@ -27,6 +30,8 @@ public class MapOverlayRenderer extends TopDownRenderer {
             );
         }
         app.shape.end();
+        //batch.end();
     }
+
 
 }

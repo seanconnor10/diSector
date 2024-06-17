@@ -7,24 +7,24 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
 import com.disector.assets.PixmapContainer;
+import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
-import com.disector.editor.EditorInterface;
 import com.disector.inputrecorder.InputRecorder;
 import com.disector.renderer.DimensionalRenderer;
 import com.disector.renderer.MapOverlayRenderer;
-import com.disector.renderer.Renderer;
 import com.disector.renderer.SoftwareRenderer;
 
 public class Application extends ApplicationAdapter {
-    private static final boolean printFPS = false;
+    private static final boolean printFPS = true;
 
     private GameWorld gameWorld;
     private DimensionalRenderer renderer;
     private MapOverlayRenderer mapOverlayRenderer;
-    private EditorInterface editor;
+    private Editor editor;
 
     private AppFocusTarget focus;
 
@@ -44,6 +44,7 @@ public class Application extends ApplicationAdapter {
 
     @Override
     public void create () {
+        focus = AppFocusTarget.GAME;
         swapFocus(AppFocusTarget.GAME);
 
         batch = new SpriteBatch();
@@ -51,7 +52,6 @@ public class Application extends ApplicationAdapter {
         shape.setColor(Color.WHITE);
         renderer = new SoftwareRenderer(this);
         mapOverlayRenderer = new MapOverlayRenderer(this);
-        gameWorld = new GameWorld(this);
 
         textures = new PixmapContainer();
         textures.loadImages();
@@ -68,19 +68,16 @@ public class Application extends ApplicationAdapter {
 
         InputRecorder.updateKeys();
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
+            swapFocus(AppFocusTarget.GAME);
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.F5))
+            swapFocus(AppFocusTarget.EDITOR);
+
         switch(focus) {
-            case MENU:
-                menu();
-                break;
-            case GAME:
-                game();
-                break;
-            case EDITOR:
-                editor();
-                break;
-            default:
-                System.out.println("How did you get here??");
-                break;
+            case MENU: menu(); break;
+            case GAME: game(); break;
+            case EDITOR: editor(); break;
+            default: System.out.println("How did you get here??"); break;
         }
 
     }
@@ -91,10 +88,34 @@ public class Application extends ApplicationAdapter {
     }
 
     private void swapFocus(AppFocusTarget target) {
+
+        switch(focus) {
+            case GAME:
+                Gdx.input.setCursorCatched(false);
+                break;
+            case MENU:
+                break;
+            case EDITOR:
+                if (editor==null) editor = new Editor(this);
+                break;
+            default:
+        }
+
+        switch (target) {
+            case GAME:
+                if (gameWorld==null) gameWorld = new GameWorld(this);
+                Gdx.input.setCursorCatched(true);
+                break;
+            case MENU:
+                break;
+            case EDITOR:
+                if (editor==null) editor = new Editor(this);
+                break;
+            default:
+        }
+
         focus = target;
 
-        if (target != AppFocusTarget.GAME)
-            Gdx.input.setCursorCatched(false);
     }
 
     private void game() {
@@ -118,7 +139,11 @@ public class Application extends ApplicationAdapter {
     }
 
     private void editor(){
-
+        editor.step(deltaTime);
+        
+        renderer.placeCamera(editor.camPos(), 0, 0);
+        renderer.renderWorld();
+        renderer.drawFrame();
     }
 
     private void updateDeltaTime() {

@@ -27,4 +27,14 @@ public abstract class TopDownRenderer extends Renderer{
     public TextureRegion copyPixels() {
         return new TextureRegion(buffer.getColorBufferTexture());
     }
+
+    @Override
+    public void drawFrame() {
+        TextureRegion frame = copyPixels();
+        frame.flip(false, true);
+        batch.begin();
+        batch.draw(frame,0 , 0);
+        batch.end();
+    }
+
 }

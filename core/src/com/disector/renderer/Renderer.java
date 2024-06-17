@@ -41,6 +41,8 @@ public abstract class Renderer {
 
     public abstract TextureRegion copyPixels();
 
+    public abstract void drawFrame();
+
     public void setFov(float val) {
         camFOV = val;
     }

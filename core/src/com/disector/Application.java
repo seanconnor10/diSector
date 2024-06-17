@@ -6,8 +6,9 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Vector4;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 
 import com.disector.assets.PixmapContainer;
@@ -87,6 +88,14 @@ public class Application extends ApplicationAdapter {
         batch.dispose();
     }
 
+    @Override
+    public void resize(int width, int height) {
+        super.resize(width, height);
+        mapOverlayRenderer.resizeFrame(width, height);
+        batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0, width, height));
+        shape.setProjectionMatrix(batch.getProjectionMatrix());
+    }
+
     private void swapFocus(AppFocusTarget target) {
 
         switch(focus) {
@@ -131,6 +140,7 @@ public class Application extends ApplicationAdapter {
         if (gameWorld.shouldDisplayMap()) {
             mapOverlayRenderer.placeCamera(gameWorld.getPlayerPosition(), 0, gameWorld.getPlayerSectorIndex());
             mapOverlayRenderer.renderWorld();
+            mapOverlayRenderer.drawFrame();
         }
     }
 
@@ -143,7 +153,9 @@ public class Application extends ApplicationAdapter {
         
         renderer.placeCamera(editor.camPos(), 0, 0);
         renderer.renderWorld();
-        renderer.drawFrame();
+        TextureRegion renderView = renderer.copyPixels();
+
+        renderView.getTexture().dispose();
     }
 
     private void updateDeltaTime() {

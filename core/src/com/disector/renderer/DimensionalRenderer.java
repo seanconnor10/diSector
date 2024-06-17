@@ -1,5 +1,6 @@
 package com.disector.renderer;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -15,15 +16,6 @@ public abstract class DimensionalRenderer extends Renderer{
         resizeFrame(app.frameWidth, app.frameHeight);
     }
 
-    public void drawFrame() {
-        TextureRegion frame = copyPixels();
-        frame.flip(false, true);
-        batch.begin();
-        batch.draw(frame,0 , 0);
-        batch.end();
-        frame.getTexture().dispose();
-    }
-
     @Override
     public void resizeFrame(int w, int h) {
         buffer = new Pixmap(w, h, pixelFormat);
@@ -36,8 +28,18 @@ public abstract class DimensionalRenderer extends Renderer{
     }
 
     @Override
+    public void drawFrame() {
+        TextureRegion frame = copyPixels();
+        frame.flip(false, true);
+        batch.begin();
+        batch.draw(frame,0 , 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.end();
+        frame.getTexture().dispose();
+    }
+
+    @Override
     public TextureRegion copyPixels() {
-        //Must dispose() the TextureRegion sometime after calling this
+        //Must dispose() the Texture sometime after calling this ( because of new Texture() )
         return new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
     }
 }

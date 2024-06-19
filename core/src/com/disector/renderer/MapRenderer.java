@@ -5,10 +5,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.disector.Application;
 
-public abstract class TopDownRenderer extends Renderer{
+public abstract class MapRenderer extends Renderer{
     FrameBuffer buffer;
 
-    public TopDownRenderer(Application app) {
+    public MapRenderer(Application app) {
         super(app);
         resizeFrame(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }

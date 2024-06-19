@@ -7,10 +7,10 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Application;
 import com.disector.Wall;
 
-public class MapOverlayRenderer extends TopDownRenderer {
+public class GameMapRenderer extends MapRenderer {
     private final Color backgroundColor  = new Color(0,0, 0.2f, 0.4f);
 
-    public MapOverlayRenderer(Application app) {
+    public GameMapRenderer(Application app) {
         super(app);
     }
 

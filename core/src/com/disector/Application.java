@@ -6,7 +6,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
@@ -16,15 +15,15 @@ import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
 import com.disector.renderer.DimensionalRenderer;
-import com.disector.renderer.MapOverlayRenderer;
+import com.disector.renderer.GameMapRenderer;
 import com.disector.renderer.SoftwareRenderer;
 
 public class Application extends ApplicationAdapter {
-    private static final boolean printFPS = true;
+    private static final boolean printFPS = false;
 
     private GameWorld gameWorld;
     private DimensionalRenderer renderer;
-    private MapOverlayRenderer mapOverlayRenderer;
+    private GameMapRenderer gameMapRenderer;
     private Editor editor;
 
     private AppFocusTarget focus;
@@ -52,7 +51,7 @@ public class Application extends ApplicationAdapter {
         shape = new ShapeRenderer();
         shape.setColor(Color.WHITE);
         renderer = new SoftwareRenderer(this);
-        mapOverlayRenderer = new MapOverlayRenderer(this);
+        gameMapRenderer = new GameMapRenderer(this);
 
         textures = new PixmapContainer();
         textures.loadImages();
@@ -91,9 +90,22 @@ public class Application extends ApplicationAdapter {
     @Override
     public void resize(int width, int height) {
         super.resize(width, height);
-        mapOverlayRenderer.resizeFrame(width, height);
+
         batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0,0, width, height));
         shape.setProjectionMatrix(batch.getProjectionMatrix());
+
+        switch(focus) {
+            case GAME:
+                if (gameMapRenderer != null) gameMapRenderer.resizeFrame(width, height);
+                break;
+            case EDITOR:
+                if (editor != null) editor.resize(width, height);
+                break;
+            case MENU:
+                break;
+            default:
+        }
+
     }
 
     private void swapFocus(AppFocusTarget target) {
@@ -105,7 +117,7 @@ public class Application extends ApplicationAdapter {
             case MENU:
                 break;
             case EDITOR:
-                if (editor==null) editor = new Editor(this);
+                //Gdx.graphics.setUndecorated(true);
                 break;
             default:
         }
@@ -119,6 +131,7 @@ public class Application extends ApplicationAdapter {
                 break;
             case EDITOR:
                 if (editor==null) editor = new Editor(this);
+                //Gdx.graphics.setUndecorated(false);
                 break;
             default:
         }
@@ -138,9 +151,9 @@ public class Application extends ApplicationAdapter {
         renderer.drawFrame();
 
         if (gameWorld.shouldDisplayMap()) {
-            mapOverlayRenderer.placeCamera(gameWorld.getPlayerPosition(), 0, gameWorld.getPlayerSectorIndex());
-            mapOverlayRenderer.renderWorld();
-            mapOverlayRenderer.drawFrame();
+            gameMapRenderer.placeCamera(gameWorld.getPlayerPosition(), 0, gameWorld.getPlayerSectorIndex());
+            gameMapRenderer.renderWorld();
+            gameMapRenderer.drawFrame();
         }
     }
 
@@ -150,7 +163,7 @@ public class Application extends ApplicationAdapter {
 
     private void editor(){
         editor.step(deltaTime);
-        editor.draw(batch);
+        editor.draw();
     }
 
     private void updateDeltaTime() {

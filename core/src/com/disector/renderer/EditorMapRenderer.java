@@ -35,6 +35,8 @@ public class EditorMapRenderer extends MapRenderer {
     }
 
     public void changeSize(int w, int h) {
+        w = Math.max(1, w);
+        h = Math.max(1, h);
         if (shape != null) shape.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, w, h));
         buffer = new FrameBuffer(app.pixelFormat, w, h, false);
         frameWidth = w;

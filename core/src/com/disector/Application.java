@@ -45,16 +45,15 @@ public class Application extends ApplicationAdapter {
     @Override
     public void create () {
         focus = AppFocusTarget.GAME;
-        swapFocus(AppFocusTarget.GAME);
 
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
         shape.setColor(Color.WHITE);
-        renderer = new SoftwareRenderer(this);
-        gameMapRenderer = new GameMapRenderer(this);
 
         textures = new PixmapContainer();
         textures.loadImages();
+
+        swapFocus(AppFocusTarget.GAME);
 
         InputRecorder.repopulateKeyCodeMap();
         Gdx.input.setCursorCatched(true);
@@ -125,13 +124,19 @@ public class Application extends ApplicationAdapter {
         switch (target) {
             case GAME:
                 if (gameWorld==null) gameWorld = new GameWorld(this);
+                if (renderer==null) renderer = new SoftwareRenderer(this);
+                if (gameMapRenderer==null) gameMapRenderer = new GameMapRenderer(this, gameWorld);
                 Gdx.input.setCursorCatched(true);
                 break;
             case MENU:
                 break;
             case EDITOR:
-                if (editor==null) editor = new Editor(this);
-                //Gdx.graphics.setUndecorated(false);
+                if (gameWorld == null) {
+                    System.out.println("Must instance GameWorld before Editor.");
+                    break;
+                }
+                if (editor==null) editor = new Editor(this, gameWorld);
+                editor.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 break;
             default:
         }

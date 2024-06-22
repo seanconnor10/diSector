@@ -53,13 +53,12 @@ public class EditorMapRenderer extends MapRenderer {
 
     private class WallTransform {
         float x1, y1, x2, y2;
-        float zoom = camFOV / 100;
 
         private WallTransform(Wall w) {
-            x1 = halfWidth - zoom*(w.x1-camX);
-            y1 = halfHeight - zoom*(w.y1-camY);
-            x2 = halfWidth - zoom*(w.x2-camX);
-            y2 = halfHeight - zoom*(w.y2-camY);
+            x1 = halfWidth - camFOV*(w.x1-camX);
+            y1 = halfHeight - camFOV*(w.y1-camY);
+            x2 = halfWidth - camFOV*(w.x2-camX);
+            y2 = halfHeight - camFOV*(w.y2-camY);
         }
     }
 

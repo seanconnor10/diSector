@@ -10,6 +10,7 @@ public abstract class MapRenderer extends Renderer{
 
     public MapRenderer(Application app) {
         super(app);
+        camFOV = 1.f;
         resizeFrame(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 

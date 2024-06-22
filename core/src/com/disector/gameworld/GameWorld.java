@@ -49,6 +49,10 @@ public class GameWorld {
         return new Vector4(player1.copyPosition(), player1.z+player1.height, player1.r);
     }
 
+    public float getPlayerRadius() {
+        return player1.getRadius();
+    }
+
     public int getPlayerSectorIndex() {
         return player1.currentSectorIndex;
     }
@@ -64,6 +68,8 @@ public class GameWorld {
     //*****************************************************
 
     private void moveObj(Movable obj) {
+        final int MAX_COLLISIONS = 100;
+
         /**
          * Takes any game object with a position and velocity and moves it,
          * colliding it against walls and updating its currentSectorIndex
@@ -84,7 +90,8 @@ public class GameWorld {
         float lowestCeilHeight = currentSector.ceilZ;
         int collisionsProcessed = 0;
 
-        while (collisionsProcessed < 100) {
+        while (collisionsProcessed < MAX_COLLISIONS) {
+            //Get all wall collisions in current sector
             wallsCollided = findCollisions(currentSector, obj);
 
             //Remove Portal Walls that we can vertically fit through,
@@ -97,6 +104,7 @@ public class GameWorld {
                         destSector = wallInfo.w.linkB;
                     Sector dest = sectors.get(destSector);
                     if (heightCheck(dest, obj, stepUpAllowance)) {
+                        //If bounding circle is jutting into other sectors...
                         teeterHeight = Math.max(teeterHeight, dest.floorZ);
                         lowestCeilHeight = Math.min(lowestCeilHeight, dest.ceilZ);
                         potentialNewSectors.add(destSector);
@@ -106,6 +114,7 @@ public class GameWorld {
                 }
             }
 
+            //Find new currentSector from list of potentials made above
             for (int sInd : potentialNewSectors.toArray()) {
                 if (containsPoint( sectors.get(sInd), objPos.x, objPos.y, walls)) {
                     obj.setCurrentSector(sInd);
@@ -190,7 +199,7 @@ public class GameWorld {
         float parallelVelX = velocity.x - perpendicularVelX;
         float parallelVelY = velocity.y - perpendicularVelY;
         final float elasticity = 0.2f;
-        final float restitution = 0.9f;
+        final float restitution = 0.95f;
         return new Vector2(
             parallelVelX * restitution - perpendicularVelX * elasticity,
             parallelVelY * restitution - perpendicularVelY * elasticity
@@ -207,8 +216,6 @@ public class GameWorld {
         if (objPos.y > bottomBound) return false;
         return !(objPos.y < topBound);
     }
-
-
 
 
 }

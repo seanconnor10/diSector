@@ -1,35 +1,49 @@
 package com.disector.editor;
 
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Application;
+import com.disector.gameworld.GameWorld;
+import com.disector.maploader.MapLoader;
+import com.disector.maploader.OldTextFormatMapLoader;
+import com.disector.maploader.TextFileMapLoader;
 
 import java.util.ArrayList;
 
 public class Editor {
     private Application app;
+    private GameWorld world;
 
     private RenderViewPanel viewPanel;
     private MapViewPanel mapPanel;
     private MenuBarPanel menuPanel;
     private ArrayList<Panel> panelList = new ArrayList<>();
 
-    public Editor(Application app) {
+    public Editor(Application app, GameWorld world) {
         this.app = app;
+        this.world = world;
         viewPanel = new RenderViewPanel(app);
         mapPanel = new MapViewPanel(app);
         menuPanel = new MenuBarPanel();
         panelList.add(viewPanel);
         panelList.add(menuPanel);
         panelList.add(mapPanel);
-        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
     }
 
     public void step(float dt) {
-
+        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
+            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
+            mapLoader.save("MAPS/test.txt");
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
+            MapLoader mapLoader = new OldTextFormatMapLoader(app.sectors, app.walls, world);
+            mapLoader.load("MAPS/SHED");
+        }
     }
 
     public void resize(int w, int h) {

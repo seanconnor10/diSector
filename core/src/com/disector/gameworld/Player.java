@@ -29,7 +29,7 @@ public class Player implements Movable {
     final float VLOOK_CLAMP = 300.f;
     final int STANDING_HEIGHT = 20;
     final int CROUCHING_HEIGHT = 5;
-    final float RADIUS = 10.f;
+    final float RADIUS = 5.f;
 
     Player(GameWorld world) {
         this.world = world;
@@ -54,8 +54,14 @@ public class Player implements Movable {
         if (backwardDown) inputVector.x -= 1.0f;
         if (leftDown) inputVector.y += 1.0f;
         if (rightDown) inputVector.y -= 1.0f;
+
+        //Quick Vector Normalization
+        if ( inputVector.x != 0.0f && Math.abs(inputVector.x) == Math.abs(inputVector.y) ) {
+            inputVector.x *= 0.707107f;
+            inputVector.y *= 0.707107f;
+        }
+
         inputVector.rotateRad(r);
-        inputVector.nor();
 
         //Update velocity with input vector
         velocity.add( new Vector2(inputVector).scl(ACCEL) );

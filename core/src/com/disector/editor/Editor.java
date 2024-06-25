@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Application;
 import com.disector.gameworld.GameWorld;
@@ -36,14 +37,7 @@ public class Editor {
     }
 
     public void step(float dt) {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
-            mapLoader.save("MAPS/test.txt");
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
-            MapLoader mapLoader = new OldTextFormatMapLoader(app.sectors, app.walls, world);
-            mapLoader.load("MAPS/SHED");
-        }
+        temporaryControls(dt);
     }
 
     public void resize(int w, int h) {
@@ -66,6 +60,50 @@ public class Editor {
         for (Panel panel : panelList) {
             panel.draw(batch, shape);
         }
+    }
+
+    private void temporaryControls(float dt) {
+        //Temporary Load and Save
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
+            mapLoader.load("MAPS/test.txt");
+//            MapLoader mapLoader = new OldTextFormatMapLoader(app.sectors,app.walls, world);
+//            mapLoader.load("MAPS/SHED");
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
+            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
+            mapLoader.save("MAPS/test.txt");
+        }
+
+        //Temporary Movement
+        float mapZoom = mapPanel.renderer.getFov();
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            mapPanel.renderer.shiftCamera(new Vector2(0, 200.f * dt / (float)Math.sqrt(mapZoom) ));
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            mapPanel.renderer.shiftCamera(new Vector2(200.f * dt / (float)Math.sqrt(mapZoom), 0));
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            mapPanel.renderer.shiftCamera(new Vector2(0, -200.f * dt / (float)Math.sqrt(mapZoom)));
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            mapPanel.renderer.shiftCamera(new Vector2(-200.f * dt / (float)Math.sqrt(mapZoom), 0));
+        }
+
+        //Temporary Zoom
+        //float mapZoom = mapPanel.renderer.getFov();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.EQUALS)) mapZoom += mapZoom < 1 ? 0.1f : mapZoom < 4 ? 0.5f : 2;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) mapZoom -= mapZoom < 1 ? 0.1f : mapZoom < 4 ? 0.5f : 2;
+        if (mapZoom < 0.1f) mapZoom = 0.1f;
+        if (mapZoom > 20) mapZoom = 20;
+        mapPanel.renderer.setFov(mapZoom);
+
+        //GridSize
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G))
+            mapPanel.renderer.gridSize *= Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) ? 0.5f : 2.f;
+        if (mapPanel.renderer.gridSize < 4)
+            mapPanel.renderer.gridSize = 4;
+
     }
 
 }

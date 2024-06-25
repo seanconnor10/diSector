@@ -17,6 +17,8 @@ public abstract class MapRenderer extends Renderer{
     @Override
     public void resizeFrame(int w, int h) {
         //w and h should probably always be Gdx.graphics.getWidth/Height?
+        if (w<1) w = 1;
+        if (h<1) h = 1;
         buffer = new FrameBuffer(app.pixelFormat, w, h,false);
         frameWidth = w;
         frameHeight = h;

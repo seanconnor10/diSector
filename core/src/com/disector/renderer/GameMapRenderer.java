@@ -23,8 +23,8 @@ public class GameMapRenderer extends MapRenderer {
 
     @Override
     public void renderWorld() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.I)) camFOV += 0.25;
-        if (Gdx.input.isKeyJustPressed(Input.Keys.O)) camFOV -= 0.25;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.EQUALS)) camFOV += 0.25f;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.MINUS)) camFOV -= 0.25f;
 
         buffer.begin();
 
@@ -55,11 +55,11 @@ public class GameMapRenderer extends MapRenderer {
         line(pos.x, pos.y, pos.x+radius*(float)Math.cos(pos.w), pos.y+radius*(float)Math.sin(pos.w));
     }
 
-    private void circle(float x, float y, float r) {
+    void circle(float x, float y, float r) {
         app.shape.circle(halfWidth+camFOV*(x-camX), halfHeight+camFOV*(y-camY), r*camFOV);
     }
 
-    private void line(float x, float y, float x2, float y2) {
+    void line(float x, float y, float x2, float y2) {
         app.shape.line(
                 halfWidth+camFOV*(x-camX),
                 halfHeight+camFOV*(y-camY),
@@ -67,6 +67,5 @@ public class GameMapRenderer extends MapRenderer {
                 halfHeight+camFOV*(y2-camY)
         );
     }
-
 
 }

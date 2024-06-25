@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
@@ -47,8 +48,17 @@ public abstract class Renderer {
         camFOV = val;
     }
 
+    public float getFov() {
+        return camFOV;
+    }
+
     public void placeCamera(Vector4 pos, float vLook, int camCurrentSector) {
         camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w; camVLook = vLook;
         this.camCurrentSector = camCurrentSector;
+    }
+
+    public void shiftCamera(Vector2 pos) {
+        camX += pos.x;
+        camY += pos.y;
     }
 }

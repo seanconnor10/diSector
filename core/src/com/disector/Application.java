@@ -136,12 +136,12 @@ public class Application extends ApplicationAdapter {
                     break;
                 }
                 if (editor==null) editor = new Editor(this, gameWorld);
-                editor.resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
                 break;
             default:
         }
 
         focus = target;
+        resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
     }
 

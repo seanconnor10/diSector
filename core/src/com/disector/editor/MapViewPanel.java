@@ -28,7 +28,7 @@ public class MapViewPanel extends Panel{
     void draw(SpriteBatch batch, ShapeRenderer shape) {
         /*If moved camera/Updated Map*/ renderer.renderWorld();
         TextureRegion tex = renderer.copyPixels();
-        tex.flip(true, false);
+        tex.flip(false, true);
         batch.begin();
         batch.draw(tex, rect.x, Gdx.graphics.getHeight()-rect.height-rect.y, rect.width, rect.height);
         batch.end();

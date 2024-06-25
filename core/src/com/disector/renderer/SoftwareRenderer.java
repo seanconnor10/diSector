@@ -19,8 +19,6 @@ public class SoftwareRenderer extends DimensionalRenderer {
     //private HashSet<Integer> transformedSectors = new HashSet<>();
 
     private final Color depthFogColor = new Color(0.1f,0f,0.2f,1f);
-    private final int mipMapZealousnessFactor = 2;
-    private final int mipMapNumber = 5;
 
     public SoftwareRenderer(Application app) {
         super(app);
@@ -180,10 +178,12 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
             Pixmap tex;
             {
+                final int mipMapCount = app.textures.pixmaps[0].length;
+                final float mipMapZealousnessFactor = 1.5f;
                 float hProgressPlusOne = (drawX+1-p1_plotX) / (p2_plotX-p1_plotX);
                 float uPlus1 = ((1 - hProgressPlusOne) * (leftClipU / x1) + hProgressPlusOne * (rightClipU / x2)) / ((1 - hProgressPlusOne) * (1 / x1) + hProgressPlusOne * (1 / x2));
-                float texPixelWidth = textures[0].getWidth() * ((uPlus1-u) / 1.f);
-                int mipMapIndex = Math.max(0, Math.min( (int)(texPixelWidth/mipMapZealousnessFactor), mipMapNumber-1));
+                float texPixelWidth = textures[0].getWidth() * (uPlus1-u);
+                int mipMapIndex = Math.max(0, Math.min( (int)(texPixelWidth/mipMapZealousnessFactor), mipMapCount-1));
                 tex = textures[mipMapIndex];
             }
 

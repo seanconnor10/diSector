@@ -22,7 +22,7 @@ public class PixmapContainer {
         for (FileHandle file : imgDir.list()) {
             if (handleIsImage(file))
                 imgFiles.add(file);
-            System.out.println(handleIsImage(file) ? "    " + file : "   REJECTED " + file);
+            System.out.println(handleIsImage(file) ? "    " + file : "    REJECTED " + file);
         }
 
         pixmaps = new Pixmap[imgFiles.size][MipMapNumber];

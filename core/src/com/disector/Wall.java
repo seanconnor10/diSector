@@ -8,11 +8,27 @@ public class Wall {
     public int linkA, linkB;
     public float normalAngle; //Angle of line protruding outward perpendicularly from wall into the sector
 
+    public Wall() {
+
+    }
+
     public Wall(float x1, float y1, float x2, float y2) {
         this.x1 = x1;
         this.y1 = y1;
         this.x2 = x2;
         this.y2 = y2;
+        setNormalAngle();
+    }
+
+    public Wall(Wall w) {
+        this.x1 = w.x1;
+        this.y1 = w.y1;
+        this.x2 = w.x2;
+        this.y2 = w.y2;
+        this.isPortal = w.isPortal;
+        this.linkA = w.linkA;
+        this.linkB = w.linkB;
+        //this.normalAngle = w.normalAngle;
         setNormalAngle();
     }
 

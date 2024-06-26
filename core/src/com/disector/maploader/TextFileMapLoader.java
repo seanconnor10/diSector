@@ -66,11 +66,11 @@ public class TextFileMapLoader implements MapLoader {
                     default:
                         break;
                 }
-            } else {
+            } else { //If not ObjectKeyword...
                 switch (mode) {
                     case "NONE":
                         if (!isObjectKeyword(next)) {
-                            System.out.println("Token is not Object Keyword..");
+                            System.out.printf("Token %s is not Object Keyword\n", next);
                         }
                         break;
                     case "SECTOR":
@@ -112,6 +112,7 @@ public class TextFileMapLoader implements MapLoader {
                                     wallBuild.linkA = Integer.parseInt(next);
                                     in.next(); //Absorb '->' or whatever is there
                                     wallBuild.linkB = Integer.parseInt(in.next());
+                                    subMode = "NONE";
                                     break;
                                 default:
                                     break;

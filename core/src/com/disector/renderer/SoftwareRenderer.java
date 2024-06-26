@@ -153,7 +153,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 lowerWallCutoffV = (destFloor - secFloorZ) / thisSectorCeilingHeight;
         }
 
-        Pixmap textures[] = app.textures.pixmaps[0];
+        Pixmap[] textures = app.textures.pixmaps[4];
 
                                 //SHOULD PROBABLY BE <= rightEdgeX
         for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
@@ -235,6 +235,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         if (occlusionBottom[drawX] < rasterBottom) {
             float heightOffset = (camZ - secFloorZ) / scaleFactor;
             int floorEndScreenY = rasterBottom;
+            Pixmap tex = app.textures.pixmaps[0][0];
             for (int drawY = occlusionBottom[drawX] + vOffset; drawY<floorEndScreenY + vOffset; drawY++) {
                 float floorX = heightOffset * (drawX-halfWidth) / (drawY-halfHeight);
                 float floorY = heightOffset * fov / (drawY-halfHeight);
@@ -256,12 +257,21 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 while(rotFloorY<0.0) rotFloorY+=1.0f;
                 while(rotFloorY>1.0f) rotFloorY-=1.0f;
 
+
+                /* CHECKERBOARD
                 boolean checkerBoard = ( (int)(rotFloorX*8%2) == (int)(rotFloorY*8%2) );
                 Color drawColor = new Color( checkerBoard ? 0xFFD08010 : 0xFF10D080 );
                 float floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
-                floorFogValue = (float) Math.min(1.f, Math.max(0.f,floorFogValue));
+                floorFogValue = Math.min(1.f, Math.max(0.f,floorFogValue));
                 drawColor.lerp(0.1f,0f,0.2f,1f, floorFogValue);
-                buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
+                buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
+
+                Color drawColor = grabColor(tex, rotFloorX, rotFloorY);
+                float floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
+                floorFogValue = Math.min(1.f, Math.max(0.f,floorFogValue));
+                drawColor.lerp(0.1f,0f,0.2f,1f, floorFogValue);
+                buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
+
             }
         }
     }
@@ -273,6 +283,9 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
         float heightOffset = (secCeilZ-camZ) / scaleFactor;
         int ceilEndScreenY = occlusionTop[drawX] + vOffset;
+
+        Pixmap tex = app.textures.pixmaps[1][0];
+
         for (int drawY = Math.max(rasterTop, occlusionBottom[drawX]) + vOffset; drawY < ceilEndScreenY; drawY++) {
             float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);
             float ceilY = heightOffset * fov / (drawY - halfHeight);
@@ -294,12 +307,18 @@ public class SoftwareRenderer extends DimensionalRenderer {
             while (rotY < 0.0) rotY += 1.0f;
             while (rotY > 1.0f) rotY -= 1.0f;
 
-            boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
+            /*boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
             Color drawColor = new Color( checkerBoard ? 0xFF_A0_20_50 : 0xFF_20_50_A0 );
             float ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
             ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));
             drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
-            buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );
+            buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
+
+            Color drawColor = grabColor(tex, rotX, rotY);
+            float ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
+            ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));
+            drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
+            buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
         }
 
     }

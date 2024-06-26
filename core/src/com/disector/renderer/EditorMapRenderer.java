@@ -1,11 +1,10 @@
 package com.disector.renderer;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Application;
 import com.disector.Wall;
@@ -18,7 +17,7 @@ public class EditorMapRenderer extends MapRenderer {
     public EditorMapRenderer(Application app, int frameWidth, int frameHeight) {
         super(app);
         shape = new ShapeRenderer();
-        changeSize(frameHeight, frameHeight);
+        changeSize(frameWidth, frameHeight);
     }
 
     @Override
@@ -50,7 +49,7 @@ public class EditorMapRenderer extends MapRenderer {
         halfHeight = frameHeight/2.f;
     }
 
-    public void drawWall(Wall wall) {
+    private void drawWall(Wall wall) {
         //WallTransform w = new WallTransform(wall);
         shape.setColor( wall.isPortal ? Color.CORAL : Color.WHITE );
         //shape.line(w.x1, w.y1, w.x2, w.y2);
@@ -71,11 +70,18 @@ public class EditorMapRenderer extends MapRenderer {
         circle(0,0,5);
     }
 
-    void circle(float x, float y, float r) {
+     public Vector2 getMouseWorldPos(int mouseLocalX, int mouseLocalY) {
+        Vector2 pos = new Vector2();
+        pos.x = camX+(mouseLocalX-halfWidth)/camFOV;
+        pos.y = camY-(mouseLocalY-halfHeight)/camFOV;
+        return pos;
+    }
+
+    private void circle(float x, float y, float r) {
         shape.circle(halfWidth+camFOV*(x-camX), halfHeight+camFOV*(y-camY), r*camFOV);
     }
 
-    void line(float x, float y, float x2, float y2) {
+    private void line(float x, float y, float x2, float y2) {
         shape.line(
                 halfWidth+camFOV*(x-camX),
                 halfHeight+camFOV*(y-camY),
@@ -84,15 +90,5 @@ public class EditorMapRenderer extends MapRenderer {
         );
     }
 
-    private class WallTransform {
-        float x1, y1, x2, y2;
-
-        private WallTransform(Wall w) {
-            x1 = halfWidth - camFOV*(w.x1-camX);
-            y1 = halfHeight - camFOV*(w.y1-camY);
-            x2 = halfWidth - camFOV*(w.x2-camX);
-            y2 = halfHeight - camFOV*(w.y2-camY);
-        }
-    }
 
 }

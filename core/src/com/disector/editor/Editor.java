@@ -38,6 +38,10 @@ public class Editor {
 
     public void step(float dt) {
         temporaryControls(dt);
+        Panel.mouseX = Gdx.input.getX();
+        Panel.mouseY = Gdx.input.getY();
+        Panel panelInFocus = mapPanel;
+        panelInFocus.step();
     }
 
     public void resize(int w, int h) {

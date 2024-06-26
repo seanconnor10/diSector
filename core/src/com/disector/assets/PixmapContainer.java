@@ -50,7 +50,7 @@ public class PixmapContainer {
         Pixmap newPix = new Pixmap(pix.getWidth()/2, pix.getHeight(), pix.getFormat());
         newPix.setFilter(Pixmap.Filter.BiLinear);
         newPix.drawPixmap(
-            pix, 1, 1, pix.getWidth()-1, pix.getHeight()-1, //Source Pixmap The -1's seem to help it align
+            pix, 1, 0, pix.getWidth()-1, pix.getHeight(), //Source Pixmap The -1's seem to help it align
             0, 0, newPix.getWidth(), newPix.getHeight() //Destination Pixmap
         );
         return newPix;

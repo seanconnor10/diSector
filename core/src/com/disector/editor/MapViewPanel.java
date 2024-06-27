@@ -1,10 +1,16 @@
 package com.disector.editor;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+
+import com.disector.gameworld.GameWorld;
+import com.disector.Wall;
+import com.disector.Sector;
 import com.disector.Application;
 import com.disector.renderer.EditorMapRenderer;
 
@@ -12,8 +18,9 @@ public class MapViewPanel extends Panel{
     Application app;
     EditorMapRenderer renderer;
 
-    public MapViewPanel(Application app) {
+    public MapViewPanel(Application app, Editor editor) {
         renderer = new EditorMapRenderer(app, 100, 100);
+        this.editor = editor;
     }
 
     @Override
@@ -36,10 +43,14 @@ public class MapViewPanel extends Panel{
     }
 
     @Override
-    void step() {
+    void step(GameWorld game, Array<Wall> walls, Array<Sector> sectors) {
         setLocalMouse();
         Vector2 mouseWorldPos = renderer.getMouseWorldPos(localMouseX, localMouseY);
         //System.out.printf("GlobalX: %d  GlobalY: %d\nLocalX: %d LocalY: %d\nWorldX: %f  WorldY: %f\n\n", mouseX, mouseY, localMouseX, localMouseY, mouseWorldPos.x, mouseWorldPos.y);
+        if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+            editor.moveRenderViewCamera(mouseWorldPos.x, mouseWorldPos.y);
+            //game.setPos(game.player1, mouseWorldPos.x, mouseWorldPos.y);
+        }
     }
 
 

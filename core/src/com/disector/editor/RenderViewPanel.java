@@ -5,7 +5,12 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector4;
+import com.badlogic.gdx.utils.Array;
 import com.disector.Application;
+import com.disector.Sector;
+import com.disector.Wall;
+import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
 import com.disector.renderer.DimensionalRenderer;
 import com.disector.renderer.SoftwareRenderer;
@@ -14,9 +19,11 @@ import com.disector.renderer.SoftwareRenderer;
 public class RenderViewPanel extends Panel{
     DimensionalRenderer renderer;
 
-    RenderViewPanel(Application app) {
+    RenderViewPanel(Application app, Editor editor) {
         renderer = new SoftwareRenderer(app);
+        renderer.placeCamera(new Vector4(0, 0, 20, 0));
         renderer.resizeFrame(app.frameWidth, app.frameHeight);
+        this.editor = editor;
     }
 
     @Override
@@ -39,7 +46,8 @@ public class RenderViewPanel extends Panel{
     }
 
     @Override
-    void step() {
+    void step(GameWorld game, Array<Wall> walls, Array<Sector> sectors) {
+
     }
 
     @Override

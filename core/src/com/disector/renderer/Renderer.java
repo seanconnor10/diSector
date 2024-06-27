@@ -57,6 +57,30 @@ public abstract class Renderer {
         this.camCurrentSector = camCurrentSector;
     }
 
+     public void placeCamera(Vector4 pos, int camCurrentSector) {
+        camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w;
+        this.camCurrentSector = camCurrentSector;
+    }
+
+    public void placeCamera(int camCurrentSector) {
+        this.camCurrentSector = camCurrentSector;
+    }
+
+    public void placeCamera(Vector4 pos) {
+        camX = pos.x; camY = pos.y; camZ = pos.z; camR = pos.w;
+    }
+
+    public void placeCamera(float x, float y) {
+        camX = x;
+        camY = y;
+    }
+
+     public void placeCamera(float x, float y, float r) {
+        camX = x;
+        camY = y;
+        camR = r;
+    }
+
     public void shiftCamera(Vector2 pos) {
         camX += pos.x;
         camY += pos.y;

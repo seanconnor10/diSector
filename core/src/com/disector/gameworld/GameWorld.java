@@ -17,10 +17,10 @@ public class GameWorld {
     private final Array<Wall> walls;
     private final Array<Sector> sectors;
 
-    private Player player1;
-
     private float dt;
     private boolean shouldDisplayMap;
+
+    public Player player1;
 
     public GameWorld(Application app) {
         this.app = app;
@@ -64,6 +64,11 @@ public class GameWorld {
     public boolean shouldDisplayMap() {
         return shouldDisplayMap;
     }
+
+    public void setPos(Positionable obj, float x, float y) {
+        obj.snagPosition().set(x,y);
+    }
+
 
     //*****************************************************
 

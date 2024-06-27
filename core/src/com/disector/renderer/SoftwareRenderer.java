@@ -234,9 +234,9 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
         if (occlusionBottom[drawX] < rasterBottom) {
             float heightOffset = (camZ - secFloorZ) / scaleFactor;
-            int floorEndScreenY = rasterBottom;
+            int floorEndScreenY = Math.min(rasterBottom, occlusionTop[drawX]);
             Pixmap tex = app.textures.pixmaps[0][0];
-            for (int drawY = occlusionBottom[drawX] + vOffset; drawY<floorEndScreenY + vOffset; drawY++) {
+            for (int drawY = occlusionBottom[drawX] + vOffset; drawY<=floorEndScreenY + vOffset; drawY++) {
                 float floorX = heightOffset * (drawX-halfWidth) / (drawY-halfHeight);
                 float floorY = heightOffset * fov / (drawY-halfHeight);
 
@@ -286,7 +286,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
         Pixmap tex = app.textures.pixmaps[1][0];
 
-        for (int drawY = Math.max(rasterTop, occlusionBottom[drawX]) + vOffset; drawY < ceilEndScreenY; drawY++) {
+        for (int drawY = Math.max(rasterTop, occlusionBottom[drawX]) + vOffset; drawY <= ceilEndScreenY; drawY++) {
             float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);
             float ceilY = heightOffset * fov / (drawY - halfHeight);
 

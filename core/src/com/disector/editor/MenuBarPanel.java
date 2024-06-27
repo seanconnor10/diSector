@@ -4,6 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.Array;
+import com.disector.Sector;
+import com.disector.Wall;
+import com.disector.gameworld.GameWorld;
 
 public class MenuBarPanel extends Panel{
     Button saveButton;
@@ -23,7 +27,7 @@ public class MenuBarPanel extends Panel{
     }
 
     @Override
-    void step() {
+    void step(GameWorld game, Array<Wall> walls, Array<Sector> sectors) {
 
     }
 

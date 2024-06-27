@@ -41,7 +41,7 @@ public class GameMapRenderer extends MapRenderer {
 
     private void drawWalls() {
         for (Wall w : walls) {
-            app.shape.setColor( w.isPortal ? Color.RED : Color.WHITE );
+            app.shape.setColor( w.isPortal ? new Color(0xFFA05060) : Color.WHITE );
             line(w.x1, w.y1, w.x2, w.y2);
         }
     }

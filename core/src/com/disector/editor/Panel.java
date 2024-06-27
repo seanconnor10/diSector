@@ -4,8 +4,14 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.utils.Array;
+
+import com.disector.gameworld.GameWorld;
+import com.disector.Wall;
+import com.disector.Sector;
 
 public abstract class Panel {
+    Editor editor;
     static int mouseX, mouseY;
     int localMouseX, localMouseY;
 
@@ -13,7 +19,7 @@ public abstract class Panel {
 
     abstract void resize(int x, int y, int w, int h);
 
-    abstract void step();
+    abstract void step(GameWorld game, Array<Wall> walls, Array<Sector> sectors);
 
     abstract void control();
 

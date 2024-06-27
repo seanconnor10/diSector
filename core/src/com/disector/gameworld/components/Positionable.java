@@ -10,6 +10,7 @@ public interface Positionable {
      * and find it's currentSector
      ************************* D: ******/
 
+    Vector2 snagPosition();
     Vector2 copyPosition();
     Vector3 copyPosition3D();
     float getZ();

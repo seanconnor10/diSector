@@ -20,7 +20,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     public SoftwareRenderer(Application app) {
         super(app);
-        super.camFOV = 125.f;
+        setFovFromDeg(105);
     }
 
     @Override
@@ -34,6 +34,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
     public void resizeFrame(int w, int h) {
         super.resizeFrame(w, h);
         reInitDrawData(w);
+    }
+
+    public void setFovFromDeg(float deg) {
+        camFOV = halfWidth / (float) Math.tan( Math.toRadians(deg/2) );
     }
 
     private void drawSector(int secInd, int spanStart, int spanEnd) {

@@ -96,6 +96,11 @@ public class TextFileMapLoader implements MapLoader {
                                     sectorBuild.ceilZ = Float.parseFloat(in.next());
                                     subMode = "NONE";
                                     break;
+                                case "LIGHT":
+                                    sectorBuild.lightFloor = Float.parseFloat(next);
+                                    sectorBuild.lightCeil = Float.parseFloat(in.next());
+                                    subMode = "NONE";
+                                    break;
                                 default:
                                     break;
                             }
@@ -132,6 +137,10 @@ public class TextFileMapLoader implements MapLoader {
                                     break;
                                 case "LOWERTEX":
                                     wallBuild.texLower = Integer.parseInt(next);
+                                    subMode = "NONE";
+                                    break;
+                                case "LIGHT":
+                                    wallBuild.light = Float.parseFloat(next);
                                     subMode = "NONE";
                                     break;
                                 default:
@@ -222,6 +231,9 @@ public class TextFileMapLoader implements MapLoader {
         //Tex
         str.append("TEX ").append( form(s.floorTex) ).append(" ").append( form(s.ceilTex) ).append(" :: ");
 
+        //Light
+        str.append("LIGHT ").append( form(s.lightFloor) ).append(" ").append( form(s.lightCeil)).append(" :: ");
+
         //Wall Indices
         str.append("HAS ");
         for (int wInd : s.walls.toArray()) {
@@ -261,6 +273,8 @@ public class TextFileMapLoader implements MapLoader {
         if (w.texUpper != 0) {
             str.append("UPPERTEX ").append(w.texUpper).append(" :: ");
         }
+
+        str.append("LIGHT ").append( form(w.light) ).append(" :: ");
 
         str.append("\n");
 

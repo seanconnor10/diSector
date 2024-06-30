@@ -11,15 +11,16 @@ import java.util.Stack;
 public class SoftwareRenderer extends DimensionalRenderer {
     private int[] occlusionBottom;
     private int[] occlusionTop;
-    private Stack<Integer> drawnPortals = new Stack<>();
+    private final Stack<Integer> drawnPortals = new Stack<>();
     //private HashSet<Integer> transformedWalls = new HashSet<>();
     //private HashSet<Integer> transformedSectors = new HashSet<>();
 
-    private final Color depthFogColor = new Color(0.1f,0f,0.2f,1f);
+    private final Color depthFogColor = new Color(0.2f, 0.05f, 0.2f, 1f);
+    private final Color darkColor = new Color(0x20_0A_10_FF);
 
     public SoftwareRenderer(Application app) {
         super(app);
-        super.camFOV = 200.f;
+        super.camFOV = 125.f;
     }
 
     @Override
@@ -153,7 +154,6 @@ public class SoftwareRenderer extends DimensionalRenderer {
         Pixmap[] texturesLow = app.textures.pixmaps[w.texLower];
         Pixmap[] texturesHigh = app.textures.pixmaps[w.texUpper];
 
-                                //SHOULD PROBABLY BE <= rightEdgeX
         for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
             if (occlusionTop[drawX] -1 <= occlusionBottom[drawX] ) continue;
 
@@ -166,7 +166,9 @@ public class SoftwareRenderer extends DimensionalRenderer {
             quadTop = p1_plotHigh + hProgress*(p2_plotHigh-p1_plotHigh);
             quadHeight = quadTop - quadBottom;
 
-            float fog = (x1 + hProgress*(x2-x1)) / 400.0f;
+            float fog = getFogFactor(x1 + hProgress*(x2-x1));
+
+            float light = w.light;
 
             rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
@@ -204,6 +206,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
                         drawColor = grabColor(texUpper, u, v);
 
                     drawColor.lerp(depthFogColor,fog);
+                    drawColor.lerp(darkColor, 1.f - light);
                 } else {
                     drawColor = getCheckerboardColor(u,v);
                 }
@@ -214,10 +217,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
             //Floor and Ceiling
             if (occlusionBottom[drawX] < quadBottom)
-                drawFloor(w, currentSector.floorTex, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos);
+                drawFloor(w, currentSector.floorTex, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos, currentSector.lightFloor);
 
             if (occlusionTop[drawX] > rasterTop)
-                drawCeiling(w, currentSector.ceilTex, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos);
+                drawCeiling(w, currentSector.ceilTex, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos, currentSector.lightCeil);
 
             //Update Occlusion Matrix
             updateOcclusion(isPortal, drawX, quadTop, quadBottom, quadHeight, upperWallCutoffV, lowerWallCutoffV);
@@ -233,11 +236,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     }
 
-    private void drawFloor(Wall w, int texInd, int drawX, float fov, int rasterBottom, float secFloorZ, float playerSin, float playerCos ) {
+    private void drawFloor(Wall w, int texInd, int drawX, float fov, int rasterBottom, float secFloorZ, float playerSin, float playerCos, float light) {
         final float scaleFactor = 32.f;
         float floorXOffset = camX/scaleFactor, floorYOffset = camY/scaleFactor;
         int vOffset = (int) camVLook;
-
         if (occlusionBottom[drawX] < rasterBottom) {
             float heightOffset = (camZ - secFloorZ) / scaleFactor;
             int floorEndScreenY = Math.min(rasterBottom, occlusionTop[drawX]);
@@ -271,26 +273,22 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 drawColor.lerp(0.1f,0f,0.2f,1f, floorFogValue);
                 buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
 
-                Color drawColor = grabColor(tex, rotFloorX, rotFloorY);
-
-                float floorFogValue;
-
-                /*floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
-                floorFogValue = Math.min(1.f, Math.max(0.f,floorFogValue));*/
-
                 float horizonScreenDistVert = halfHeight - drawY;
                 float angleOfScreenRow = (float) Math.atan(horizonScreenDistVert / fov);
                 float dist = (camZ - secFloorZ) / (float) Math.sin(angleOfScreenRow);
-                floorFogValue = dist / 400.f;
 
-                drawColor.lerp(0.1f,0f,0.2f,1f, floorFogValue);
+                Color drawColor = grabColor(tex, rotFloorX, rotFloorY);
+
+                drawColor.lerp(depthFogColor, getFogFactor(dist));
+                drawColor.lerp(darkColor, 1.0f - light);
+
                 buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
 
             }
         }
     }
 
-    private void drawCeiling(Wall w, int texInd, int drawX, float fov, int rasterTop, float secCeilZ, float playerSin, float playerCos) {
+    private void drawCeiling(Wall w, int texInd, int drawX, float fov, int rasterTop, float secCeilZ, float playerSin, float playerCos, float light) {
         final float scaleFactor = 32.f;
         float floorXOffset = camX/scaleFactor, floorYOffset = camY/scaleFactor;
         int vOffset = (int) camVLook;
@@ -328,17 +326,15 @@ public class SoftwareRenderer extends DimensionalRenderer {
             drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
             buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
 
-            float ceilFogValue;
-            /*ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
-            ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));*/
-
             float horizonScreenDistVert = - halfHeight + drawY;
             float angleOfScreenRow = (float) Math.atan(horizonScreenDistVert / fov);
             float dist = (secCeilZ - camZ) / (float) Math.sin(angleOfScreenRow);
-            ceilFogValue = dist / 400.f;
 
             Color drawColor = grabColor(tex, rotX, rotY);
-            drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
+
+            drawColor.lerp(0.1f,0f,0.2f,1f, getFogFactor(dist) );
+            drawColor.lerp(darkColor, 1.0f - light);
+
             buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
         }
 
@@ -368,6 +364,11 @@ public class SoftwareRenderer extends DimensionalRenderer {
             occlusionBottom[i] = 0;
             occlusionTop[i] = frameHeight;
         }
+    }
+
+    private float getFogFactor(float dist) {
+        final float fogDistance = 400f;
+        return Math.max(0, Math.min(fogDistance, dist) ) / fogDistance;
     }
 
     private boolean spanFilled(int spanStart, int spanEnd) {

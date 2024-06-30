@@ -40,8 +40,8 @@ public class OldTextFormatMapLoader implements MapLoader{
             Sector s = new Sector();
             s.floorZ = Integer.parseInt( scanner.next().trim() );
             s.ceilZ = Integer.parseInt( scanner.next().trim() );
-            /*s.floorLight = Float.parseFloat(*/ scanner.next();//.trim();
-            /*s.ceilLight = Float.parseFloat(*/ scanner.next();//.trim();
+            s.lightFloor = Float.parseFloat( scanner.next().trim() );
+            s.lightCeil = Float.parseFloat( scanner.next().trim() );
             /*s.floorTexIndex / Integer.parseInt(*/ scanner.next();//.trim();
             /*s.ceilTexIndex = Integer.parseInt(*/ scanner.next();//.trim();
 
@@ -66,7 +66,7 @@ public class OldTextFormatMapLoader implements MapLoader{
             String isPortalInput = scanner.next().trim();
             boolean isPortal = Boolean.parseBoolean(isPortalInput);
             /*Color c = new Color( Color.valueOf(*/ scanner.next().trim() /* )) */ ;
-            /*float light = Float.parseFloat(*/ scanner.next().trim() /* ) */ ;
+            float light = Float.parseFloat(scanner.next().trim());
             int linkA = Integer.parseInt( scanner.next().trim() );
             int linkB = Integer.parseInt( scanner.next().trim() );
             /* int texIndex = Integer.parseInt(*/ scanner.next().trim() /* ) */ ;
@@ -80,6 +80,7 @@ public class OldTextFormatMapLoader implements MapLoader{
             w.isPortal = isPortal;
             w.linkA = linkA;
             w.linkB = linkB;
+            w.light = light;
             w.setNormalAngle();
             walls.add(w);
         }

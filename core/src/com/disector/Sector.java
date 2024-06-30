@@ -5,8 +5,8 @@ import com.badlogic.gdx.utils.IntArray;
 public class Sector {
     public IntArray walls = new IntArray();
     public float floorZ, ceilZ;
-
     public int floorTex, ceilTex;
+    public float lightFloor = 1.f, lightCeil = 1.f;
 
     public Sector() {
     }
@@ -20,6 +20,8 @@ public class Sector {
         this.ceilZ = s.ceilZ;
         this.floorTex = s.floorTex;
         this.ceilTex = s.ceilTex;
+        this.lightCeil = s.lightCeil;
+        this.lightFloor = s.lightFloor;
     }
 
     public void addWallSafely(int wInd) {

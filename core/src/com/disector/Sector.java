@@ -6,6 +6,8 @@ public class Sector {
     public IntArray walls = new IntArray();
     public float floorZ, ceilZ;
 
+    public int floorTex, ceilTex;
+
     public Sector() {
     }
 
@@ -16,6 +18,8 @@ public class Sector {
         }
         this.floorZ = s.floorZ;
         this.ceilZ = s.ceilZ;
+        this.floorTex = s.floorTex;
+        this.ceilTex = s.ceilTex;
     }
 
     public void addWallSafely(int wInd) {

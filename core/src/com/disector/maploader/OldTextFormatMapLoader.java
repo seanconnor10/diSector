@@ -80,6 +80,7 @@ public class OldTextFormatMapLoader implements MapLoader{
             w.isPortal = isPortal;
             w.linkA = linkA;
             w.linkB = linkB;
+            w.setNormalAngle();
             walls.add(w);
         }
 

@@ -4,10 +4,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.disector.Application;
-import com.disector.Sector;
-import com.disector.Wall;
-import com.disector.WallInfoPack;
+import com.disector.*;
 
 import java.util.Stack;
 
@@ -22,6 +19,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     public SoftwareRenderer(Application app) {
         super(app);
+        super.camFOV = 200.f;
     }
 
     @Override
@@ -83,7 +81,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         x2 = x2 * playerCos - y2 * playerSin;
         y2 = y2 * playerCos + tempX * playerSin;
 
-        if (x1 < 0.f && x2 < 0.f) return; //Avoid drawing if totally behind camera
+        if (x1 < 0 && x2 < 0) return; //Avoid drawing if totally behind camera
 
         float leftClipU = 0.f, rightClipU = 1.f;
         float wallLength = w.length();
@@ -112,20 +110,18 @@ public class SoftwareRenderer extends DimensionalRenderer {
         float p1_plotX = halfWidth - fov*y1/x1; //Plot edges of wall onto screen space
         float p2_plotX = halfWidth - fov*y2/x2;
 
-        if (!isPortal && p1_plotX > p2_plotX) return; //Avoid drawing backside of non portal wall
+        if (!isPortal && p2_plotX < p1_plotX) return; //Avoid drawing backside of non portal wall
 
-        int leftEdgeX = (int) p1_plotX; //Snap plots to integer representing pixel column
-        if (leftEdgeX < 0) leftEdgeX = 0;
-        if (leftEdgeX < spanStart) leftEdgeX = spanStart;
-
-        int rightEdgeX = (int) p2_plotX;
-        if (rightEdgeX > frameWidth-1) rightEdgeX = frameWidth-1;
-        if (rightEdgeX > spanEnd) rightEdgeX = spanEnd;
+        int leftEdgeX = Math.max(0, Math.min((int)p2_plotX,(int)p1_plotX) );
+		int rightEdgeX = Math.min( Math.max((int)p2_plotX,(int)p1_plotX), frameWidth-1);
 
         if (leftEdgeX > spanEnd) return; //Avoid more processing if out of span
         if (rightEdgeX < spanStart) return;
         if (spanFilled(spanStart, spanEnd)) return;
-        
+
+        if (leftEdgeX < spanStart) leftEdgeX = spanStart;
+        if (rightEdgeX > spanEnd) rightEdgeX = spanEnd;
+
         Sector currentSector = sectors.get(currentSectorIndex);
         float secFloorZ = currentSector.floorZ, secCeilZ = currentSector.ceilZ;
 
@@ -139,7 +135,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         int rasterBottom, rasterTop; //Where to stop and start drawing for this pixel column
 
         //Variables needed if portal
-        int portalDestIndex = w.linkA == currentSectorIndex ? w.linkB : w.linkA;
+        int portalDestIndex = (w.linkA == currentSectorIndex) ? w.linkB : w.linkA;
         float destCeiling = 100.f, destFloor = 0.f, upperWallCutoffV = 1.001f, lowerWallCutoffV = -0.001f;
 
         if (isPortal) {
@@ -153,7 +149,9 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 lowerWallCutoffV = (destFloor - secFloorZ) / thisSectorCeilingHeight;
         }
 
-        Pixmap[] textures = app.textures.pixmaps[4];
+        Pixmap[] textures = app.textures.pixmaps[w.tex];
+        Pixmap[] texturesLow = app.textures.pixmaps[w.texLower];
+        Pixmap[] texturesHigh = app.textures.pixmaps[w.texUpper];
 
                                 //SHOULD PROBABLY BE <= rightEdgeX
         for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
@@ -176,7 +174,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
             float u =  ((1 - hProgress)*(leftClipU/x1) + hProgress*(rightClipU/x2)) / ( (1-hProgress)*(1/x1) + hProgress*(1/x2));
             //if (u<0.01f) u = 0.01f; if (u>0.99) u = 0.99f;
 
-            Pixmap tex;
+            Pixmap tex, texLower, texUpper;
             {
                 final int mipMapCount = app.textures.pixmaps[0].length;
                 final float mipMapZealousnessFactor = 1.5f;
@@ -185,6 +183,8 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 float texPixelWidth = textures[0].getWidth() * (uPlus1-u);
                 int mipMapIndex = Math.max(0, Math.min( (int)(texPixelWidth/mipMapZealousnessFactor), mipMapCount-1));
                 tex = textures[mipMapIndex];
+                texLower = texturesLow[mipMapIndex];
+                texUpper = texturesHigh[mipMapIndex];
             }
 
             for (int drawY = rasterBottom; drawY < rasterTop; drawY++) { //Per Pixel draw loop
@@ -196,7 +196,13 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
                 Color drawColor;
                 if (/*Draw Textures*/ true) {
-                    drawColor = grabColor(tex, u, v);
+                    if (!w.isPortal)
+                        drawColor = grabColor(tex, u, v);
+                    else if (v <= lowerWallCutoffV)
+                        drawColor = grabColor(texLower, u, v);
+                    else
+                        drawColor = grabColor(texUpper, u, v);
+
                     drawColor.lerp(depthFogColor,fog);
                 } else {
                     drawColor = getCheckerboardColor(u,v);
@@ -208,10 +214,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
             //Floor and Ceiling
             if (occlusionBottom[drawX] < quadBottom)
-                drawFloor(w, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos);
+                drawFloor(w, currentSector.floorTex, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos);
 
             if (occlusionTop[drawX] > rasterTop)
-                drawCeiling(w, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos);
+                drawCeiling(w, currentSector.ceilTex, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos);
 
             //Update Occlusion Matrix
             updateOcclusion(isPortal, drawX, quadTop, quadBottom, quadHeight, upperWallCutoffV, lowerWallCutoffV);
@@ -227,7 +233,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     }
 
-    private void drawFloor(Wall w, int drawX, float fov, int rasterBottom, float secFloorZ, float playerSin, float playerCos ) {
+    private void drawFloor(Wall w, int texInd, int drawX, float fov, int rasterBottom, float secFloorZ, float playerSin, float playerCos ) {
         final float scaleFactor = 32.f;
         float floorXOffset = camX/scaleFactor, floorYOffset = camY/scaleFactor;
         int vOffset = (int) camVLook;
@@ -235,7 +241,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         if (occlusionBottom[drawX] < rasterBottom) {
             float heightOffset = (camZ - secFloorZ) / scaleFactor;
             int floorEndScreenY = Math.min(rasterBottom, occlusionTop[drawX]);
-            Pixmap tex = app.textures.pixmaps[0][0];
+            Pixmap tex = app.textures.pixmaps[texInd][0];
             for (int drawY = occlusionBottom[drawX] + vOffset; drawY<=floorEndScreenY + vOffset; drawY++) {
                 float floorX = heightOffset * (drawX-halfWidth) / (drawY-halfHeight);
                 float floorY = heightOffset * fov / (drawY-halfHeight);
@@ -257,7 +263,6 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 while(rotFloorY<0.0) rotFloorY+=1.0f;
                 while(rotFloorY>1.0f) rotFloorY-=1.0f;
 
-
                 /* CHECKERBOARD
                 boolean checkerBoard = ( (int)(rotFloorX*8%2) == (int)(rotFloorY*8%2) );
                 Color drawColor = new Color( checkerBoard ? 0xFFD08010 : 0xFF10D080 );
@@ -267,8 +272,17 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
 
                 Color drawColor = grabColor(tex, rotFloorX, rotFloorY);
-                float floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
-                floorFogValue = Math.min(1.f, Math.max(0.f,floorFogValue));
+
+                float floorFogValue;
+
+                /*floorFogValue = 1.f - ((halfHeight-heightOffset-drawY)/(halfHeight-heightOffset));
+                floorFogValue = Math.min(1.f, Math.max(0.f,floorFogValue));*/
+
+                float horizonScreenDistVert = halfHeight - drawY;
+                float angleOfScreenRow = (float) Math.atan(horizonScreenDistVert / fov);
+                float dist = (camZ - secFloorZ) / (float) Math.sin(angleOfScreenRow);
+                floorFogValue = dist / 400.f;
+
                 drawColor.lerp(0.1f,0f,0.2f,1f, floorFogValue);
                 buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
 
@@ -276,7 +290,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         }
     }
 
-    private void drawCeiling(Wall w, int drawX, float fov, int rasterTop, float secCeilZ, float playerSin, float playerCos) {
+    private void drawCeiling(Wall w, int texInd, int drawX, float fov, int rasterTop, float secCeilZ, float playerSin, float playerCos) {
         final float scaleFactor = 32.f;
         float floorXOffset = camX/scaleFactor, floorYOffset = camY/scaleFactor;
         int vOffset = (int) camVLook;
@@ -284,7 +298,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         float heightOffset = (secCeilZ-camZ) / scaleFactor;
         int ceilEndScreenY = occlusionTop[drawX] + vOffset;
 
-        Pixmap tex = app.textures.pixmaps[1][0];
+        Pixmap tex = app.textures.pixmaps[texInd][0];
 
         for (int drawY = Math.max(rasterTop, occlusionBottom[drawX]) + vOffset; drawY <= ceilEndScreenY; drawY++) {
             float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);
@@ -314,9 +328,16 @@ public class SoftwareRenderer extends DimensionalRenderer {
             drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
             buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
 
+            float ceilFogValue;
+            /*ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
+            ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));*/
+
+            float horizonScreenDistVert = - halfHeight + drawY;
+            float angleOfScreenRow = (float) Math.atan(horizonScreenDistVert / fov);
+            float dist = (secCeilZ - camZ) / (float) Math.sin(angleOfScreenRow);
+            ceilFogValue = dist / 400.f;
+
             Color drawColor = grabColor(tex, rotX, rotY);
-            float ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
-            ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));
             drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
             buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
         }

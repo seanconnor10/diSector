@@ -8,15 +8,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Application;
 import com.disector.Wall;
+import com.disector.editor.MapViewPanel;
 
 public class EditorMapRenderer extends MapRenderer {
     private ShapeRenderer shape;
+    private MapViewPanel panel;
 
     public int gridSize = 32;
+    public float animCycle;
 
-    public EditorMapRenderer(Application app, int frameWidth, int frameHeight) {
+    public EditorMapRenderer(Application app, MapViewPanel panel, int frameWidth, int frameHeight) {
         super(app);
         shape = new ShapeRenderer();
+        this.panel = panel;
         changeSize(frameWidth, frameHeight);
     }
 
@@ -49,13 +53,6 @@ public class EditorMapRenderer extends MapRenderer {
         halfHeight = frameHeight/2.f;
     }
 
-    private void drawWall(Wall wall) {
-        //WallTransform w = new WallTransform(wall);
-        shape.setColor( wall.isPortal ? Color.CORAL : Color.WHITE );
-        //shape.line(w.x1, w.y1, w.x2, w.y2);
-        line(wall.x1, wall.y1, wall.x2, wall.y2);
-    }
-
     public void drawGrid() {
         shape.setColor(0, 0.2f, 0.1f, 0.5f);
         for (float worldX = gridSize*(int)((camX-(halfWidth/camFOV))/gridSize); worldX<camX+(halfWidth/camFOV); worldX+=gridSize) {
@@ -70,11 +67,19 @@ public class EditorMapRenderer extends MapRenderer {
         circle(0,0,5);
     }
 
-     public Vector2 getMouseWorldPos(int mouseLocalX, int mouseLocalY) {
+    public Vector2 getMouseWorldPos(int mouseLocalX, int mouseLocalY) {
         Vector2 pos = new Vector2();
         pos.x = camX+(mouseLocalX-halfWidth)/camFOV;
         pos.y = camY-(mouseLocalY-halfHeight)/camFOV;
         return pos;
+    }
+
+    private void drawWall(Wall wall) {
+        //WallTransform w = new WallTransform(wall);
+        shape.setColor( wall.isPortal ? Color.CORAL : Color.WHITE );
+        shape.getColor().mul(animCycle, 1f - animCycle, animCycle, 1f);
+        //shape.line(w.x1, w.y1, w.x2, w.y2);
+        line(wall.x1, wall.y1, wall.x2, wall.y2);
     }
 
     private void circle(float x, float y, float r) {
@@ -89,6 +94,5 @@ public class EditorMapRenderer extends MapRenderer {
                 halfHeight+camFOV*(y2-camY)
         );
     }
-
 
 }

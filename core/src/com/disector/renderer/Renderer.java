@@ -24,9 +24,9 @@ public abstract class Renderer {
     int frameWidth, frameHeight;
     float halfWidth, halfHeight;
 
-    float camX, camY, camZ, camR, camVLook;
-    float camFOV = 175.f;
-    int camCurrentSector;
+    public float camX, camY, camZ, camR, camVLook;
+    public float camFOV = 175.f;
+    public int camCurrentSector;
 
     public Renderer(Application app) {
         this.app = app;

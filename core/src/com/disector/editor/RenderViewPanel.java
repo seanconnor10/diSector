@@ -35,17 +35,6 @@ public class RenderViewPanel extends Panel{
     }
 
     @Override
-    void control() {
-        boolean forwardPressed = InputRecorder.getKeyInfo("FORWARD").isDown;
-
-        boolean cameraMoved = false;
-
-        cameraMoved = forwardPressed;
-
-        if (cameraMoved) renderer.renderWorld();
-    }
-
-    @Override
     void step(GameWorld game, Array<Wall> walls, Array<Sector> sectors) {
 
     }

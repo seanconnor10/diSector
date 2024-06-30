@@ -55,6 +55,7 @@ public class TextFileMapLoader implements MapLoader {
                 }
                 subMode = "NONE";
                 mode = next;
+
                 //Init New Mode
                 switch (mode) {
                     case "SECTOR":
@@ -66,7 +67,9 @@ public class TextFileMapLoader implements MapLoader {
                     default:
                         break;
                 }
+
             } else { //If not ObjectKeyword...
+
                 switch (mode) {
                     case "NONE":
                         if (!isObjectKeyword(next)) {
@@ -82,6 +85,11 @@ public class TextFileMapLoader implements MapLoader {
                             switch (subMode) {
                                 case "HAS":
                                     sectorBuild.walls.add(Integer.parseInt(next));
+                                    break;
+                                case "TEX":
+                                    sectorBuild.floorTex = Integer.parseInt(next);
+                                    sectorBuild.ceilTex = Integer.parseInt(in.next());
+                                    subMode = "NONE";
                                     break;
                                 case "HEIGHT":
                                     sectorBuild.floorZ = Float.parseFloat(next);
@@ -114,6 +122,18 @@ public class TextFileMapLoader implements MapLoader {
                                     wallBuild.linkB = Integer.parseInt(in.next());
                                     subMode = "NONE";
                                     break;
+                                case "TEX":
+                                    wallBuild.tex = Integer.parseInt(next);
+                                    subMode = "NONE";
+                                    break;
+                                case "UPPERTEX":
+                                    wallBuild.texUpper = Integer.parseInt(next);
+                                    subMode = "NONE";
+                                    break;
+                                case "LOWERTEX":
+                                    wallBuild.texLower = Integer.parseInt(next);
+                                    subMode = "NONE";
+                                    break;
                                 default:
                                     break;
                             }
@@ -122,6 +142,7 @@ public class TextFileMapLoader implements MapLoader {
                     default:
                         break;
                 }
+
             }
         }
 
@@ -150,6 +171,7 @@ public class TextFileMapLoader implements MapLoader {
         //Copy To Applications' Sector and Wall Lists
         sectors.clear();
         for (Sector s : newSectors) {
+            s.removeDuplicateIndices();
             sectors.add(new Sector(s));
         }
 
@@ -194,16 +216,17 @@ public class TextFileMapLoader implements MapLoader {
 
         str.append(":: ");
 
+        //Height
+        str.append("HEIGHT ").append( form(s.floorZ) ).append(" ").append( form(s.ceilZ) ).append(" :: ");
+
+        //Tex
+        str.append("TEX ").append( form(s.floorTex) ).append(" ").append( form(s.ceilTex) ).append(" :: ");
+
         //Wall Indices
         str.append("HAS ");
         for (int wInd : s.walls.toArray()) {
             str.append(wInd).append(" ");
         }
-        str.append(":: ");
-
-        //Height
-        str.append("HEIGHT ").append(s.floorZ).append(" ").append(s.ceilZ).append(" ");
-
         str.append("::\n");
 
         return str.toString();
@@ -225,8 +248,18 @@ public class TextFileMapLoader implements MapLoader {
         str.append(form(w.y2)).append(" ");
         str.append(":: ");
 
+        str.append("TEX ").append(w.tex).append(" :: ");
+
         if (w.isPortal) {
             str.append(String.format("PORT %d -> %d :: ", w.linkA, w.linkB));
+        }
+
+        if (w.texLower != 0) {
+            str.append("LOWERTEX ").append(w.texLower).append(" :: ");
+        }
+
+        if (w.texUpper != 0) {
+            str.append("UPPERTEX ").append(w.texUpper).append(" :: ");
         }
 
         str.append("\n");

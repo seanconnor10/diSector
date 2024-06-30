@@ -32,11 +32,6 @@ public class MenuBarPanel extends Panel{
     }
 
     @Override
-    void control() {
-
-    }
-
-    @Override
     void draw(SpriteBatch batch, ShapeRenderer shape) {
         shape.setColor(Color.GOLDENROD);
         shape.begin(ShapeRenderer.ShapeType.Filled);

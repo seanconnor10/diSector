@@ -21,8 +21,6 @@ public abstract class Panel {
 
     abstract void step(GameWorld game, Array<Wall> walls, Array<Sector> sectors);
 
-    abstract void control();
-
     abstract void draw(SpriteBatch batch, ShapeRenderer shape);
 
     void setLocalMouse() {

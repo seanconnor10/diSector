@@ -8,8 +8,11 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Application;
+import com.disector.Sector;
+import com.disector.Wall;
 import com.disector.gameworld.GameWorld;
 import com.disector.maploader.MapLoader;
+import com.disector.maploader.OldTextFormatMapLoader;
 import com.disector.maploader.TextFileMapLoader;
 
 import java.util.ArrayList;
@@ -23,6 +26,12 @@ public class Editor {
     private MenuBarPanel menuPanel;
     private ArrayList<Panel> panelList = new ArrayList<>();
 
+    private float animProgress = 0f;
+    float animCycle = 0f;
+
+    Wall selectedWall = null;
+    Sector selectedSector = null;
+
     public Editor(Application app, GameWorld world) {
         this.app = app;
         this.world = world;
@@ -35,6 +44,9 @@ public class Editor {
     }
 
     public void step(float dt) {
+        animProgress += 2*dt;
+        animProgress = animProgress%3;
+        animCycle = (float) Math.sin(animProgress);
         temporaryControls(dt);
         Panel.mouseX = Gdx.input.getX();
         Panel.mouseY = Gdx.input.getY();
@@ -71,10 +83,13 @@ public class Editor {
     private void temporaryControls(float dt) {
         //Temporary Load and Save
         if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
-            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
-            mapLoader.load("MAPS/test.txt");
-//            MapLoader mapLoader = new OldTextFormatMapLoader(app.sectors,app.walls, world);
-//            mapLoader.load("MAPS/SHED");
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                MapLoader mapLoader = new OldTextFormatMapLoader(app.sectors, app.walls, world);
+                mapLoader.load("MAPS/SHED");
+            } else {
+                MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
+                mapLoader.load("MAPS/test.txt");
+            }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
             MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
@@ -106,7 +121,10 @@ public class Editor {
 
         //GridSize
         if (Gdx.input.isKeyJustPressed(Input.Keys.G))
-            mapPanel.renderer.gridSize *= Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) ? 0.5f : 2.f;
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                mapPanel.renderer.gridSize /= 2;
+            else
+                mapPanel.renderer.gridSize *= 2;
         if (mapPanel.renderer.gridSize < 4)
             mapPanel.renderer.gridSize = 4;
 

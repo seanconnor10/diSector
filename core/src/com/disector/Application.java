@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
 import com.disector.assets.PixmapContainer;
@@ -59,6 +60,7 @@ public class Application extends ApplicationAdapter {
         Gdx.input.setCursorCatched(true);
 
         createTestMap();
+        randomizeTextures();
     }
 
     @Override
@@ -160,6 +162,26 @@ public class Application extends ApplicationAdapter {
             gameMapRenderer.renderWorld();
             gameMapRenderer.drawFrame();
         }
+
+        //Randomize Textures
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T))
+            randomizeTextures();
+
+        //Fov Angle Experiments
+        if (false) {
+            Vector4 pPos = gameWorld.getPlayerPosition();
+            float angleToPointOne = 90f + (float) (-(180 / Math.PI) * (Math.atan2(100 - pPos.x, 20 - pPos.y) + pPos.w));// + pPos.w; // w is player angle
+            float halfFrame = frameWidth / 2f;
+            float fov = renderer.getFov();
+            float angleLeftScreenEdge = (float) Math.atan(halfFrame / fov); //This is angle in rad
+            float horizonScreenDistVert = (frameHeight / 2.f) - renderer.camVLook;
+            float angleBottomScreenEdge = (float) Math.atan(horizonScreenDistVert / fov);
+            float distToFloorAtScreenBottom = (renderer.camZ /*minus Sector Floor Height*/) / (float) Math.sin(angleBottomScreenEdge);
+            // ^ This ^ is the one-dimensional-distance from viewPlace for floor row...
+            angleLeftScreenEdge *= (float) (180.0 / Math.PI);
+            //System.out.printf("AngToPoint2: %f\nArcCot:%f\nDist to floor %f\n\n", angleToPointOne, angleLeftScreenEdge, distToFloorAtScreenBottom);
+            System.out.println("Floor Dist Screen Bottom: " + distToFloorAtScreenBottom);
+        }
     }
 
     private void menu() {
@@ -223,6 +245,21 @@ public class Application extends ApplicationAdapter {
         walls.add(new Wall( 150, 145, 185, 125  )); s.walls.add(walls.size-1);
         sectors.add(s);
 
+    }
+
+    private void randomizeTextures() {
+        final int num = textures.pixmaps.length-1;
+
+        for (Sector s : sectors) {
+            s.ceilTex = (int) Math.round(Math.random()*num);
+            s.floorTex = (int) Math.round(Math.random()*num);
+        }
+
+        for (Wall w : walls) {
+            w.tex = (int) Math.round(Math.random()*num);
+            w.texLower = (int) Math.round(Math.random()*num);
+            w.texUpper = (int) Math.round(Math.random()*num);
+        }
     }
 
 }

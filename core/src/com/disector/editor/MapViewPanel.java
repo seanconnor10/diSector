@@ -19,7 +19,7 @@ public class MapViewPanel extends Panel{
     EditorMapRenderer renderer;
 
     public MapViewPanel(Application app, Editor editor) {
-        renderer = new EditorMapRenderer(app, 100, 100);
+        renderer = new EditorMapRenderer(app, this, 100, 100);
         this.editor = editor;
     }
 
@@ -34,6 +34,7 @@ public class MapViewPanel extends Panel{
 
     @Override
     void draw(SpriteBatch batch, ShapeRenderer shape) {
+        renderer.animCycle = editor.animCycle;
         /*If moved camera/Updated Map*/ renderer.renderWorld();
         TextureRegion tex = renderer.copyPixels();
         tex.flip(false, true);
@@ -47,15 +48,10 @@ public class MapViewPanel extends Panel{
         setLocalMouse();
         Vector2 mouseWorldPos = renderer.getMouseWorldPos(localMouseX, localMouseY);
         //System.out.printf("GlobalX: %d  GlobalY: %d\nLocalX: %d LocalY: %d\nWorldX: %f  WorldY: %f\n\n", mouseX, mouseY, localMouseX, localMouseY, mouseWorldPos.x, mouseWorldPos.y);
-        if (Gdx.input.isButtonPressed(Input.Buttons.MIDDLE)) {
+        if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
             editor.moveRenderViewCamera(mouseWorldPos.x, mouseWorldPos.y);
             //game.setPos(game.player1, mouseWorldPos.x, mouseWorldPos.y);
         }
     }
 
-
-    @Override
-    void control() {
-
-    }
 }

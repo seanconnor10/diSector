@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
+import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;
 import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
@@ -35,7 +36,8 @@ public class Application extends ApplicationAdapter {
     public final Array<Sector> sectors = new Array<>();
 
     public PixmapContainer textures;
-    public Pixmap.Format pixelFormat = Pixmap.Format.RGBA4444;
+    public final Pixmap.Format pixelFormat = Pixmap.Format.RGBA4444;
+    public final Array<Material> materials = new Array<>();
 
     public int frameWidth = 400;
     public int frameHeight = 225;
@@ -60,7 +62,7 @@ public class Application extends ApplicationAdapter {
         Gdx.input.setCursorCatched(true);
 
         createTestMap();
-        randomizeTextures();
+        createTestMaterial();
     }
 
     @Override
@@ -108,6 +110,8 @@ public class Application extends ApplicationAdapter {
         }
 
     }
+
+    // --------------------------------------------------------
 
     private void swapFocus(AppFocusTarget target) {
 
@@ -247,18 +251,23 @@ public class Application extends ApplicationAdapter {
 
     }
 
+    private void createTestMaterial() {
+        materials.clear();
+        materials.add(new Material(textures.pixmaps2.get("WOOD2"), false));
+    }
+
     private void randomizeTextures() {
-        final int num = textures.pixmaps.length-1;
+        final int num = materials.size-1;
 
         for (Sector s : sectors) {
-            s.ceilTex = (int) Math.round(Math.random()*num);
-            s.floorTex = (int) Math.round(Math.random()*num);
+            s.matCeil = (int) Math.round(Math.random()*num);
+            s.matFloor = (int) Math.round(Math.random()*num);
         }
 
         for (Wall w : walls) {
-            w.tex = (int) Math.round(Math.random()*num);
-            w.texLower = (int) Math.round(Math.random()*num);
-            w.texUpper = (int) Math.round(Math.random()*num);
+            w.mat = (int) Math.round(Math.random()*num);
+            w.matLower = (int) Math.round(Math.random()*num);
+            w.matUpper = (int) Math.round(Math.random()*num);
         }
     }
 

@@ -7,7 +7,7 @@ public class Wall {
     public boolean isPortal;
     public int linkA, linkB;
     public float normalAngle; //Angle of line protruding outward perpendicularly from wall into the sector
-    public int tex, texUpper, texLower;
+    public int mat, matUpper, matLower;
     public float light = 1.f;
 
     public Wall() {
@@ -30,9 +30,9 @@ public class Wall {
         this.isPortal = w.isPortal;
         this.linkA = w.linkA;
         this.linkB = w.linkB;
-        this.tex = w.tex;
-        this.texUpper = w.texUpper;
-        this.texLower = w.texLower;
+        this.mat = w.mat;
+        this.matUpper = w.matUpper;
+        this.matLower = w.matLower;
         this.light = w.light;
         setNormalAngle();
     }

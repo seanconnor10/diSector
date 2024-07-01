@@ -1,5 +1,5 @@
 package com.disector.maploader;
 
 public enum WallKeyword {
-    POS, PORT, TEX, UPPERTEX, LOWERTEX, LIGHT;
+    POS, PORT, MAT, UPPERMAT, LOWERMAT, LIGHT;
 }

@@ -37,8 +37,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
     }
 
     public void setFovFromDeg(float deg) {
-        camFOV = halfWidth / (float) Math.tan( Math.toRadians(deg/2) );
+        camFOV = (float) ( halfWidth / Math.tan(Math.toRadians(deg/2)) );
     }
+
+    // --------------------------------------------------------------------------------------
 
     private void drawSector(int secInd, int spanStart, int spanEnd) {
         Sector sec = sectors.get(secInd);
@@ -154,9 +156,9 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 lowerWallCutoffV = (destFloor - secFloorZ) / thisSectorCeilingHeight;
         }
 
-        Pixmap[] textures = app.textures.pixmaps[w.tex];
-        Pixmap[] texturesLow = app.textures.pixmaps[w.texLower];
-        Pixmap[] texturesHigh = app.textures.pixmaps[w.texUpper];
+        Pixmap[] textures = materials.get(w.mat).tex;
+        Pixmap[] texturesLow = materials.get(w.matLower).tex;
+        Pixmap[] texturesHigh = materials.get(w.matUpper).tex;
 
         for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
             if (occlusionTop[drawX] -1 <= occlusionBottom[drawX] ) continue;
@@ -221,10 +223,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
             //Floor and Ceiling
             if (occlusionBottom[drawX] < quadBottom)
-                drawFloor(w, currentSector.floorTex, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos, currentSector.lightFloor);
+                drawFloor(w, currentSector.matFloor, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos, currentSector.lightFloor);
 
             if (occlusionTop[drawX] > rasterTop)
-                drawCeiling(w, currentSector.ceilTex, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos, currentSector.lightCeil);
+                drawCeiling(w, currentSector.matCeil, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos, currentSector.lightCeil);
 
             //Update Occlusion Matrix
             updateOcclusion(isPortal, drawX, quadTop, quadBottom, quadHeight, upperWallCutoffV, lowerWallCutoffV);
@@ -247,7 +249,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         if (occlusionBottom[drawX] < rasterBottom) {
             float heightOffset = (camZ - secFloorZ) / scaleFactor;
             int floorEndScreenY = Math.min(rasterBottom, occlusionTop[drawX]);
-            Pixmap tex = app.textures.pixmaps[texInd][0];
+            Pixmap tex = materials.get(texInd).tex[0];
             for (int drawY = occlusionBottom[drawX] + vOffset; drawY<=floorEndScreenY + vOffset; drawY++) {
                 float floorX = heightOffset * (drawX-halfWidth) / (drawY-halfHeight);
                 float floorY = heightOffset * fov / (drawY-halfHeight);
@@ -300,7 +302,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         float heightOffset = (secCeilZ-camZ) / scaleFactor;
         int ceilEndScreenY = occlusionTop[drawX] + vOffset;
 
-        Pixmap tex = app.textures.pixmaps[texInd][0];
+        Pixmap tex = materials.get(texInd).tex[0];
 
         for (int drawY = Math.max(rasterTop, occlusionBottom[drawX]) + vOffset; drawY <= ceilEndScreenY; drawY++) {
             float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);

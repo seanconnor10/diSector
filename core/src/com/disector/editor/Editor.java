@@ -87,12 +87,12 @@ public class Editor {
                 MapLoader mapLoader = new OldTextFormatMapLoader(app.sectors, app.walls, world);
                 mapLoader.load("MAPS/SHED");
             } else {
-                MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
+                MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world, app.textures, app.materials);
                 mapLoader.load("MAPS/test.txt");
             }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world);
+            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world, app.textures, app.materials);
             mapLoader.save("MAPS/test.txt");
         }
 

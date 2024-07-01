@@ -6,13 +6,17 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.math.Matrix4;
+import com.badlogic.gdx.utils.Array;
 import com.disector.Application;
+import com.disector.assets.Material;
 
 public abstract class DimensionalRenderer extends Renderer{
     Pixmap buffer;
+    Array<Material> materials;
 
     public DimensionalRenderer(Application app) {
         super(app);
+        materials = app.materials;
         resizeFrame(app.frameWidth, app.frameHeight);
     }
 

@@ -6,10 +6,15 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
+import java.sql.Time;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class PixmapContainer {
     public Pixmap[][] pixmaps;
+    public TreeMap<String, Pixmap[]> pixmaps2;
 
     public static final int MipMapNumber = 5;
     private static final FileHandle imgDir = Gdx.files.local("assets/img");
@@ -25,8 +30,8 @@ public class PixmapContainer {
             System.out.println(handleIsImage(file) ? "    " + file : "    REJECTED " + file);
         }
 
+        //Make 'pixmaps' 2D-Array
         pixmaps = new Pixmap[imgFiles.size][MipMapNumber];
-
         for (int i=0; i<imgFiles.size; i++) {
             Texture temp = new Texture(imgFiles.get(i), Pixmap.Format.RGBA8888, false);
             if (!temp.getTextureData().isPrepared()) temp.getTextureData().prepare();
@@ -34,6 +39,20 @@ public class PixmapContainer {
             for (int k=1; k<MipMapNumber; k++) {
                 pixmaps[i][k] = halvePixmap(pixmaps[i][k-1]);
             }
+            temp.dispose();
+        }
+
+        //Make 'pixmaps2' String/Img Map
+        pixmaps2 = new TreeMap<>();
+        for (int i=0; i<imgFiles.size; i++) {
+            Texture temp = new Texture(imgFiles.get(i), Pixmap.Format.RGBA8888, false);
+            if (!temp.getTextureData().isPrepared()) temp.getTextureData().prepare();
+            Pixmap[] thisImgMips = new Pixmap[MipMapNumber];
+            thisImgMips[0] = temp.getTextureData().consumePixmap();
+            for (int k=1; k<MipMapNumber; k++) {
+                thisImgMips[k] = halvePixmap(thisImgMips[k-1]);
+            }
+            pixmaps2.put(imgFiles.get(i).nameWithoutExtension().toUpperCase(), thisImgMips);
             temp.dispose();
         }
     }

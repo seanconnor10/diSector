@@ -5,7 +5,7 @@ import com.badlogic.gdx.utils.IntArray;
 public class Sector {
     public IntArray walls = new IntArray();
     public float floorZ, ceilZ;
-    public int floorTex, ceilTex;
+    public int matFloor, matCeil;
     public float lightFloor = 1.f, lightCeil = 1.f;
 
     public Sector() {
@@ -18,8 +18,8 @@ public class Sector {
         }
         this.floorZ = s.floorZ;
         this.ceilZ = s.ceilZ;
-        this.floorTex = s.floorTex;
-        this.ceilTex = s.ceilTex;
+        this.matFloor = s.matFloor;
+        this.matCeil = s.matCeil;
         this.lightCeil = s.lightCeil;
         this.lightFloor = s.lightFloor;
     }
@@ -29,7 +29,7 @@ public class Sector {
             walls.add(wInd);
     }
 
-    public int[] getWallIndices() {
+    public int[] walls() {
         return walls.toArray();
     }
 

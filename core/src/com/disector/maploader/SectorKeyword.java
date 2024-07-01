@@ -1,5 +1,5 @@
 package com.disector.maploader;
 
 public enum SectorKeyword {
-     HAS, HEIGHT, TEX, LIGHT;
+     HAS, HEIGHT, MAT, LIGHT;
 }

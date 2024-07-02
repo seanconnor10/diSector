@@ -11,7 +11,6 @@ import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.gameworld.GameWorld;
-import com.disector.inputrecorder.InputRecorder;
 import com.disector.renderer.DimensionalRenderer;
 import com.disector.renderer.SoftwareRenderer;
 
@@ -23,6 +22,7 @@ public class RenderViewPanel extends Panel{
         renderer = new SoftwareRenderer(app);
         renderer.placeCamera(new Vector4(0, 0, 20, 0));
         renderer.resizeFrame(app.frameWidth, app.frameHeight);
+        renderer.drawParallax = false;
         this.editor = editor;
     }
 

@@ -31,4 +31,8 @@ public abstract class Panel {
     void drawBackground(ShapeRenderer shape) {
         shape.rect(rect.x, Gdx.graphics.getHeight()-rect.height-rect.y, rect.width, rect.height);
     }
+
+    void drawRect(ShapeRenderer shape, Rectangle r) {
+        shape.rect(r.x, Gdx.graphics.getHeight()-r.height-r.y, r.width, r.height);
+    }
 }

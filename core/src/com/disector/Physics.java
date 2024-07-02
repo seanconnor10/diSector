@@ -2,11 +2,13 @@ package com.disector;
 
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.disector.gameworld.components.Movable;
+import com.disector.gameworld.components.Positionable;
 
 public class Physics {
 
     public static boolean containsPoint(Sector sec, float x, float y, Array<Wall> walls) {
-        /**
+        /*
          * For each wall in Sector, casts a ray, if an odd number of walls were contacted,
          * the point is within the sector
          */
@@ -78,6 +80,43 @@ public class Physics {
             return (var > bound1 && var < bound2);
         return (var > bound2 && var < bound1);
         //return (var > bound1) ^ (var > bound2); //May or may not include bounds
+    }
+
+    public static Vector2 bounceVector(Vector2 velocity, Wall wall) {
+        float wallXNormal = (float) Math.cos(wall.normalAngle);
+        float wallYNormal = (float) Math.sin(wall.normalAngle);
+        float proj_norm = velocity.x * wallXNormal + velocity.y * wallYNormal;
+        float perpendicularVelX = proj_norm * wallXNormal;
+        float perpendicularVelY = proj_norm * wallYNormal;
+        float parallelVelX = velocity.x - perpendicularVelX;
+        float parallelVelY = velocity.y - perpendicularVelY;
+        final float elasticity = 0.2f;
+        final float restitution = 0.95f;
+
+        return new Vector2(
+            parallelVelX * restitution - perpendicularVelX * elasticity,
+            parallelVelY * restitution - perpendicularVelY * elasticity
+        );
+    }
+
+    public static boolean boundingBoxCheck(Wall w, Vector2 objPos, float objRadius) {
+        float leftBound = Math.min(w.x1, w.x2) - objRadius;
+        float rightBound = Math.max(w.x1, w.x2) + objRadius;
+        float topBound = Math.min(w.y1, w.y2) - objRadius;
+        float bottomBound = Math.max(w.y1, w.y2) + objRadius;
+        if (objPos.x > rightBound) return false;
+        if (objPos.x < leftBound) return false;
+        if (objPos.y > bottomBound) return false;
+        return !(objPos.y < topBound);
+    }
+
+    public static void resolveCollision(WallInfoPack collisionInfo, Movable obj) {
+        float resolutionDistance = obj.getRadius() - collisionInfo.distToNearest;
+        if (collisionInfo.w.isPortal && collisionInfo.w.linkA == obj.getCurrentSector())
+            resolutionDistance *= -1;
+        Vector2 objPos = obj.snagPosition();
+        objPos.x += (float) Math.cos(collisionInfo.w.normalAngle) * resolutionDistance;
+        objPos.y += (float) Math.sin(collisionInfo.w.normalAngle) * resolutionDistance;
     }
 
 }

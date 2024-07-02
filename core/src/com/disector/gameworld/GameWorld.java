@@ -136,8 +136,8 @@ public class GameWorld {
             //Get reference to closest collision
             WallInfoPack closestCollision = wallsCollided.get(0);
 
-            resolveCollision(closestCollision, obj);
-            velocity.set(bounceVector(velocity, closestCollision.w));
+            Physics.resolveCollision(closestCollision, obj);
+            velocity.set(Physics.bounceVector(velocity, closestCollision.w));
 
             collisionsProcessed++;
 
@@ -176,7 +176,7 @@ public class GameWorld {
         //and if still colliding, add to list of collisions
         for (int wInd : sector.walls.toArray()) {
             Wall w = walls.get(wInd);
-            if (boundingBoxCheck(w, obj.copyPosition(), obj.getRadius())) {
+            if (Physics.boundingBoxCheck(w, obj.copyPosition(), obj.getRadius())) {
                 WallInfoPack info = new WallInfoPack(w, wInd, objPos);
                 if (info.distToNearest < obj.getRadius()) {
                     collisions.add(info);
@@ -185,42 +185,5 @@ public class GameWorld {
         }
         return collisions;
     }
-
-    private void resolveCollision (WallInfoPack collisionInfo, Movable obj) {
-        float resolutionDistance = obj.getRadius() - collisionInfo.distToNearest;
-        if (collisionInfo.w.isPortal && collisionInfo.w.linkA == obj.getCurrentSector())
-            resolutionDistance *= -1;
-        Vector2 objPos = obj.snagPosition();
-        objPos.x += (float) Math.cos(collisionInfo.w.normalAngle) * resolutionDistance;
-        objPos.y += (float) Math.sin(collisionInfo.w.normalAngle) * resolutionDistance;
-    }
-
-    private Vector2 bounceVector(Vector2 velocity, Wall wall) {
-        float wallXNormal = (float) Math.cos(wall.normalAngle);
-        float wallYNormal = (float) Math.sin(wall.normalAngle);
-        float proj_norm = velocity.x * wallXNormal + velocity.y * wallYNormal;
-        float perpendicularVelX = proj_norm * wallXNormal;
-        float perpendicularVelY = proj_norm * wallYNormal;
-        float parallelVelX = velocity.x - perpendicularVelX;
-        float parallelVelY = velocity.y - perpendicularVelY;
-        final float elasticity = 0.2f;
-        final float restitution = 0.95f;
-        return new Vector2(
-            parallelVelX * restitution - perpendicularVelX * elasticity,
-            parallelVelY * restitution - perpendicularVelY * elasticity
-        );
-    }
-
-    private boolean boundingBoxCheck(Wall w, Vector2 objPos, float objRadius) {
-        float leftBound = Math.min(w.x1, w.x2) - objRadius;
-        float rightBound = Math.max(w.x1, w.x2) + objRadius;
-        float topBound = Math.min(w.y1, w.y2) - objRadius;
-        float bottomBound = Math.max(w.y1, w.y2) + objRadius;
-        if (objPos.x > rightBound) return false;
-        if (objPos.x < leftBound) return false;
-        if (objPos.y > bottomBound) return false;
-        return !(objPos.y < topBound);
-    }
-
 
 }

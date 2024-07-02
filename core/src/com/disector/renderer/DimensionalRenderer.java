@@ -14,6 +14,8 @@ public abstract class DimensionalRenderer extends Renderer{
     Pixmap buffer;
     Array<Material> materials;
 
+    public boolean drawParallax = true;
+
     public DimensionalRenderer(Application app) {
         super(app);
         materials = app.materials;

@@ -40,6 +40,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
         camFOV = (float) ( halfWidth / Math.tan(Math.toRadians(deg/2)) );
     }
 
+    public float getDegFromFov() {
+        return 2.f * (float) Math.toDegrees( Math.atan(halfWidth / camFOV) );
+    }
+
     // --------------------------------------------------------------------------------------
 
     private void drawSector(int secInd, int spanStart, int spanEnd) {
@@ -185,11 +189,11 @@ public class SoftwareRenderer extends DimensionalRenderer {
             Pixmap tex, texLower, texUpper;
             {
                 final int mipMapCount = app.textures.pixmaps[0].length;
-                final float mipMapZealousnessFactor = 1.5f;
+                final float mipMapResistanceFactor = 1f;
                 float hProgressPlusOne = (drawX+1-p1_plotX) / (p2_plotX-p1_plotX);
                 float uPlus1 = ((1 - hProgressPlusOne) * (leftClipU / x1) + hProgressPlusOne * (rightClipU / x2)) / ((1 - hProgressPlusOne) * (1 / x1) + hProgressPlusOne * (1 / x2));
-                float texPixelWidth = textures[0].getWidth() * (uPlus1-u);
-                int mipMapIndex = Math.max(0, Math.min( (int)(texPixelWidth/mipMapZealousnessFactor), mipMapCount-1));
+                float texPixelWidth = Math.abs( textures[0].getWidth() * (uPlus1-u) );
+                int mipMapIndex = Math.max(0, Math.min( (int)( (int)(Math.sqrt(texPixelWidth))/mipMapResistanceFactor ), mipMapCount-1));
                 tex = textures[mipMapIndex];
                 texLower = texturesLow[mipMapIndex];
                 texUpper = texturesHigh[mipMapIndex];
@@ -295,53 +299,74 @@ public class SoftwareRenderer extends DimensionalRenderer {
     }
 
     private void drawCeiling(Wall w, int texInd, int drawX, float fov, int rasterTop, float secCeilZ, float playerSin, float playerCos, float light) {
-        final float scaleFactor = 32.f;
-        float floorXOffset = camX/scaleFactor, floorYOffset = camY/scaleFactor;
-        int vOffset = (int) camVLook;
+        Pixmap tex = materials.get(texInd).tex[0];
+        boolean isSky = drawParallax && materials.get(texInd).isSky;
 
-        float heightOffset = (secCeilZ-camZ) / scaleFactor;
+        final float scaleFactor = 32.f;
+
+        float floorXOffset = 0f, floorYOffset = 0f, heightOffset = 0f;
+        float portionImgToDraw = 0f, centerScreenSkyU = 0f;
+
+        if (!isSky) {
+            floorXOffset = camX / scaleFactor;
+            floorYOffset = camY / scaleFactor;
+            heightOffset = (secCeilZ-camZ) / scaleFactor;
+        } else {
+            portionImgToDraw = getDegFromFov() / 360f;
+            float angle = (float) Math.toDegrees(camR);
+            while(angle < 0) angle += 360;
+            angle = angle%360;
+            centerScreenSkyU = angle / 360f;
+        }
+
+        int vOffset = (int) camVLook;
         int ceilEndScreenY = occlusionTop[drawX] + vOffset;
 
-        Pixmap tex = materials.get(texInd).tex[0];
-
         for (int drawY = Math.max(rasterTop, occlusionBottom[drawX]) + vOffset; drawY <= ceilEndScreenY; drawY++) {
-            float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);
-            float ceilY = heightOffset * fov / (drawY - halfHeight);
 
-            float rotX = ceilX * playerSin - ceilY * playerCos - floorXOffset;
-            float rotY = ceilX * playerCos + ceilY * playerSin - floorYOffset;
+            if (!isSky) {
 
-            if (rotX <= 0) rotX = -rotX;
-            if (rotY < 0) rotY = -rotY;
+                float ceilX = heightOffset * (drawX - halfWidth) / (drawY - halfHeight);
+                float ceilY = heightOffset * fov / (drawY - halfHeight);
 
-            rotX /= 4f;
-            rotY /= 4f;
+                float rotX = ceilX * playerSin - ceilY * playerCos - floorXOffset;
+                float rotY = ceilX * playerCos + ceilY * playerSin - floorYOffset;
 
-            rotX = rotX % 1;
-            rotY = rotY % 1;
+                if (rotX <= 0) rotX = -rotX;
+                if (rotY < 0) rotY = -rotY;
 
-            while (rotX < 0.0) rotX += 1.0f;
-            while (rotX > 1.0f) rotX -= 1.0f;
-            while (rotY < 0.0) rotY += 1.0f;
-            while (rotY > 1.0f) rotY -= 1.0f;
+                rotX /= 4f;
+                rotY /= 4f;
 
-            /*boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
-            Color drawColor = new Color( checkerBoard ? 0xFF_A0_20_50 : 0xFF_20_50_A0 );
-            float ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
-            ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));
-            drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
-            buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
+                rotX = rotX % 1;
+                rotY = rotY % 1;
 
-            float horizonScreenDistVert = - halfHeight + drawY;
-            float angleOfScreenRow = (float) Math.atan(horizonScreenDistVert / fov);
-            float dist = (secCeilZ - camZ) / (float) Math.sin(angleOfScreenRow);
+                while (rotX < 0.0) rotX += 1.0f;
+                while (rotX > 1.0f) rotX -= 1.0f;
+                while (rotY < 0.0) rotY += 1.0f;
+                while (rotY > 1.0f) rotY -= 1.0f;
 
-            Color drawColor = grabColor(tex, rotX, rotY);
+                /*boolean checkerBoard = ( (int)(rotX*8%2) == (int)(rotY*8%2) );
+                Color drawColor = new Color( checkerBoard ? 0xFF_A0_20_50 : 0xFF_20_50_A0 );
+                float ceilFogValue = 1.0f - ( ((drawY-halfHeight) / halfHeight) );
+                ceilFogValue = (float) Math.min(1.f, Math.max(0.f,ceilFogValue));
+                drawColor.lerp(0.1f,0f,0.2f,1f, ceilFogValue);
+                buffer.drawPixel(drawX, drawY - vOffset, drawColor.toIntBits() );*/
 
-            drawColor.lerp(0.1f,0f,0.2f,1f, getFogFactor(dist) );
-            drawColor.lerp(darkColor, 1.0f - light);
+                float horizonScreenDistVert = -halfHeight + drawY;
+                float angleOfScreenRow = (float) Math.atan(horizonScreenDistVert / fov);
+                float dist = (secCeilZ - camZ) / (float) Math.sin(angleOfScreenRow);
 
-            buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
+                Color drawColor = grabColor(tex, rotX, rotY);
+
+                drawColor.lerp(0.1f, 0f, 0.2f, 1f, getFogFactor(dist));
+                drawColor.lerp(darkColor, 1.0f - light);
+                buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
+            } else { //If isSky
+                Color drawColor = grabColor(tex, centerScreenSkyU - (drawX-halfWidth)*portionImgToDraw/frameWidth, drawY/(float)tex.getHeight());
+                buffer.drawPixel(drawX, drawY - vOffset, Color.rgba8888(drawColor) );
+            }
+
         }
 
     }

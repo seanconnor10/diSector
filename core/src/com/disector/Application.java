@@ -71,16 +71,14 @@ public class Application extends ApplicationAdapter {
 
         InputRecorder.updateKeys();
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
-            swapFocus(AppFocusTarget.GAME);
-        else if (Gdx.input.isKeyJustPressed(Input.Keys.F5))
-            swapFocus(AppFocusTarget.EDITOR);
+        functionKeyInputs();
 
+        //Run Screen
         switch(focus) {
             case MENU: menu(); break;
             case GAME: game(); break;
             case EDITOR: editor(); break;
-            default: System.out.println("How did you get here??"); break;
+            default: break;
         }
 
     }
@@ -197,6 +195,8 @@ public class Application extends ApplicationAdapter {
         editor.draw();
     }
 
+    // --------------------------------------------------------
+
     private void updateDeltaTime() {
         deltaTime = Gdx.graphics.getDeltaTime();
         if (printFPS) {
@@ -205,6 +205,27 @@ public class Application extends ApplicationAdapter {
         }
         if (deltaTime > 0.04f) deltaTime = 0.04f; //If below 25 frames/second only advance time as if it were running at 25fps
     }
+
+    private void functionKeyInputs() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
+            swapFocus(AppFocusTarget.GAME);
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
+            swapFocus(AppFocusTarget.EDITOR);
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F4) ) {
+			if (Gdx.graphics.isFullscreen())
+				Gdx.graphics.setWindowedMode( frameWidth*2, frameHeight*2 );
+			else
+				Gdx.graphics.setFullscreenMode( Gdx.graphics.getDisplayMode() );
+		}
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F10))
+            Gdx.graphics.setUndecorated( true );
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F11))
+            Gdx.graphics.setUndecorated( false );
+    }
+
+    // --------------------------------------------------------
 
     private void createTestMap() {
         walls.clear(); sectors.clear();

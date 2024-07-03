@@ -21,7 +21,7 @@ public class MenuBarPanel extends Panel{
         saveButton = new Button();
         saveButton.setRect(5,5, 90, 30);
         loadButton = new Button();
-        loadButton.setRect(120, 0, 100, 30);
+        loadButton.setRect(125, 5, 90, 30);
     }
 
     @Override
@@ -36,8 +36,9 @@ public class MenuBarPanel extends Panel{
 
     @Override
     void draw(SpriteBatch batch, ShapeRenderer shape) {
-        shape.setColor(Color.GOLDENROD);
         shape.begin(ShapeRenderer.ShapeType.Filled);
+
+        shape.setColor(Color.GOLDENROD);
         drawBackground(shape);
 
         shape.setColor(Color.MAROON);
@@ -48,7 +49,12 @@ public class MenuBarPanel extends Panel{
 
         shape.setColor(Color.TEAL);
         drawRect(shape, saveButton.rect);
+        drawRect(shape, loadButton.rect);
 
         shape.end();
+
+        //batch.begin();
+        //Editor.font.draw(batch, saveButton.text, 10, 10);
+        //batch.end();
     }
 }

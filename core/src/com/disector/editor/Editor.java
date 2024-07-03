@@ -3,6 +3,7 @@ package com.disector.editor;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -25,6 +26,8 @@ public class Editor {
     private MapViewPanel mapPanel;
     private MenuBarPanel menuPanel;
     private ArrayList<Panel> panelList = new ArrayList<>();
+
+    //static BitmapFont font = new BitmapFont( Gdx.files.internal("assets/font.tff") );
 
     private float animProgress = 0f;
     float animCycle = 0f;

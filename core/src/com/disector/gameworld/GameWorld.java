@@ -1,5 +1,7 @@
 package com.disector.gameworld;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
@@ -40,9 +42,6 @@ public class GameWorld {
         moveObj(player1);
     }
 
-    public void drawMap() {
-    }
-
     //*****************************************************
 
     public Vector4 getPlayerPosition() {
@@ -68,7 +67,6 @@ public class GameWorld {
     public void setPos(Positionable obj, float x, float y) {
         obj.snagPosition().set(x,y);
     }
-
 
     //*****************************************************
 

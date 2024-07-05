@@ -19,15 +19,16 @@ import com.disector.maploader.TextFileMapLoader;
 import java.util.ArrayList;
 
 public class Editor {
-    private Application app;
+    Application app;
     private GameWorld world;
 
     private RenderViewPanel viewPanel;
     private MapViewPanel mapPanel;
     private MenuBarPanel menuPanel;
     private ArrayList<Panel> panelList = new ArrayList<>();
+    private Panel panelInFocus;
 
-    //static BitmapFont font = new BitmapFont( Gdx.files.internal("assets/font.tff") );
+    static BitmapFont font = new BitmapFont( Gdx.files.local("assets/font/fira.fnt") );
 
     private float animProgress = 0f;
     float animCycle = 0f;
@@ -38,12 +39,17 @@ public class Editor {
     public Editor(Application app, GameWorld world) {
         this.app = app;
         this.world = world;
+
         viewPanel = new RenderViewPanel(app, this);
         mapPanel = new MapViewPanel(app, this);
-        menuPanel = new MenuBarPanel();
+        menuPanel = new MenuBarPanel(this);
         panelList.add(viewPanel);
         panelList.add(menuPanel);
         panelList.add(mapPanel);
+
+        panelInFocus = menuPanel;
+
+        font.setColor(new Color(0xA0_A0_A0_FF) );
     }
 
     public void step(float dt) {
@@ -53,7 +59,6 @@ public class Editor {
         temporaryControls(dt);
         Panel.mouseX = Gdx.input.getX();
         Panel.mouseY = Gdx.input.getY();
-        Panel panelInFocus = mapPanel;
         panelInFocus.step(world, app.walls, app.sectors);
     }
 
@@ -63,7 +68,7 @@ public class Editor {
 
     public void resize(int w, int h) {
         int menuBarHeight = (int) menuPanel.rect.height;
-        for (Panel panel : panelList) {
+        /*for (Panel panel : panelList) {
             if (panel.getClass().equals(RenderViewPanel.class)) {
                 panel.resize(0, menuBarHeight, w/3, w/3*9/16);
             } else if (panel.getClass().equals(MenuBarPanel.class)) {
@@ -71,7 +76,10 @@ public class Editor {
             } else if (panel.getClass().equals(MapViewPanel.class)) {
                 panel.resize(w/3, menuBarHeight, w-(w/3), h-menuBarHeight);
             }
-        }
+        }*/
+        viewPanel.resize(0, menuBarHeight, w/3, w/3*9/16);
+        menuPanel.resize(0, 0, w, menuBarHeight);
+        mapPanel.resize(w/3, menuBarHeight, w-(w/3), h-menuBarHeight);
     }
 
     public void draw() {

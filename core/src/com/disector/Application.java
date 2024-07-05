@@ -16,9 +16,12 @@ import com.disector.assets.PixmapContainer;
 import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
+import com.disector.maploader.OldTextFormatMapLoader;
 import com.disector.renderer.DimensionalRenderer;
 import com.disector.renderer.GameMapRenderer;
 import com.disector.renderer.SoftwareRenderer;
+import com.disector.maploader.MapLoader;
+import com.disector.maploader.TextFileMapLoader;
 
 public class Application extends ApplicationAdapter {
     private static final boolean printFPS = true;
@@ -111,6 +114,30 @@ public class Application extends ApplicationAdapter {
 
     // --------------------------------------------------------
 
+    public boolean loadMap(String filePath) {
+        MapLoader mapLoader = new TextFileMapLoader(sectors, walls, gameWorld, textures, materials);
+        try {
+            mapLoader.load(filePath);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return  false;
+        }
+    }
+
+    public boolean loadMapOldFormat(String filePath) {
+        MapLoader mapLoader = new OldTextFormatMapLoader(sectors, walls, gameWorld);
+        try {
+            mapLoader.load(filePath);
+            return true;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return  false;
+        }
+    }
+
+    // --------------------------------------------------------
+
     private void swapFocus(AppFocusTarget target) {
 
         switch(focus) {
@@ -166,8 +193,9 @@ public class Application extends ApplicationAdapter {
         }
 
         //Randomize Textures
-        if (Gdx.input.isKeyJustPressed(Input.Keys.T))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
             randomizeTextures();
+        }
 
         //Fov Angle Experiments
         if (false) {

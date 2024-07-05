@@ -221,7 +221,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
                     drawColor = getCheckerboardColor(u,v);
                 }
 
-                buffer.drawPixel(drawX, drawY, Color.rgba8888(drawColor));
+                buffer.drawPixel(drawX, drawY, Color.rgba8888(drawColor) );
 
             } //End Per Pixel Loop
 

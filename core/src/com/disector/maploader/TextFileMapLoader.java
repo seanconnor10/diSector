@@ -354,7 +354,7 @@ public class TextFileMapLoader implements MapLoader {
         String matOrigTexName = "ERROR";
         for (Map.Entry<String, Pixmap[]> entry : pixmapContainer.pixmaps2.entrySet()) {
             if (m.tex == entry.getValue()) {
-                matOrigTexName = entry.getKey();
+                matOrigTexName = entry.getKey().toLowerCase();
                 break;
             }
         }

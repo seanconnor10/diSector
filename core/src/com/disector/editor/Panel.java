@@ -35,4 +35,8 @@ public abstract class Panel {
     void drawRect(ShapeRenderer shape, Rectangle r) {
         shape.rect(r.x, Gdx.graphics.getHeight()-r.height-r.y, r.width, r.height);
     }
+
+    boolean localMouseInButton(Button b) {
+        return b.rect.contains(localMouseX, localMouseY);
+    }
 }

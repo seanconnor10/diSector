@@ -14,7 +14,11 @@ import com.disector.gameworld.GameWorld;
 public class GameMapRenderer extends MapRenderer {
     private final GameWorld world;
 
-    private final Color backgroundColor  = new Color(0.f, 0.f, 0.f, 0.8f);
+    private final Color backgroundColor  = new Color(0.f, 0.f, 0.f, 0.65f);
+    private final Color PORTAL_COLOR = new Color(0xD0FFD0FF);
+    private final Color WALL_COLOR = new Color(0x7050D0FF);
+
+    public boolean mapRotates = true;
 
     public GameMapRenderer(Application app, GameWorld world) {
         super(app);
@@ -41,7 +45,26 @@ public class GameMapRenderer extends MapRenderer {
 
     private void drawWalls() {
         for (Wall w : walls) {
-            app.shape.setColor( w.isPortal ? new Color(0xFFA05060) : Color.WHITE );
+            //Avoid drawing portals without a difference in floor height
+            float floorDifference = 0f;
+
+            if (w.isPortal) {
+                floorDifference = Math.abs( sectors.get(w.linkA).floorZ - sectors.get(w.linkB).floorZ );
+                if (floorDifference == 0f)
+                    continue;
+            }
+
+
+            app.shape.setColor( w.isPortal ? PORTAL_COLOR : WALL_COLOR );
+
+            if (w.isPortal) {
+                float portalShadeLERPFactor = floorDifference / 100;
+                portalShadeLERPFactor = Math.max(0.3f, Math.min(1.0f, portalShadeLERPFactor));
+                app.shape.getColor().a *= portalShadeLERPFactor;
+                //app.shape.getColor().r *= 1.f + portalShadeLERPFactor;
+                app.shape.getColor().g *= 1.0f - portalShadeLERPFactor;
+            }
+
             line(w.x1, w.y1, w.x2, w.y2);
         }
     }
@@ -60,11 +83,30 @@ public class GameMapRenderer extends MapRenderer {
     }
 
     void line(float x, float y, float x2, float y2) {
+        if (mapRotates)
+            lineROTATED(x, y, x2, y2);
+        else
+            lineSTATIC(x, y, x2, y2);
+    }
+
+    private void lineSTATIC(float x, float y, float x2, float y2) {
         app.shape.line(
                 halfWidth+camFOV*(x-camX),
                 halfHeight+camFOV*(y-camY),
                 halfWidth+camFOV*(x2-camX),
                 halfHeight+camFOV*(y2-camY)
+        );
+    }
+
+    private void lineROTATED(float x, float y, float x2, float y2) {
+        final double pi4 = Math.PI/2.0;
+        float cos = (float) Math.cos(pi4-camR);
+        float sin = (float) Math.sin(pi4-camR);
+        app.shape.line(
+                halfWidth+camFOV*( cos*(x-camX) - sin*(y-camY) ),
+                halfHeight+camFOV*( cos*(y-camY) + sin*(x-camX) ),
+                halfWidth+camFOV*( cos*(x2-camX) - sin*(y2-camY) ),
+                halfHeight+camFOV*( cos*(y2-camY) + sin*(x2-camX) )
         );
     }
 

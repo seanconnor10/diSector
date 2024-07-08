@@ -101,7 +101,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
             float slope = (y2-y1) / (x2-x1);
             float yAxisIntersect = y1 - slope*x1;
             leftClipU = (float) Math.sqrt( x1*x1 + (yAxisIntersect-y1)*(yAxisIntersect-y1) ) / wallLength;
-            x1 = 0.f;
+            x1 = 0.001f; //Avoid dividing by zero
             y1 = yAxisIntersect;
         }
 
@@ -109,12 +109,12 @@ public class SoftwareRenderer extends DimensionalRenderer {
             float slope = (y2-y1) / (x2-x1);
             float yAxisIntersect = y1 - slope*x1;
             rightClipU = 1.f - (float) ( Math.sqrt( x2*x2 + (yAxisIntersect-y2)*(yAxisIntersect-y2) ) / wallLength );
-            x2 = 0.f;
+            x2 = 0.001f; //Avoid dividing by zero
             y2 = yAxisIntersect;
         }
 
-        if (x1 < 0.01f) x1 = 0.01f; //Avoid future division by very small values
-        if (x2 < 0.01f) x2 = 0.01f;
+        //if (x1 < 0.001f) x1 = 0.001f; //Avoid future division by very small values
+        //if (x2 < 0.001f) x2 = 0.001f; //Well this is already set above ^^ And if
 
         float fov = camFOV;
 

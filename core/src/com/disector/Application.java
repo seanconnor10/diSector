@@ -13,7 +13,7 @@ import com.badlogic.gdx.utils.Array;
 
 import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;
-import com.disector.editor.Editor;
+import com.disector.editor2.Editor;
 import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
 import com.disector.maploader.OldTextFormatMapLoader;
@@ -26,7 +26,7 @@ import com.disector.maploader.TextFileMapLoader;
 public class Application extends ApplicationAdapter {
     private static final boolean printFPS = true;
 
-    private GameWorld gameWorld;
+    public GameWorld gameWorld;
     private DimensionalRenderer renderer;
     private GameMapRenderer gameMapRenderer;
     private Editor editor;
@@ -115,7 +115,7 @@ public class Application extends ApplicationAdapter {
     // --------------------------------------------------------
 
     public boolean loadMap(String filePath) {
-        MapLoader mapLoader = new TextFileMapLoader(sectors, walls, gameWorld, textures, materials);
+        MapLoader mapLoader = new TextFileMapLoader(this);
         try {
             mapLoader.load(filePath);
             return true;
@@ -126,7 +126,7 @@ public class Application extends ApplicationAdapter {
     }
 
     public boolean loadMapOldFormat(String filePath) {
-        MapLoader mapLoader = new OldTextFormatMapLoader(sectors, walls, gameWorld);
+        MapLoader mapLoader = new OldTextFormatMapLoader(this);
         try {
             mapLoader.load(filePath);
             return true;
@@ -166,7 +166,7 @@ public class Application extends ApplicationAdapter {
                     System.out.println("Must instance GameWorld before Editor.");
                     break;
                 }
-                if (editor==null) editor = new Editor(this, gameWorld);
+                if (editor==null) editor = new Editor(this); //new Editor(this, gameWorld);
                 break;
             default:
         }

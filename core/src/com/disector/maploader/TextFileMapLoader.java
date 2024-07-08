@@ -5,6 +5,7 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.utils.Array;
 
+import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.assets.Material;
@@ -19,18 +20,18 @@ import java.util.PrimitiveIterator;
 import java.util.Scanner;
 
 public class TextFileMapLoader implements MapLoader {
-    private Array<Sector> sectors;
-    private Array<Wall> walls;
-    private GameWorld world;
-    private PixmapContainer pixmapContainer;
-    private Array<Material> materials;
+    private final Array<Sector> sectors;
+    private final Array<Wall> walls;
+    private final GameWorld world;
+    private final PixmapContainer pixmapContainer;
+    private final Array<Material> materials;
 
-    public TextFileMapLoader(Array<Sector> sectors, Array<Wall> walls, GameWorld world, PixmapContainer pixmapContainer, Array<Material> materials) {
-        this.sectors = sectors;
-        this.walls = walls;
-        this.world = world;
-        this.pixmapContainer = pixmapContainer;
-        this.materials = materials;
+    public TextFileMapLoader(Application app) {
+        this.sectors = app.sectors;
+        this.walls = app.walls;
+        this.world = app.gameWorld;
+        this.pixmapContainer = app.textures;
+        this.materials = app.materials;
     }
 
     @Override

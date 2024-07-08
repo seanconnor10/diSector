@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.utils.Array;
 
+import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.gameworld.GameWorld;
@@ -16,10 +17,10 @@ public class OldTextFormatMapLoader implements MapLoader{
     private Array<Wall> walls;
     private GameWorld world;
 
-    public OldTextFormatMapLoader(Array<Sector> sectors, Array<Wall> walls, GameWorld world) {
-        this.sectors = sectors;
-        this.walls = walls;
-        this.world = world;
+    public OldTextFormatMapLoader(Application app) {
+        this.sectors = app.sectors;
+        this.walls = app.walls;
+        this.world = app.gameWorld;
     }
 
     @Override

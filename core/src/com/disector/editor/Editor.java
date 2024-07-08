@@ -95,15 +95,15 @@ public class Editor {
         //Temporary Load and Save
         if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                MapLoader mapLoader = new OldTextFormatMapLoader(app.sectors, app.walls, world);
+                MapLoader mapLoader = new OldTextFormatMapLoader(app);
                 mapLoader.load("MAPS/SHED");
             } else {
-                MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world, app.textures, app.materials);
+                MapLoader mapLoader = new TextFileMapLoader(app);
                 mapLoader.load("MAPS/test.txt");
             }
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-            MapLoader mapLoader = new TextFileMapLoader(app.sectors, app.walls, world, app.textures, app.materials);
+            MapLoader mapLoader = new TextFileMapLoader(app);
             mapLoader.save("MAPS/test.txt");
         }
 

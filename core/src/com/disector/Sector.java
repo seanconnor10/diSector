@@ -4,9 +4,11 @@ import com.badlogic.gdx.utils.IntArray;
 
 public class Sector {
     public IntArray walls = new IntArray();
-    public float floorZ, ceilZ;
+    public float floorZ = 0f, ceilZ = 100f;
     public int matFloor, matCeil;
     public float lightFloor = 1.f, lightCeil = 1.f;
+
+    public static final Sector BLANK_SECTOR = new Sector();
 
     public Sector() {
     }
@@ -16,12 +18,12 @@ public class Sector {
         for (int wInd : s.walls.toArray()) {
             this.walls.add(wInd);
         }
-        this.floorZ = s.floorZ;
-        this.ceilZ = s.ceilZ;
-        this.matFloor = s.matFloor;
-        this.matCeil = s.matCeil;
-        this.lightCeil = s.lightCeil;
-        this.lightFloor = s.lightFloor;
+        this.floorZ     =   s.floorZ;
+        this.ceilZ      =   s.ceilZ;
+        this.matFloor   =   s.matFloor;
+        this.matCeil    =   s.matCeil;
+        this.lightCeil  =   s.lightCeil;
+        this.lightFloor =   s.lightFloor;
     }
 
     public void addWallSafely(int wInd) {

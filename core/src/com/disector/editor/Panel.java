@@ -1,42 +1,30 @@
 package com.disector.editor;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import com.disector.gameworld.GameWorld;
-import com.disector.Wall;
-import com.disector.Sector;
+class Panel {
+    Rectangle rect;
 
-public abstract class Panel {
-    Editor editor;
-    static int mouseX, mouseY;
-    int localMouseX, localMouseY;
+    final Array<Button> buttons = new Array<>();
 
-    Rectangle rect = new Rectangle();
-
-    abstract void resize(int x, int y, int w, int h);
-
-    abstract void step(GameWorld game, Array<Wall> walls, Array<Sector> sectors);
-
-    abstract void draw(SpriteBatch batch, ShapeRenderer shape);
-
-    void setLocalMouse() {
-        localMouseX = mouseX-(int)rect.x;
-        localMouseY = mouseY-(int)rect.y;
+    public Panel() {
+        this.rect = new Rectangle();
     }
 
-    void drawBackground(ShapeRenderer shape) {
-        shape.rect(rect.x, Gdx.graphics.getHeight()-rect.height-rect.y, rect.width, rect.height);
+    void resize(Rectangle rect) {
+        resize(rect.x, rect.y, rect.width, rect.height);
     }
 
-    void drawRect(ShapeRenderer shape, Rectangle r) {
-        shape.rect(r.x, Gdx.graphics.getHeight()-r.height-r.y, r.width, r.height);
+    void resize(float x, float y, float width, float height) {
+        rect.set(x, y, width, height);
+        rearrangeButtons();
     }
 
-    boolean localMouseInButton(Button b) {
-        return b.rect.contains(localMouseX, localMouseY);
+    void rearrangeButtons() {
+        for (int i=0; i<buttons.size; i++) {
+            buttons.get(i).rect.set(2 + i*140, 2, 100, 28);
+        }
     }
+
 }

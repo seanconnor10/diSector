@@ -13,6 +13,7 @@ import com.disector.gameworld.components.Positionable;
 import com.disector.inputrecorder.InputRecorder;
 
 import static com.disector.Physics.containsPoint;
+import static com.disector.Physics.findCurrentSectorBranching;
 
 public class GameWorld {
     private final Application app;
@@ -68,16 +69,48 @@ public class GameWorld {
         obj.snagPosition().set(x,y);
     }
 
+    public int refreshPlayerSectorIndex() {
+        int sec = player1.currentSectorIndex;
+        float x = getPlayerPosition().x;
+        float y = getPlayerPosition().y;
+
+        try {
+            if (Physics.containsPoint(sectors.get(sec), x, y))
+                return sec;
+        } catch (IndexOutOfBoundsException indexException) {
+            System.out.println("Player1 currentSectorIndex nonexistent");
+        }
+
+        sec = Physics.findCurrentSectorBranching(getPlayerSectorIndex(), x, y);
+
+        /*sec = 0;
+
+        for (int i=0; i<sectors.size; i++) {
+            if (Physics.containsPoint(sectors.get(i), x, y)) {
+                sec = i;
+                break;
+            }
+        }*/
+
+        player1.currentSectorIndex = sec;
+        return sec;
+    }
+
     //*****************************************************
 
     private void moveObj(Movable obj) {
         final int MAX_COLLISIONS = 100;
 
-        /**
+        /*
          * Takes any game object with a position and velocity and moves it,
          * colliding it against walls and updating its currentSectorIndex
          */
-        Sector currentSector = sectors.get( obj.getCurrentSector() );
+        Sector currentSector = Sector.BLANK_SECTOR;
+        try {
+            currentSector = sectors.get( obj.getCurrentSector() );
+        } catch (IndexOutOfBoundsException indexException) {
+            System.out.println("Movable-Obj's currentSectorIndex Nonexistent");
+        }
 
         Vector2 objPos = obj.snagPosition(); //Snag grabs a reference to the Vector so we can change it
         Vector2 velocity = obj.snagVelocity();
@@ -119,10 +152,16 @@ public class GameWorld {
 
             //Find new currentSector from list of potentials made above
             for (int sInd : potentialNewSectors.toArray()) {
-                if (containsPoint( sectors.get(sInd), objPos.x, objPos.y, walls)) {
+                if (containsPoint( sectors.get(sInd), objPos.x, objPos.y)) {
                     obj.setCurrentSector(sInd);
                     break;
                 }
+            }
+
+            if (!containsPoint( obj.getCurrentSector(), objPos.x, objPos.y)) {
+                obj.setCurrentSector(
+                        findCurrentSectorBranching(obj.getCurrentSector(), objPos.x, objPos.y)
+                );
             }
 
             if (wallsCollided.isEmpty()) break;

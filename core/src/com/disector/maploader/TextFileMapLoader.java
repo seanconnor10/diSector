@@ -10,13 +10,10 @@ import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;
-import com.disector.editor.MapViewPanel;
 import com.disector.gameworld.GameWorld;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.Map;
-import java.util.PrimitiveIterator;
 import java.util.Scanner;
 
 public class TextFileMapLoader implements MapLoader {

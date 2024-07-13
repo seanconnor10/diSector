@@ -15,6 +15,7 @@ public abstract class DimensionalRenderer extends Renderer{
     Array<Material> materials;
 
     public boolean drawParallax = true;
+    public boolean fullBright = false;
 
     public DimensionalRenderer(Application app) {
         super(app);
@@ -24,13 +25,14 @@ public abstract class DimensionalRenderer extends Renderer{
 
     @Override
     public void resizeFrame(int w, int h) {
+        if (buffer != null) buffer.dispose();
         buffer = new Pixmap(w, h, pixelFormat);
         buffer.setColor(0x000000FF);
         frameWidth = w;
         frameHeight = h;
         halfWidth = w / 2.f;
         halfHeight = h /2.f;
-        batch.setProjectionMatrix( new Matrix4().setToOrtho2D(0,0,frameWidth,frameHeight) );
+        //batch.setProjectionMatrix( new Matrix4().setToOrtho2D(0,0,frameWidth,frameHeight) );
     }
 
     @Override
@@ -48,4 +50,6 @@ public abstract class DimensionalRenderer extends Renderer{
         //Must dispose() the Texture sometime after calling this ( because of new Texture() )
         return new TextureRegion(new Texture((buffer)), buffer.getWidth(), buffer.getHeight());
     }
+
+    public abstract boolean screenHasEmptySpace();
 }

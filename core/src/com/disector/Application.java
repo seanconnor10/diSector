@@ -11,9 +11,10 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
 
+import com.disector.Config.Config;
 import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;
-import com.disector.editor2.Editor;
+import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
 import com.disector.maploader.OldTextFormatMapLoader;
@@ -24,9 +25,12 @@ import com.disector.maploader.MapLoader;
 import com.disector.maploader.TextFileMapLoader;
 
 public class Application extends ApplicationAdapter {
-    private static final boolean printFPS = true;
+    public static Config config;
+
+    private boolean printFPS;
 
     public GameWorld gameWorld;
+
     private DimensionalRenderer renderer;
     private GameMapRenderer gameMapRenderer;
     private Editor editor;
@@ -50,7 +54,16 @@ public class Application extends ApplicationAdapter {
 
     @Override
     public void create () {
+        config = new Config( Gdx.files.local("diSector.config") );
+
+        printFPS = config.printFps;
+        frameWidth = config.frameWidth;
+        frameHeight = config.frameHeight;
+
         focus = AppFocusTarget.GAME;
+
+        Physics.walls = walls;
+        Physics.sectors = sectors;
 
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
@@ -116,13 +129,19 @@ public class Application extends ApplicationAdapter {
 
     public boolean loadMap(String filePath) {
         MapLoader mapLoader = new TextFileMapLoader(this);
+        boolean success = false;
         try {
             mapLoader.load(filePath);
-            return true;
+            success = true;
+            gameWorld.refreshPlayerSectorIndex();
+            float newFloorZ = sectors.get(gameWorld.getPlayerSectorIndex()).floorZ;
+            if (gameWorld.getPlayerPosition().z < newFloorZ) {
+                gameWorld.player1.setZ(newFloorZ);
+            }
         } catch (Exception e) {
             System.out.println(e.getMessage());
-            return  false;
         }
+        return success;
     }
 
     public boolean loadMapOldFormat(String filePath) {
@@ -185,6 +204,10 @@ public class Application extends ApplicationAdapter {
         renderer.placeCamera(gameWorld.getPlayerPosition(), gameWorld.getPlayerVLook(), gameWorld.getPlayerSectorIndex());
         renderer.renderWorld();
         renderer.drawFrame();
+
+        /*if (renderer.screenHasEmptySpace()) {
+            gameWorld.refreshPlayerSectorIndex();
+        }*/
 
         if (gameWorld.shouldDisplayMap()) {
             gameMapRenderer.placeCamera(gameWorld.getPlayerPosition(), 0, gameWorld.getPlayerSectorIndex());

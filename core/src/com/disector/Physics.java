@@ -7,7 +7,10 @@ import com.disector.gameworld.components.Positionable;
 
 public class Physics {
 
-    public static boolean containsPoint(Sector sec, float x, float y, Array<Wall> walls) {
+    public static Array<Wall> walls;
+    public static Array<Sector> sectors;
+
+    public static boolean containsPoint(Sector sec, float x, float y) {
         /*
          * For each wall in Sector, casts a ray, if an odd number of walls were contacted,
          * the point is within the sector
@@ -20,6 +23,72 @@ public class Physics {
         }
 
         return (intersections%2 == 1);
+    }
+
+    public static boolean containsPoint(int sInd, float x, float y) {
+        if (sInd >= sectors.size || sInd < 0)
+            return false;
+        return containsPoint(sectors.get(sInd), x, y);
+    }
+
+    public static int findCurrentSectorBranching(int startIndex, float x, float y) {
+        boolean secIndValid = (startIndex >= 0 && startIndex < sectors.size);
+
+        if (secIndValid && containsPoint(sectors.get(startIndex), x, y)) return startIndex;
+
+        Array<Integer> checkedSectors = new Array<>( sectors.size );
+        Array<Integer> sectorsToCheck = new Array<>(16);
+
+        checkedSectors.add(startIndex);
+        sectorsToCheck.add(startIndex);
+
+        //Loop, stopping when either all sectors are checked or there are no more portal connections to unchecked sectors
+        if ( secIndValid ) {
+             while (checkedSectors.size < sectors.size && sectorsToCheck.size > 0) {
+
+                 //Check this pass of sectors for our position, and return once found
+                 for (Integer indS : sectorsToCheck) {
+                     checkedSectors.add(indS);
+                     if (containsPoint(sectors.get(indS), x, y)) {
+                         return indS;
+                     }
+                 }
+
+                 //Temporarily store the sectors we are checking this pass,
+                 // so we can manipulate sectorsToCheck
+                 int[] sectorsThisRound = new int[sectorsToCheck.size];
+                 for (int i = 0; i < sectorsThisRound.length; i++) {
+                     sectorsThisRound[i] = sectorsToCheck.get(i);
+                 }
+
+                 //Clear once stored
+                 sectorsToCheck.clear();
+
+                 //Find linked sectors that arent yet checked
+                 for (int j : sectorsThisRound) {
+                     for (Integer indW : sectors.get(j).walls.toArray()) {
+                         Wall wall = walls.get(indW);
+                         if (wall.isPortal) {
+                             if (!checkedSectors.contains(wall.linkA, false)) {
+                                 sectorsToCheck.add(wall.linkA);
+                                 //Added to checkedSectors at start of next loop
+                             }
+                             if (!checkedSectors.contains(wall.linkB, false)) {
+                                 sectorsToCheck.add(wall.linkB);
+                                 //Added to checkedSectors at start of next loop
+                             }
+                         }
+                     }
+                 }
+             } //End while loop
+        }
+
+        for (int i=0; i<sectors.size; i++) {
+            if (containsPoint(i, x, y))
+                return i;
+        }
+
+        return startIndex; //If no match found, don't change..
     }
 
     public static Vector2 rayWallIntersection(Wall w, float angle, float rayX, float rayY, boolean allowBehind) {
@@ -111,9 +180,28 @@ public class Physics {
     }
 
     public static void resolveCollision(WallInfoPack collisionInfo, Movable obj) {
+        Wall w = collisionInfo.w;
+
         float resolutionDistance = obj.getRadius() - collisionInfo.distToNearest;
+        float xLast = obj.snagPosition().x - obj.snagVelocity().y;
+        float yLast = obj.snagPosition().y - obj.snagVelocity().y;
+
+        float scalar;
+
+
+        if (w.isPortal) {
+            scalar= (float) (
+                    (xLast-collisionInfo.nearestPoint.x) * Math.cos(w.normalAngle)
+                            + (yLast-collisionInfo.nearestPoint.y) * Math.sin(w.normalAngle)
+            ); //Dot Product of Camera's position relative (on last frame) to nearest point and the wall's normalised normal vector
+            if (scalar < 0) resolutionDistance = -resolutionDistance;
+        }
+
+        /*
         if (collisionInfo.w.isPortal && collisionInfo.w.linkA == obj.getCurrentSector())
             resolutionDistance *= -1;
+         */
+
         Vector2 objPos = obj.snagPosition();
         objPos.x += (float) Math.cos(collisionInfo.w.normalAngle) * resolutionDistance;
         objPos.y += (float) Math.sin(collisionInfo.w.normalAngle) * resolutionDistance;

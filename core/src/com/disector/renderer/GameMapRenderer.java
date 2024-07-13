@@ -34,16 +34,17 @@ public class GameMapRenderer extends MapRenderer {
 
         ScreenUtils.clear(backgroundColor);
 
-        app.shape.begin(ShapeRenderer.ShapeType.Line);
+        app.shape.begin(ShapeRenderer.ShapeType.Filled);
         drawWalls();
         drawPlayer();
         app.shape.end();
 
         buffer.end();
-
     }
 
     private void drawWalls() {
+        final int widthMin = 2, widthMax = 6;
+        float width = (float) Math.max(widthMin, Math.min(widthMax, camFOV));
         for (Wall w : walls) {
             //Avoid drawing portals without a difference in floor height
             float floorDifference = 0f;
@@ -53,7 +54,6 @@ public class GameMapRenderer extends MapRenderer {
                 if (floorDifference == 0f)
                     continue;
             }
-
 
             app.shape.setColor( w.isPortal ? PORTAL_COLOR : WALL_COLOR );
 
@@ -65,7 +65,7 @@ public class GameMapRenderer extends MapRenderer {
                 app.shape.getColor().g *= 1.0f - portalShadeLERPFactor;
             }
 
-            line(w.x1, w.y1, w.x2, w.y2);
+            line(w.x1, w.y1, w.x2, w.y2, width);
         }
     }
 
@@ -74,39 +74,41 @@ public class GameMapRenderer extends MapRenderer {
         float radius = world.getPlayerRadius();
         app.shape.setColor(Color.GOLDENROD);
         circle(pos.x, pos.y, radius);
-        app.shape.setColor(Color.PINK);
-        line(pos.x, pos.y, pos.x+radius*(float)Math.cos(pos.w), pos.y+radius*(float)Math.sin(pos.w));
+        app.shape.setColor(Color.BLACK);
+        line(pos.x, pos.y, pos.x+radius*(float)Math.cos(pos.w), pos.y+radius*(float)Math.sin(pos.w), 2);
     }
 
-    void circle(float x, float y, float r) {
+    private void line(float x, float y, float x2, float y2, float width) {
+        if (mapRotates)
+            lineROTATED(x, y, x2, y2, width);
+        else
+            lineSTATIC(x, y, x2, y2, width);
+    }
+
+    private void circle(float x, float y, float r) {
         app.shape.circle(halfWidth+camFOV*(x-camX), halfHeight+camFOV*(y-camY), r*camFOV);
     }
 
-    void line(float x, float y, float x2, float y2) {
-        if (mapRotates)
-            lineROTATED(x, y, x2, y2);
-        else
-            lineSTATIC(x, y, x2, y2);
-    }
-
-    private void lineSTATIC(float x, float y, float x2, float y2) {
-        app.shape.line(
+    private void lineSTATIC(float x, float y, float x2, float y2, float width) {
+        app.shape.rectLine(
                 halfWidth+camFOV*(x-camX),
                 halfHeight+camFOV*(y-camY),
                 halfWidth+camFOV*(x2-camX),
-                halfHeight+camFOV*(y2-camY)
+                halfHeight+camFOV*(y2-camY),
+                width
         );
     }
 
-    private void lineROTATED(float x, float y, float x2, float y2) {
+    private void lineROTATED(float x, float y, float x2, float y2, float width) {
         final double pi4 = Math.PI/2.0;
         float cos = (float) Math.cos(pi4-camR);
         float sin = (float) Math.sin(pi4-camR);
-        app.shape.line(
+        app.shape.rectLine(
                 halfWidth+camFOV*( cos*(x-camX) - sin*(y-camY) ),
                 halfHeight+camFOV*( cos*(y-camY) + sin*(x-camX) ),
                 halfWidth+camFOV*( cos*(x2-camX) - sin*(y2-camY) ),
-                halfHeight+camFOV*( cos*(y2-camY) + sin*(x2-camX) )
+                halfHeight+camFOV*( cos*(y2-camY) + sin*(x2-camX) ),
+                width
         );
     }
 

@@ -1,4 +1,4 @@
-package com.disector.editor2;
+package com.disector.editor;
 
 enum Layouts {
     DEFAULT, SWAP, RENDER, MAP;

@@ -20,7 +20,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     public SoftwareRenderer(Application app) {
         super(app);
-        setFovFromDeg(105);
+        setFovFromDeg(110);
     }
 
     @Override
@@ -32,7 +32,11 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     @Override
     public void resizeFrame(int w, int h) {
+        w = Math.max(1, w);
+        h = Math.max(1, h);
+        float fovDeg = getDegFromFov();
         super.resizeFrame(w, h);
+        setFovFromDeg(fovDeg);
         reInitDrawData(w);
     }
 
@@ -44,10 +48,20 @@ public class SoftwareRenderer extends DimensionalRenderer {
         return 2.f * (float) Math.toDegrees( Math.atan(halfWidth / camFOV) );
     }
 
+    @Override
+    public boolean screenHasEmptySpace() {
+        return !spanFilled(0, frameWidth-1);
+    }
+
     // --------------------------------------------------------------------------------------
 
-    private void drawSector(int secInd, int spanStart, int spanEnd) {
-        Sector sec = sectors.get(secInd);
+    private boolean drawSector(int secInd, int spanStart, int spanEnd) {
+        Sector sec = null;
+        try {
+            sec = sectors.get(secInd);
+        } catch (IndexOutOfBoundsException indexException) {
+            return false;
+        }
 
         //Get all walls of the sector, finding their nearest point to the camera
         Array<WallInfoPack> wallsToDraw = new Array<>();
@@ -61,8 +75,15 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
         for (WallInfoPack wallInfo : wallsToDraw) {
             drawWall(wallInfo.wInd, secInd, spanStart, spanEnd);
-            if (spanFilled(spanStart, spanEnd)) return;
+            if (spanFilled(spanStart, spanEnd)) return true;
         }
+
+        //Returns false if the entire span isn't filled
+        //If this instance of drawSector() is the original
+        //where the span is the full screen AND we have returned false,
+        //we can know that currentSectorIndex of the camera is
+        //misplaced
+        return false;
     }
 
     private void drawWall(int wInd, int currentSectorIndex, int spanStart, int spanEnd) {
@@ -149,6 +170,11 @@ public class SoftwareRenderer extends DimensionalRenderer {
         int portalDestIndex = (w.linkA == currentSectorIndex) ? w.linkB : w.linkA;
         float destCeiling = 100.f, destFloor = 0.f, upperWallCutoffV = 1.001f, lowerWallCutoffV = -0.001f;
 
+        Pixmap[] textures, texturesLow, texturesHigh;
+        textures = materials.get(w.mat).tex;
+        texturesLow = textures;
+        texturesHigh = textures;
+
         if (isPortal) {
             drawnPortals.push(wInd); // !!
             destCeiling = sectors.get(portalDestIndex).ceilZ;
@@ -158,11 +184,9 @@ public class SoftwareRenderer extends DimensionalRenderer {
                 upperWallCutoffV = (destCeiling - secFloorZ) / thisSectorCeilingHeight;
             if (destFloor > secFloorZ)
                 lowerWallCutoffV = (destFloor - secFloorZ) / thisSectorCeilingHeight;
+            texturesLow = materials.get(w.matLower).tex;
+            texturesHigh = materials.get(w.matUpper).tex;
         }
-
-        Pixmap[] textures = materials.get(w.mat).tex;
-        Pixmap[] texturesLow = materials.get(w.matLower).tex;
-        Pixmap[] texturesHigh = materials.get(w.matUpper).tex;
 
         for (int drawX = leftEdgeX; drawX <= rightEdgeX; drawX++) { //Per draw column loop
             if (occlusionTop[drawX] -1 <= occlusionBottom[drawX] ) continue;
@@ -178,7 +202,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
             float fog = getFogFactor(x1 + hProgress*(x2-x1));
 
-            float light = w.light;
+            float light = fullBright ? 1.0f : w.light;
 
             rasterBottom = Math.max( (int) quadBottom, occlusionBottom[drawX]);
             rasterTop = Math.min( (int) quadTop, occlusionTop[drawX]);
@@ -227,10 +251,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
             //Floor and Ceiling
             if (occlusionBottom[drawX] < quadBottom)
-                drawFloor(w, currentSector.matFloor, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos, currentSector.lightFloor);
+                drawFloor(w, currentSector.matFloor, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos, fullBright ? 1.f : currentSector.lightFloor);
 
             if (occlusionTop[drawX] > rasterTop)
-                drawCeiling(w, currentSector.matCeil, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos, currentSector.lightCeil);
+                drawCeiling(w, currentSector.matCeil, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos, fullBright ? 1.f : currentSector.lightCeil);
 
             //Update Occlusion Matrix
             updateOcclusion(isPortal, drawX, quadTop, quadBottom, quadHeight, upperWallCutoffV, lowerWallCutoffV);

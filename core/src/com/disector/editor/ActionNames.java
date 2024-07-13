@@ -1,4 +1,4 @@
-package com.disector.editor2;
+package com.disector.editor;
 
 enum ActionNames {
     CREATE_SECTOR,

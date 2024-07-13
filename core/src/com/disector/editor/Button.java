@@ -2,21 +2,22 @@ package com.disector.editor;
 
 import com.badlogic.gdx.math.Rectangle;
 
-public class Button {
-    Rectangle rect = new Rectangle();
+class Button {
     String text = "";
 
-    public Button() {
-    }
+    final Rectangle panelRect;
+    final Rectangle rect;
 
-    public Button(String text) {
+    Button(Panel p, String text) {
+        this.rect = new Rectangle();
         this.text = text;
+        panelRect = p.rect;
     }
 
-    void setRect(float x, float y, float w, float h) {
+    void setRect(int x, int y, int width, int height) {
         rect.x = x;
         rect.y = y;
-        rect.width = w;
-        rect.height = h;
+        rect.width = width;
+        rect.height = height;
     }
 }

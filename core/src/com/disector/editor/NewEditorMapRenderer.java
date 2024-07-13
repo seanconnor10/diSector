@@ -1,4 +1,4 @@
-package com.disector.editor2;
+package com.disector.editor;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
@@ -24,12 +24,14 @@ class NewEditorMapRenderer {
 
     NewEditorMapRenderer(Application app, Rectangle startDimensions) {
         this.app = app;
+        frame = new FrameBuffer(app.pixelFormat, 1, 1, false);
         refreshPanelSize(startDimensions);
     }
 
     // -------------------------------------------------
 
     void refreshPanelSize(Rectangle r) {
+        frame.dispose();
         int w = Math.max( (int) r.width,  1 );
         int h = Math.max( (int) r.height, 1 );
         frame = new FrameBuffer(app.pixelFormat, w, h, false);
@@ -73,7 +75,8 @@ class NewEditorMapRenderer {
 
     public void drawGrid() {
         shape.setColor(0, 0.2f, 0.1f, 0.5f);
-        for (float worldX = gridSize*(int)((camX-(halfWidth/zoom))/gridSize); worldX<camX+(halfWidth/zoom); worldX+=gridSize) {
+
+        for (float worldX = gridSize*(int)((camX-(halfWidth/zoom))/gridSize); worldX<camX+( (halfWidth+gridSize) /zoom); worldX+=gridSize) {
             drawLine(worldX, camY-halfHeight/zoom, worldX, camY+halfHeight/zoom);
         }
         for (float worldY = gridSize*(int)((camY-(halfHeight/zoom))/gridSize); worldY<camY+(halfHeight/zoom); worldY+=gridSize) {

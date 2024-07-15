@@ -141,6 +141,7 @@ public class Application extends ApplicationAdapter {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+        if (editor != null) editor.forceViewRefresh();
         return success;
     }
 
@@ -148,6 +149,7 @@ public class Application extends ApplicationAdapter {
         MapLoader mapLoader = new OldTextFormatMapLoader(this);
         try {
             mapLoader.load(filePath);
+            if (editor != null) editor.forceViewRefresh();
             return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -199,6 +201,9 @@ public class Application extends ApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) //Toggle Mouse Locking
             Gdx.input.setCursorCatched( !Gdx.input.isCursorCatched() );
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) //Randomize Textures
+            randomizeTextures();
+
         gameWorld.step(deltaTime);
 
         renderer.placeCamera(gameWorld.getPlayerPosition(), gameWorld.getPlayerVLook(), gameWorld.getPlayerSectorIndex());
@@ -213,11 +218,6 @@ public class Application extends ApplicationAdapter {
             gameMapRenderer.placeCamera(gameWorld.getPlayerPosition(), 0, gameWorld.getPlayerSectorIndex());
             gameMapRenderer.renderWorld();
             gameMapRenderer.drawFrame();
-        }
-
-        //Randomize Textures
-        if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
-            randomizeTextures();
         }
 
         //Fov Angle Experiments

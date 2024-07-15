@@ -5,13 +5,19 @@ import com.badlogic.gdx.math.Rectangle;
 class Button {
     String text = "";
 
+    final Panel panel;
+    final Editor editor;
     final Rectangle panelRect;
     final Rectangle rect;
 
-    Button(Panel p, String text) {
+    boolean pressed;
+
+    Button(Editor editor, Panel panel, String text) {
+        this.editor = editor;
+        this.panel = panel;
         this.rect = new Rectangle();
         this.text = text;
-        panelRect = p.rect;
+        panelRect = panel.rect;
     }
 
     void setRect(int x, int y, int width, int height) {

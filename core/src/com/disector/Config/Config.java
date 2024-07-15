@@ -1,15 +1,11 @@
 package com.disector.Config;
 
 import com.badlogic.gdx.files.FileHandle;
-import jdk.jpackage.internal.PackagerException;
-import org.xml.sax.helpers.ParserAdapter;
 
 import java.lang.reflect.Field;
-import java.text.ParseException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.TreeMap;
 
 public class Config {
     public boolean printFps = false;
@@ -18,27 +14,40 @@ public class Config {
 
     public Config(FileHandle file) {
         System.out.println("Loading Config at " + file.path());
-
-        Map<String, String> fileValues = new HashMap<>();
-
         Scanner fileScan = new Scanner(file.readString());
 
-
+        Field[] fields = Config.class.getFields();
+        Map<String, String> fileValues = new HashMap<>();
+        
         while(fileScan.hasNextLine()) {
             String line = fileScan.nextLine();
             int equalsPosition = line.indexOf('=');
-            fileValues.put(line.substring(0, equalsPosition), line.substring(equalsPosition+1));
+            String varName = line.substring(0, equalsPosition);
+            String varValue = line.substring(equalsPosition+1);
+            boolean nameFound = false;
+            for (Field field : fields) {
+                if (varName.equals(field.getName())) {
+                    nameFound = true;
+                    break;
+                }
+            }
+            if (nameFound)
+                fileValues.put(varName, varValue);
+            else
+                System.out.println("    Invalid Name: " + varName);
         }
 
-        Field[] fields = Config.class.getFields();
+        String fieldName = "";
+        String fieldType = "";
+        String valueStr = "";
 
         try {
             for (Field field : fields) {
-                String fieldName = field.getName();
-                String fieldType = field.getType().getSimpleName();
+                fieldName = field.getName();
+                fieldType = field.getType().getSimpleName();
                 boolean fieldFound = false;
 
-                String valueStr = "";
+                valueStr = "";
 
                 switch (fieldType) {
                     case "boolean":
@@ -57,15 +66,11 @@ public class Config {
                         break;
                 }
 
-                System.out.println(
-                        "    " + fieldName +
-                        (!fieldFound ? "NOT FOUND.." : " set to " + field.get(this).toString() ) +
-                        " (" + fieldType + ")"
-                );
+                System.out.println("    " + fieldName + (!fieldFound ? "NOT FOUND.." : " set to " + field.get(this).toString() ));
 
             }
         } catch (IllegalAccessException | NumberFormatException e) {
-            System.out.println(e.getMessage());
+            System.out.printf("    PARSING ERROR FOR %s %s WHEN GIVEN %s\n", fieldType.toUpperCase(), fieldName, valueStr );
         }
 
     }

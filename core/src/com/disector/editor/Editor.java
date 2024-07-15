@@ -19,7 +19,11 @@ import com.disector.maploader.OldTextFormatMapLoader;
 import com.disector.maploader.TextFileMapLoader;
 import com.disector.renderer.SoftwareRenderer;
 
+import java.util.Stack;
+
 public class Editor {
+    static BitmapFont font = new BitmapFont( Gdx.files.local("assets/font/fira.fnt") );
+
     final Application app;
     final Array<Wall> walls;
     final Array<Sector> sectors;
@@ -30,19 +34,24 @@ public class Editor {
     private final NewEditorMapRenderer mapRenderer;
     private final SoftwareRenderer viewRenderer;
 
-    static BitmapFont font = new BitmapFont( Gdx.files.local("assets/font/fira.fnt") );
+    private final Stack<EditAction> undoStack = new Stack<>();
+    private final EditorMessageLog messageLog = new EditorMessageLog();
 
+    private final int max3DViewWidth = 400;
+    private final int max3DViewHeight = 225;
     private static final int MENU_BAR_HEIGHT = 32;
+
     private final Panel mapPanel = new Panel();
     private final Panel viewPanel = new Panel();
     private final Panel menuPanel = new Panel();
     private final Panel propertiesPanel = new Panel();
 
+    Button clickedButton = null;
+
+    private Panel focusedPanel = mapPanel;
     private final Panel[] panels = new Panel[] {
             mapPanel, viewPanel, menuPanel, propertiesPanel
     };
-
-    private Panel focusedPanel = mapPanel;
 
     private Layouts layout = Layouts.DEFAULT;
 
@@ -69,8 +78,8 @@ public class Editor {
     }
 
     private void makeButtons() {
-        Button loadButton = new Button(menuPanel, "LOAD");
-        Button saveButton = new Button(menuPanel, "SAVE");
+        Button loadButton = new Button(this, menuPanel, "LOAD");
+        Button saveButton = new Button(this, menuPanel, "SAVE");
         menuPanel.buttons.add(saveButton);
         menuPanel.buttons.add(loadButton);
     }
@@ -78,20 +87,30 @@ public class Editor {
     // -----------------------------------------------
 
     public void step(float dt) {
+        messageLog.stepLifeTime(dt);
+
         updateMouse();
 
-        if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT)) {
+        if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             focusedPanel = getPanelUnderMouse();
-        }
 
-        shouldUpdateViewRenderer = false;
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT))
+            onMouseClick();
+        else if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT) && clickedButton != null)
+            onMouseRelease();
 
         temporaryControls(dt);
 
-        if (shouldUpdateViewRenderer /* Map Changed or Camera Moved */ )
+        if (shouldUpdateViewRenderer)
             viewRenderer.renderWorld();
 
         mapRenderer.render();
+
+        shouldUpdateViewRenderer = false;
+    }
+
+    public void forceViewRefresh() {
+        shouldUpdateViewRenderer = true;
     }
 
     public void draw() {
@@ -103,39 +122,90 @@ public class Editor {
             shape.setColor(col);
             drawRect(panel.rect);
             for (Button button : panel.buttons) {
-                shape.setColor(Color.TEAL);
+                shape.setColor(button.pressed ? Color.MAROON : Color.TEAL);
                 drawRect(offsetRectBy(button.rect, panel.rect));
             }
         }
-        shape.end();
 
+        //Switch from shapeRenderer to SpriteBatch
+        shape.end();
         batch.begin();
-        font.setColor(Color.GREEN);
-        //Draw Button Text
-        for (Panel panel : panels) {
-            for (Button button : panel.buttons) {
-                font.draw(batch, button.text, button.rect.x + panel.rect.x+4, button.rect.y + panel.rect.y + font.getCapHeight()+4);
-            }
-        }
+
 
         //Draw Renderers' frames
         TextureRegion viewTex = viewRenderer.copyPixels();;
         drawFrameBuffer(mapPanel.rect, new TextureRegion(mapRenderer.frame.getColorBufferTexture()));
         drawFrameBuffer(viewPanel.rect, viewTex);
 
+        //Draw Button Text
+        for (Panel panel : panels) {
+            for (Button button : panel.buttons) {
+                font.setColor(button.pressed ? Color.YELLOW : Color.GREEN);
+                font.draw(batch, button.text, button.rect.x + panel.rect.x+4, button.rect.y + panel.rect.y + font.getCapHeight()+4);
+            }
+        }
+
+        //DrawLogText
+        drawLog();
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) messageLog.log("NEW!!S");
+
+        //End Batch and clear frame Textures
         batch.end();
         viewTex.getTexture().dispose();
 
         //Draw Borders
-        shape.begin(ShapeRenderer.ShapeType.Line);
         shape.setColor(Color.CORAL);
+        shape.begin(ShapeRenderer.ShapeType.Line);
         for (Panel panel : panels) {
             shape.rect(panel.rect.x+1, panel.rect.y, panel.rect.width-1, panel.rect.height-1);
         }
+
+        if (focusedPanel != null) {
+            shape.setColor(Color.PINK);
+            shape.rect(focusedPanel.rect.x+1, focusedPanel.rect.y, focusedPanel.rect.width-1, focusedPanel.rect.height-1);
+        }
+
         shape.end();
     }
 
     // -----------------------------------------------
+
+    private void onMouseClick() {
+        Panel panelClicked = getPanelUnderMouse();
+
+        for (Button b : panelClicked.buttons) {
+            if (mouseIn(b)) {
+                clickedButton = b;
+                b.pressed = true;
+                break;
+            }
+        }
+
+    }
+
+    private void onMouseRelease() {
+        clickedButton.pressed = false;
+
+        if (mouseIn(clickedButton)) {
+            switch(clickedButton.text.toLowerCase()) {
+                case "load":
+                    if (app.loadMap("MAPS/test.txt") )
+                        messageLog.log("Loaded from MAPS/test.txt");
+                    else
+                        messageLog.log("FAILED TO LOAD MAPS/test.txt");
+                    break;
+                case "save":
+                    new TextFileMapLoader(app).save("MAPS/test.txt");
+                    messageLog.log("Saved to MAPS/test.txt");
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        clickedButton = null;
+    }
 
     private void updateMouse() {
         mouseX = Gdx.input.getX();
@@ -179,8 +249,11 @@ public class Editor {
             default:        resizeDEFAULT();    break;
         }
 
+        int view3DviewWidth = Math.min( max3DViewWidth, Math.round(viewPanel.rect.width));
+        int view3DviewHeight = Math.min( max3DViewHeight, Math.round(viewPanel.rect.height));
+
         mapRenderer.refreshPanelSize(mapPanel.rect);
-        viewRenderer.resizeFrame(Math.round(viewPanel.rect.width), Math.round(viewPanel.rect.height));
+        viewRenderer.resizeFrame(view3DviewWidth, view3DviewHeight);
         mapRenderer.render();
         viewRenderer.renderWorld();
     }
@@ -227,7 +300,22 @@ public class Editor {
 
     private void drawFrameBuffer(Rectangle rect, TextureRegion tex) {
         tex.flip(false, true);
-        batch.draw(tex, rect.x, rect.y);
+        batch.draw(tex, rect.x, rect.y, rect.width, rect.height);
+    }
+
+    private void drawLog() {
+        int logSize = messageLog.messages.size();
+        int lineSpace = (int) font.getLineHeight();
+
+        for (int i=logSize-1; i>=0; i--) {
+            font.setColor(Color.GOLDENROD);
+            font.getColor().lerp(Color.CLEAR, (logSize-1-i) * (1.f/(logSize+1)) );
+            //font.getColor().lerp(Color.CLEAR, messageLog.messageLifetime.get(i) / EditorMessageLog.MAX_LIFE );
+            font.draw(batch, messageLog.messages.get(i),
+                    mapPanel.rect.x+12,
+                    mapPanel.rect.y+mapPanel.rect.height-12-lineSpace*(logSize-1-i)
+            );
+        }
     }
 
     private Rectangle offsetRectBy(Rectangle rect, Rectangle offset) {

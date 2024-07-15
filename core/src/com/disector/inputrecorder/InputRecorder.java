@@ -40,7 +40,8 @@ public class InputRecorder {
                 System.exit(1);
             }
         }
-        System.out.println("InputRecorder::KeyCodeMap = " + keyBinds.toString());
+
+        System.out.println(mapToString());
 
         keyPressMap.clear(); //Map of keyCodes assigned to an action and a keyPressData for each
         for (Integer code : keyBinds.values() ) {
@@ -57,6 +58,10 @@ public class InputRecorder {
             throw new RuntimeException("Action: " + actionName + " not found in KeyBind map.");
         }
         return data;
+    }
+
+    public static String mapToString() {
+        return "InputRecorder::KeyCodeMap = " + keyBinds.toString().replace("}", "\n}").replace("{", "{\n    ").replace(", ", ", \n    ");
     }
 
     public static class keyPressData {

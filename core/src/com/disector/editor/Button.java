@@ -14,6 +14,7 @@ class Button {
     Function<Void, Void> releaseAction = (Void) -> {text = "WHOOPS! NO ACTION..."; return Void;};
 
     boolean pressed;
+    boolean active = true;
 
     Button(Editor editor, Panel panel, String text) {
         this.panel = panel;

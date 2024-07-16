@@ -3,9 +3,15 @@ package com.disector.editor;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.function.Function;
+
 class Panel {
     Editor editor;
     Rectangle rect;
+
+    Function<Void, Void> stepFunction = (Void) -> {return Void;};
+
+    boolean isForcingMouseFocus;
 
     final Array<Button> buttons = new Array<>();
 
@@ -24,8 +30,14 @@ class Panel {
     }
 
     void rearrangeButtons() {
-        for (int i=0; i<buttons.size; i++) {
-            buttons.get(i).rect.set(2 + i*140, 2, 100, 28);
+        int placedButtons = 0;
+        for (Button b : buttons) {
+            if (b.active) {
+                b.rect.set(2 + placedButtons * 140, 2, 100, 28);
+                placedButtons++;
+            } else {
+                b.rect.set(-1,-1,-1,-1);
+            }
         }
     }
 
@@ -38,6 +50,14 @@ class Panel {
                 return b;
         }
         return null;
+    }
+
+    void clickedIn() {
+
+    }
+
+    void step() {
+
     }
 
 }

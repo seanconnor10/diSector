@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Null;
 
 import com.disector.Config.Config;
 import com.disector.assets.Material;
@@ -38,7 +37,6 @@ public class Application extends ApplicationAdapter {
     private Editor editor;
 
     private AppFocusTarget focus;
-    private Function<Null, Null> stepFocusTarget = null;
 
     private float deltaTime;
 
@@ -190,7 +188,7 @@ public class Application extends ApplicationAdapter {
                     System.out.println("Must instance GameWorld before Editor.");
                     break;
                 }
-                if (editor==null) editor = new Editor(this); //new Editor(this, gameWorld);
+                if (editor==null) editor = new Editor(this);
                 break;
             default:
         }
@@ -332,17 +330,17 @@ public class Application extends ApplicationAdapter {
     }
 
     private void randomizeTextures() {
-        final int num = materials.size-1;
+        final int lastIndex = materials.size-1;
 
         for (Sector s : sectors) {
-            s.matCeil = (int) Math.round(Math.random()*num);
-            s.matFloor = (int) Math.round(Math.random()*num);
+            s.matCeil = (int) Math.round(Math.random()*lastIndex);
+            s.matFloor = (int) Math.round(Math.random()*lastIndex);
         }
 
         for (Wall w : walls) {
-            w.mat = (int) Math.round(Math.random()*num);
-            w.matLower = (int) Math.round(Math.random()*num);
-            w.matUpper = (int) Math.round(Math.random()*num);
+            w.mat = (int) Math.round(Math.random()*lastIndex);
+            w.matLower = (int) Math.round(Math.random()*lastIndex);
+            w.matUpper = (int) Math.round(Math.random()*lastIndex);
         }
     }
 

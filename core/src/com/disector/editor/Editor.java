@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
-import com.disector.AppFocusTarget;
 import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
@@ -18,7 +17,6 @@ import com.disector.assets.Material;
 import com.disector.editor.actions.EditAction;
 import com.disector.maploader.MapLoader;
 import com.disector.maploader.OldTextFormatMapLoader;
-import com.disector.maploader.TextFileMapLoader;
 import com.disector.renderer.SoftwareRenderer;
 
 import java.util.Stack;
@@ -42,11 +40,10 @@ public class Editor {
     private final int max3DViewHeight = 225;
     private static final int MENU_BAR_HEIGHT = 32;
 
-    private final Panel mapPanel = new Panel(this);
-    private final Panel viewPanel = BLUEPRINT.createViewPanel(this);
-    private final Panel menuPanel = BLUEPRINT.createMenuPanel(this);
-    private final Panel propertiesPanel = new Panel(this);
-
+    private final Panel mapPanel        = new MapPanel(this);
+    private final Panel viewPanel       = new ViewPanel(this);
+    private final Panel menuPanel       = new MenuPanel(this);
+    private final Panel propertiesPanel = new PropertiesPanel(this);
 
     final EditorMessageLog messageLog = new EditorMessageLog();
     Panel logPanel = mapPanel;
@@ -90,8 +87,14 @@ public class Editor {
 
         updateMouse();
 
-        if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-            focusedPanel = getPanelUnderMouse();
+        focusedPanel.step();
+
+        if (focusedPanel.isForcingMouseFocus) {
+            constrainMouseToRect(focusedPanel.rect);
+        } else {
+            if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+                focusedPanel = getPanelUnderMouse();
+        }
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT))
             onMouseClick();
@@ -121,6 +124,7 @@ public class Editor {
             shape.setColor(col);
             drawRect(panel.rect);
             for (Button button : panel.buttons) {
+                if (!button.active) continue;
                 shape.setColor(button.pressed ? Color.MAROON : Color.TEAL);
                 drawRect(offsetRectBy(button.rect, panel.rect));
             }
@@ -139,6 +143,7 @@ public class Editor {
         //Draw Button Text
         for (Panel panel : panels) {
             for (Button button : panel.buttons) {
+                if (!button.active) continue;
                 font.setColor(button.pressed ? Color.YELLOW : Color.GREEN);
                 font.draw(batch, button.text, button.rect.x + panel.rect.x+4, button.rect.y + panel.rect.y + font.getCapHeight()+4);
             }
@@ -173,6 +178,8 @@ public class Editor {
     private void onMouseClick() {
         Panel panelClicked = getPanelUnderMouse();
 
+        panelClicked.clickedIn();
+
         for (Button b : panelClicked.buttons) {
             if (mouseIn(b)) {
                 clickedButton = b;
@@ -188,23 +195,6 @@ public class Editor {
 
         if (mouseIn(clickedButton)) {
             clickedButton.releaseAction.apply(null);
-            /*switch(clickedButton.text.toLowerCase()) {
-                case "load":
-                    if (app.loadMap("MAPS/test.txt") )
-                        messageLog.log("Loaded from MAPS/test.txt");
-                    else
-                        messageLog.log("FAILED TO LOAD MAPS/test.txt");
-                    break;
-                case "save":
-                    new TextFileMapLoader(app).save("MAPS/test.txt");
-                    messageLog.log("Saved to MAPS/test.txt");
-                    break;
-                case "play":
-                    app.swapFocus(AppFocusTarget.GAME);
-                    break;
-                default:
-                    break;
-            }*/
         }
 
         clickedButton = null;
@@ -212,7 +202,7 @@ public class Editor {
 
     private void updateMouse() {
         mouseX = Gdx.input.getX();
-        mouseY = Gdx.input.getY();
+        mouseY = height - Gdx.input.getY();
     }
 
     private Panel getPanelUnderMouse() {
@@ -227,7 +217,7 @@ public class Editor {
     // -----------------------------------------------
 
     private boolean mouseIn(Panel p) {
-        return /*p != null &&*/ p.rect.contains(mouseX, height-mouseY);
+        return /*p != null &&*/ p.rect.contains(mouseX, mouseY);
     }
 
     private boolean mouseIn(Button b) {
@@ -236,7 +226,7 @@ public class Editor {
                 b.panelRect.y + b.rect.y,
                 b.rect.width,
                 b.rect.height
-        ).contains(mouseX, height-mouseY);
+        ).contains(mouseX, mouseY);
     }
 
     // -----------------------------------------------
@@ -384,6 +374,20 @@ public class Editor {
 
     private Rectangle offsetRectBy(Rectangle rect, Rectangle offset) {
         return new Rectangle(offset.x + rect.x, offset.y+rect.y, rect.width, rect.height);
+    }
+
+    private void constrainMouseToRect(Rectangle rect) {
+        if (rect.width < 0 || rect.height < 0)
+            return;
+        if (mouseX < rect.x)
+            mouseX = rect.x;
+        else if (mouseX > rect.x + rect.width)
+            mouseX = rect.x + rect.width;
+        if (mouseY < rect.y)
+            mouseY = rect.y;
+        else if (mouseY > rect.y + rect.height)
+            mouseY = rect.y + rect.height;
+        Gdx.input.setCursorPosition((int) mouseX, height - (int) mouseY);
     }
 
     // -----------------------------------------------

@@ -8,7 +8,6 @@ class Button {
     String text = "";
 
     final Panel panel;
-    final Editor editor;
     final Rectangle panelRect;
     final Rectangle rect;
 
@@ -17,7 +16,6 @@ class Button {
     boolean pressed;
 
     Button(Editor editor, Panel panel, String text) {
-        this.editor = editor;
         this.panel = panel;
         this.rect = new Rectangle();
         this.text = text;

@@ -20,7 +20,6 @@ import com.disector.maploader.MapLoader;
 import com.disector.maploader.OldTextFormatMapLoader;
 import com.disector.maploader.TextFileMapLoader;
 import com.disector.renderer.SoftwareRenderer;
-import sun.reflect.generics.tree.VoidDescriptor;
 
 import java.util.Stack;
 
@@ -43,14 +42,14 @@ public class Editor {
     private final int max3DViewHeight = 225;
     private static final int MENU_BAR_HEIGHT = 32;
 
-    private final Panel mapPanel = new Panel();
-    private final Panel viewPanel = new Panel();
-    private final Panel menuPanel = new Panel();
-    private final Panel propertiesPanel = new Panel();
+    private final Panel mapPanel = new Panel(this);
+    private final Panel viewPanel = BLUEPRINT.createViewPanel(this);
+    private final Panel menuPanel = BLUEPRINT.createMenuPanel(this);
+    private final Panel propertiesPanel = new Panel(this);
 
 
-    private final EditorMessageLog messageLog = new EditorMessageLog();
-    private Panel logPanel = mapPanel;
+    final EditorMessageLog messageLog = new EditorMessageLog();
+    Panel logPanel = mapPanel;
 
     private Panel focusedPanel = mapPanel;
     private final Panel[] panels = new Panel[] {
@@ -77,41 +76,11 @@ public class Editor {
         this.viewRenderer = new SoftwareRenderer(app);
         this.viewRenderer.placeCamera(100, 30, -(float)Math.PI/4f);
         this.viewRenderer.camZ = 20;
+
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        makeButtons();
+
         for (Panel panel : panels)
             panel.rearrangeButtons();
-    }
-
-    private void makeButtons() {
-
-        Button loadButton = new Button(this, menuPanel, "LOAD");
-        loadButton.releaseAction = (Void) -> {
-             if (app.loadMap("MAPS/test.txt") )
-                 messageLog.log("Loaded from MAPS/test.txt");
-             else
-                 messageLog.log("FAILED TO LOAD MAPS/test.txt");
-             return Void;
-        };
-        menuPanel.buttons.add(loadButton);
-
-
-        Button saveButton = new Button(this, menuPanel, "SAVE");
-        saveButton.releaseAction = (Void) -> {
-            new TextFileMapLoader(app).save("MAPS/test.txt");
-            messageLog.log("Saved to MAPS/test.txt");
-            return Void;
-        };
-        menuPanel.buttons.add(saveButton);
-
-
-        Button playButton = new Button(this, menuPanel, "PLAY");
-        playButton.releaseAction = (Void) -> {
-            app.swapFocus(AppFocusTarget.GAME);
-            return Void;
-        };
-        menuPanel.buttons.add(playButton);
-
     }
 
     // -----------------------------------------------

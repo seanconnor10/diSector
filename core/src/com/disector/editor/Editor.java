@@ -10,14 +10,17 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
+import com.disector.AppFocusTarget;
 import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.assets.Material;
+import com.disector.editor.actions.EditAction;
 import com.disector.maploader.MapLoader;
 import com.disector.maploader.OldTextFormatMapLoader;
 import com.disector.maploader.TextFileMapLoader;
 import com.disector.renderer.SoftwareRenderer;
+import sun.reflect.generics.tree.VoidDescriptor;
 
 import java.util.Stack;
 
@@ -35,7 +38,6 @@ public class Editor {
     private final SoftwareRenderer viewRenderer;
 
     private final Stack<EditAction> undoStack = new Stack<>();
-    private final EditorMessageLog messageLog = new EditorMessageLog();
 
     private final int max3DViewWidth = 400;
     private final int max3DViewHeight = 225;
@@ -46,12 +48,16 @@ public class Editor {
     private final Panel menuPanel = new Panel();
     private final Panel propertiesPanel = new Panel();
 
-    Button clickedButton = null;
+
+    private final EditorMessageLog messageLog = new EditorMessageLog();
+    private Panel logPanel = mapPanel;
 
     private Panel focusedPanel = mapPanel;
     private final Panel[] panels = new Panel[] {
             mapPanel, viewPanel, menuPanel, propertiesPanel
     };
+
+    private Button clickedButton = null;
 
     private Layouts layout = Layouts.DEFAULT;
 
@@ -78,10 +84,34 @@ public class Editor {
     }
 
     private void makeButtons() {
+
         Button loadButton = new Button(this, menuPanel, "LOAD");
-        Button saveButton = new Button(this, menuPanel, "SAVE");
-        menuPanel.buttons.add(saveButton);
+        loadButton.releaseAction = (Void) -> {
+             if (app.loadMap("MAPS/test.txt") )
+                 messageLog.log("Loaded from MAPS/test.txt");
+             else
+                 messageLog.log("FAILED TO LOAD MAPS/test.txt");
+             return Void;
+        };
         menuPanel.buttons.add(loadButton);
+
+
+        Button saveButton = new Button(this, menuPanel, "SAVE");
+        saveButton.releaseAction = (Void) -> {
+            new TextFileMapLoader(app).save("MAPS/test.txt");
+            messageLog.log("Saved to MAPS/test.txt");
+            return Void;
+        };
+        menuPanel.buttons.add(saveButton);
+
+
+        Button playButton = new Button(this, menuPanel, "PLAY");
+        playButton.releaseAction = (Void) -> {
+            app.swapFocus(AppFocusTarget.GAME);
+            return Void;
+        };
+        menuPanel.buttons.add(playButton);
+
     }
 
     // -----------------------------------------------
@@ -188,7 +218,8 @@ public class Editor {
         clickedButton.pressed = false;
 
         if (mouseIn(clickedButton)) {
-            switch(clickedButton.text.toLowerCase()) {
+            clickedButton.releaseAction.apply(null);
+            /*switch(clickedButton.text.toLowerCase()) {
                 case "load":
                     if (app.loadMap("MAPS/test.txt") )
                         messageLog.log("Loaded from MAPS/test.txt");
@@ -199,9 +230,12 @@ public class Editor {
                     new TextFileMapLoader(app).save("MAPS/test.txt");
                     messageLog.log("Saved to MAPS/test.txt");
                     break;
+                case "play":
+                    app.swapFocus(AppFocusTarget.GAME);
+                    break;
                 default:
                     break;
-            }
+            }*/
         }
 
         clickedButton = null;
@@ -278,18 +312,79 @@ public class Editor {
         propertiesPanel.rect.width = mapPanel.rect.x;
         propertiesPanel.rect.x = 0;
         propertiesPanel.rect.y = 0;
+
+        logPanel = mapPanel;
     }
 
     private void resizeSWAP() {
+        menuPanel.rect.height = MENU_BAR_HEIGHT;
+        menuPanel.rect.width = width;
+        menuPanel.rect.x = 0;
+        menuPanel.rect.y = height-menuPanel.rect.height;
 
+        viewPanel.rect.height = height-menuPanel.rect.height;
+        viewPanel.rect.width = (int) (width*0.6f);
+        viewPanel.rect.x = width-viewPanel.rect.width;
+        viewPanel.rect.y = 0;
+
+        mapPanel.rect.height = (int) ( (height-menuPanel.rect.height)*0.5f);
+        mapPanel.rect.width = viewPanel.rect.x;
+        mapPanel.rect.x = 0;
+        mapPanel.rect.y = mapPanel.rect.height;
+
+        propertiesPanel.rect.height = mapPanel.rect.y;
+        propertiesPanel.rect.width = viewPanel.rect.x;
+        propertiesPanel.rect.x = 0;
+        propertiesPanel.rect.y = 0;
+
+        logPanel = viewPanel;
     }
 
     private void resizeRENDER() {
+        menuPanel.rect.height = MENU_BAR_HEIGHT;
+        menuPanel.rect.width = width;
+        menuPanel.rect.x = 0;
+        menuPanel.rect.y = height-menuPanel.rect.height;
 
+        viewPanel.rect.x = 0;
+        viewPanel.rect.y = 0;
+        viewPanel.rect.width = width;
+        viewPanel.rect.height = height - MENU_BAR_HEIGHT;
+
+        propertiesPanel.rect.set(-1,-1,-1,-1);
+        mapPanel.rect.set(-1,-1,-1,-1);
+
+        logPanel = viewPanel;
     }
 
     private void resizeMAP() {
+        menuPanel.rect.height = MENU_BAR_HEIGHT;
+        menuPanel.rect.width = width;
+        menuPanel.rect.x = 0;
+        menuPanel.rect.y = height-menuPanel.rect.height;
 
+        mapPanel.rect.height = height-menuPanel.rect.height;
+        mapPanel.rect.width = (int) (width*0.75f);
+        mapPanel.rect.x = width-mapPanel.rect.width;
+        mapPanel.rect.y = 0;
+
+        propertiesPanel.rect.height = mapPanel.rect.height;
+        propertiesPanel.rect.width = mapPanel.rect.x;
+        propertiesPanel.rect.x = 0;
+        propertiesPanel.rect.y = 0;
+
+        viewPanel.rect.set(-1, -1, -1, -1);
+
+        logPanel = mapPanel;
+    }
+
+    private void cycleLayout() {
+        int nextLayoutOrdinal = layout.ordinal() + 1;
+        if (nextLayoutOrdinal == Layouts.values().length)
+            nextLayoutOrdinal = 0;
+        layout = Layouts.values()[nextLayoutOrdinal];
+        System.out.println("LAYOUT: " + layout.toString());
+        resize(width, height);
     }
 
     // -----------------------------------------------
@@ -312,8 +407,8 @@ public class Editor {
             font.getColor().lerp(Color.CLEAR, (logSize-1-i) * (1.f/(logSize+1)) );
             //font.getColor().lerp(Color.CLEAR, messageLog.messageLifetime.get(i) / EditorMessageLog.MAX_LIFE );
             font.draw(batch, messageLog.messages.get(i),
-                    mapPanel.rect.x+12,
-                    mapPanel.rect.y+mapPanel.rect.height-12-lineSpace*(logSize-1-i)
+                    logPanel.rect.x+12,
+                    logPanel.rect.y+logPanel.rect.height-12-lineSpace*(logSize-1-i)
             );
         }
     }
@@ -331,21 +426,14 @@ public class Editor {
             moveViewWithKeyBoard(dt);
 
         //Temporary Load and Save
-        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
-            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                MapLoader mapLoader = new OldTextFormatMapLoader(app);
-                mapLoader.load("MAPS/SHED");
-                shouldUpdateViewRenderer = true;
-            } else {
-                //MapLoader mapLoader = new TextFileMapLoader(app);
-                //mapLoader.load("MAPS/test.txt");
-                app.loadMap("MAPS/test.txt");
-                shouldUpdateViewRenderer = true;
-            }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L) && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+            MapLoader mapLoader = new OldTextFormatMapLoader(app);
+            mapLoader.load("MAPS/SHED");
+            shouldUpdateViewRenderer = true;
         }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-            MapLoader mapLoader = new TextFileMapLoader(app);
-            mapLoader.save("MAPS/test.txt");
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            cycleLayout();
         }
 
         //Temporary Toggle FullBright

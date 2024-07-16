@@ -2,6 +2,8 @@ package com.disector.editor;
 
 import com.badlogic.gdx.math.Rectangle;
 
+import java.util.function.Function;
+
 class Button {
     String text = "";
 
@@ -9,6 +11,8 @@ class Button {
     final Editor editor;
     final Rectangle panelRect;
     final Rectangle rect;
+
+    Function<Void, Void> releaseAction = (Void) -> {text = "WHOOPS! NO ACTION..."; return Void;};
 
     boolean pressed;
 
@@ -20,10 +24,4 @@ class Button {
         panelRect = panel.rect;
     }
 
-    void setRect(int x, int y, int width, int height) {
-        rect.x = x;
-        rect.y = y;
-        rect.width = width;
-        rect.height = height;
-    }
 }

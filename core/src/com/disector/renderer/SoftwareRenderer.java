@@ -55,12 +55,12 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     // --------------------------------------------------------------------------------------
 
-    private boolean drawSector(int secInd, int spanStart, int spanEnd) {
+    private void drawSector(int secInd, int spanStart, int spanEnd) {
         Sector sec = null;
         try {
             sec = sectors.get(secInd);
         } catch (IndexOutOfBoundsException indexException) {
-            return false;
+            return;// false;
         }
 
         //Get all walls of the sector, finding their nearest point to the camera
@@ -75,7 +75,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
         for (WallInfoPack wallInfo : wallsToDraw) {
             drawWall(wallInfo.wInd, secInd, spanStart, spanEnd);
-            if (spanFilled(spanStart, spanEnd)) return true;
+            if (spanFilled(spanStart, spanEnd)) return;// true;
         }
 
         //Returns false if the entire span isn't filled
@@ -83,7 +83,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         //where the span is the full screen AND we have returned false,
         //we can know that currentSectorIndex of the camera is
         //misplaced
-        return false;
+        return;// false;
     }
 
     private void drawWall(int wInd, int currentSectorIndex, int spanStart, int spanEnd) {

@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector4;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Null;
 
 import com.disector.Config.Config;
 import com.disector.assets.Material;
@@ -24,6 +24,8 @@ import com.disector.renderer.SoftwareRenderer;
 import com.disector.maploader.MapLoader;
 import com.disector.maploader.TextFileMapLoader;
 
+import java.util.function.Function;
+
 public class Application extends ApplicationAdapter {
     public static Config config;
 
@@ -36,6 +38,7 @@ public class Application extends ApplicationAdapter {
     private Editor editor;
 
     private AppFocusTarget focus;
+    private Function<Null, Null> stepFocusTarget = null;
 
     private float deltaTime;
 
@@ -46,8 +49,8 @@ public class Application extends ApplicationAdapter {
     public final Pixmap.Format pixelFormat = Pixmap.Format.RGBA4444;
     public final Array<Material> materials = new Array<>();
 
-    public int frameWidth = 400; //400
-    public int frameHeight = 225; //225
+    public int frameWidth = 400;  //Actual default in Config class
+    public int frameHeight = 225;
 
     public SpriteBatch batch;
     public ShapeRenderer shape;
@@ -159,7 +162,7 @@ public class Application extends ApplicationAdapter {
 
     // --------------------------------------------------------
 
-    private void swapFocus(AppFocusTarget target) {
+    public void swapFocus(AppFocusTarget target) {
 
         switch(focus) {
             case GAME:
@@ -220,21 +223,21 @@ public class Application extends ApplicationAdapter {
             gameMapRenderer.drawFrame();
         }
 
-        //Fov Angle Experiments
-        if (false) {
-            Vector4 pPos = gameWorld.getPlayerPosition();
-            float angleToPointOne = 90f + (float) (-(180 / Math.PI) * (Math.atan2(100 - pPos.x, 20 - pPos.y) + pPos.w));// + pPos.w; // w is player angle
-            float halfFrame = frameWidth / 2f;
-            float fov = renderer.getFov();
-            float angleLeftScreenEdge = (float) Math.atan(halfFrame / fov); //This is angle in rad
-            float horizonScreenDistVert = (frameHeight / 2.f) - renderer.camVLook;
-            float angleBottomScreenEdge = (float) Math.atan(horizonScreenDistVert / fov);
-            float distToFloorAtScreenBottom = (renderer.camZ /*minus Sector Floor Height*/) / (float) Math.sin(angleBottomScreenEdge);
-            // ^ This ^ is the one-dimensional-distance from viewPlace for floor row...
-            angleLeftScreenEdge *= (float) (180.0 / Math.PI);
-            //System.out.printf("AngToPoint2: %f\nArcCot:%f\nDist to floor %f\n\n", angleToPointOne, angleLeftScreenEdge, distToFloorAtScreenBottom);
-            System.out.println("Floor Dist Screen Bottom: " + distToFloorAtScreenBottom);
-        }
+//        Fov Angle Experiments
+//        if (false) {
+//            Vector4 pPos = gameWorld.getPlayerPosition();
+//            float angleToPointOne = 90f + (float) (-(180 / Math.PI) * (Math.atan2(100 - pPos.x, 20 - pPos.y) + pPos.w));// + pPos.w; // w is player angle
+//            float halfFrame = frameWidth / 2f;
+//            float fov = renderer.getFov();
+//            float angleLeftScreenEdge = (float) Math.atan(halfFrame / fov); //This is angle in rad
+//            float horizonScreenDistVert = (frameHeight / 2.f) - renderer.camVLook;
+//            float angleBottomScreenEdge = (float) Math.atan(horizonScreenDistVert / fov);
+//            float distToFloorAtScreenBottom = (renderer.camZ /*minus Sector Floor Height*/) / (float) Math.sin(angleBottomScreenEdge);
+//            // ^ This ^ is the one-dimensional-distance from viewPlace for floor row...
+//            angleLeftScreenEdge *= (float) (180.0 / Math.PI);
+//            //System.out.printf("AngToPoint2: %f\nArcCot:%f\nDist to floor %f\n\n", angleToPointOne, angleLeftScreenEdge, distToFloorAtScreenBottom);
+//            System.out.println("Floor Dist Screen Bottom: " + distToFloorAtScreenBottom);
+//        }
     }
 
     private void menu() {

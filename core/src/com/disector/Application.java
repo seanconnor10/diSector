@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 
+import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Config.Config;
 import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;
@@ -94,7 +95,12 @@ public class Application extends ApplicationAdapter {
         switch(focus) {
             case MENU: menu(); break;
             case GAME: game(); break;
-            case EDITOR: editor(); break;
+            case EDITOR:
+                if (editor != null)
+                    editor();
+                else
+                    ScreenUtils.clear(Color.SLATE);
+                break;
             default: break;
         }
 
@@ -263,10 +269,10 @@ public class Application extends ApplicationAdapter {
             swapFocus(AppFocusTarget.GAME);
         }
         else if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
                 editor = null;
-            }
-            swapFocus(AppFocusTarget.EDITOR);
+            else
+                swapFocus(AppFocusTarget.EDITOR);
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F4) ) {

@@ -16,6 +16,7 @@ public abstract class DimensionalRenderer extends Renderer{
 
     public boolean drawParallax = true;
     public boolean fullBright = false;
+    public boolean drawFog = true;
 
     public DimensionalRenderer(Application app) {
         super(app);

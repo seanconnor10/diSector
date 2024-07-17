@@ -9,10 +9,7 @@ class MenuPanel extends Panel {
 
         Button loadButton = new Button(editor, this, "LOAD");
         loadButton.releaseAction = (Void) -> {
-            if (editor.app.loadMap("MAPS/test.txt"))
-                editor.messageLog.log("Loaded from MAPS/test.txt");
-            else
-                editor.messageLog.log("FAILED TO LOAD MAPS/test.txt");
+            editor.loadMap("MAPS/test.txt");
             return Void;
         };
         buttons.add(loadButton);

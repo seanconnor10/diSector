@@ -259,10 +259,15 @@ public class Application extends ApplicationAdapter {
     }
 
     private void functionKeyInputs() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             swapFocus(AppFocusTarget.GAME);
-        else if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
+        }
+        else if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                editor = null;
+            }
             swapFocus(AppFocusTarget.EDITOR);
+        }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.F4) ) {
 			if (Gdx.graphics.isFullscreen())

@@ -250,10 +250,10 @@ public class SoftwareRenderer extends DimensionalRenderer {
             } //End Per Pixel Loop
 
             //Floor and Ceiling
-            if (occlusionBottom[drawX] < quadBottom)
+            if (occlusionBottom[drawX] < quadBottom && camZ > currentSector.floorZ)
                 drawFloor(w, currentSector.matFloor, drawX, fov, rasterBottom, secFloorZ, playerSin, playerCos, fullBright ? 1.f : currentSector.lightFloor);
 
-            if (occlusionTop[drawX] > rasterTop)
+            if (occlusionTop[drawX] > rasterTop && camZ < currentSector.ceilZ)
                 drawCeiling(w, currentSector.matCeil, drawX, fov, rasterTop, secCeilZ, playerSin, playerCos, fullBright ? 1.f : currentSector.lightCeil);
 
             //Update Occlusion Matrix
@@ -422,6 +422,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
     }
 
     private float getFogFactor(float dist) {
+        if (!drawFog) return 0f;
         final float fogDistance = 400f;
         return Math.max(0, Math.min(fogDistance, dist) ) / fogDistance;
     }

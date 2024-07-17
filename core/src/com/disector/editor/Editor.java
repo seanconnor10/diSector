@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.utils.Array;
 
 import com.disector.Application;
+import com.disector.Physics;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.assets.Material;
@@ -151,8 +152,6 @@ public class Editor {
 
         //DrawLogText
         drawLog();
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) messageLog.log("NEW!!S");
 
         //End Batch and clear frame Textures
         batch.end();
@@ -342,7 +341,14 @@ public class Editor {
         if (nextLayoutOrdinal == Layouts.values().length)
             nextLayoutOrdinal = 0;
         layout = Layouts.values()[nextLayoutOrdinal];
-        System.out.println("LAYOUT: " + layout.toString());
+        resize(width, height);
+    }
+
+    private void cycleLayoutBackward() {
+        int nextLayoutOrdinal = layout.ordinal() - 1;
+        if (nextLayoutOrdinal < 0)
+            nextLayoutOrdinal = Layouts.values().length-1;
+        layout = Layouts.values()[nextLayoutOrdinal];
         resize(width, height);
     }
 
@@ -362,6 +368,15 @@ public class Editor {
         int lineSpace = (int) font.getLineHeight();
 
         for (int i=logSize-1; i>=0; i--) {
+            //Draw Text-Shadow
+            font.setColor(Color.TEAL);
+            font.getColor().lerp(Color.CLEAR, (logSize-1-i) * (1.f/(logSize+1)) );
+            //font.getColor().lerp(Color.CLEAR, messageLog.messageLifetime.get(i) / EditorMessageLog.MAX_LIFE );
+            font.draw(batch, messageLog.messages.get(i),
+                    logPanel.rect.x+9,
+                    logPanel.rect.y+logPanel.rect.height-15-lineSpace*(logSize-1-i)
+            );
+            //Draw Main-Text
             font.setColor(Color.GOLDENROD);
             font.getColor().lerp(Color.CLEAR, (logSize-1-i) * (1.f/(logSize+1)) );
             //font.getColor().lerp(Color.CLEAR, messageLog.messageLifetime.get(i) / EditorMessageLog.MAX_LIFE );
@@ -399,31 +414,47 @@ public class Editor {
             moveViewWithKeyBoard(dt);
 
         //Temporary Load and Save
-        if (Gdx.input.isKeyJustPressed(Input.Keys.L) && Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-            MapLoader mapLoader = new OldTextFormatMapLoader(app);
-            mapLoader.load("MAPS/SHED");
-            shouldUpdateViewRenderer = true;
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
+                MapLoader mapLoader = new OldTextFormatMapLoader(app);
+                mapLoader.load("MAPS/OLD-BANK");
+                shouldUpdateViewRenderer = true;
+                messageLog.log("Loaded Old-Format Map");
+            } else {
+                loadMap("MAPS/test.txt");
+            }
         }
 
+        //Cycle Layout
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
-            cycleLayout();
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                cycleLayoutBackward();
+            else
+                cycleLayout();
         }
 
         //Temporary Toggle FullBright
         if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
             viewRenderer.fullBright = !viewRenderer.fullBright;
+            messageLog.log("Full-Bright " + (viewRenderer.fullBright ? "ON" : "OFF"));
+            shouldUpdateViewRenderer = true;
+        }
+         if (Gdx.input.isKeyJustPressed(Input.Keys.U)) {
+            viewRenderer.drawFog = !viewRenderer.drawFog;
+            messageLog.log("Distance-Fog " + (viewRenderer.drawFog ? "ON" : "OFF"));
             shouldUpdateViewRenderer = true;
         }
 
         //GridSize
-        if (Gdx.input.isKeyJustPressed(Input.Keys.G))
+        if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
                 mapRenderer.gridSize /= 2;
             else
                 mapRenderer.gridSize *= 2;
-        if (mapRenderer.gridSize < 4)
-            mapRenderer.gridSize = 4;
-
+            if (mapRenderer.gridSize < 4)
+                mapRenderer.gridSize = 4;
+            messageLog.log("GridSize " + mapRenderer.gridSize);
+        }
     }
 
     private void moveMapWithKeyBoard(float dt) {
@@ -452,7 +483,9 @@ public class Editor {
     }
 
     private void moveViewWithKeyBoard(float dt) {
-        //Temporary Movement
+        boolean shift = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+
+        //Looking
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             viewRenderer.camVLook += 200 * dt;
             shouldUpdateViewRenderer = true;
@@ -465,9 +498,50 @@ public class Editor {
             viewRenderer.camR += 2*dt;
             shouldUpdateViewRenderer = true;
         }
-         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             viewRenderer.camR -= 2*dt;
             shouldUpdateViewRenderer = true;
+        }
+
+        //Moving
+        float moveDist = 100*dt;
+        if (shift) moveDist*=3;
+
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            viewRenderer.camX += (float) Math.cos(viewRenderer.camR) * moveDist;
+            viewRenderer.camY += (float) Math.sin(viewRenderer.camR) * moveDist;
+            shouldUpdateViewRenderer = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            viewRenderer.camX -= (float) Math.cos(viewRenderer.camR) * moveDist;
+            viewRenderer.camY -= (float) Math.sin(viewRenderer.camR) * moveDist;
+            shouldUpdateViewRenderer = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            viewRenderer.camX += (float) Math.cos(viewRenderer.camR + Math.PI/2) * moveDist;
+            viewRenderer.camY += (float) Math.sin(viewRenderer.camR + Math.PI/2) * moveDist;
+            shouldUpdateViewRenderer = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            viewRenderer.camX -= (float) Math.cos(viewRenderer.camR + Math.PI/2) * moveDist;
+            viewRenderer.camY -= (float) Math.sin(viewRenderer.camR + Math.PI/2) * moveDist;
+            shouldUpdateViewRenderer = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.E)) {
+            viewRenderer.camZ += (shift ? 200 : 80) * dt;
+            shouldUpdateViewRenderer = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.Q)) {
+            viewRenderer.camZ -= (shift ? 200 : 80) * dt;
+            shouldUpdateViewRenderer = true;
+        }
+
+        if (shouldUpdateViewRenderer) {
+            viewRenderer.camCurrentSector = Physics.findCurrentSectorBranching(
+                    viewRenderer.camCurrentSector,
+                    viewRenderer.camX,
+                    viewRenderer.camY
+            );
         }
          
         //Temporary Zoom
@@ -484,4 +558,13 @@ public class Editor {
 
     }
 
+    // -----------------------------------------------
+
+    void loadMap(String path) {
+        if (app.loadMap(path)) {
+            messageLog.log("Loaded from " + path);
+            forceViewRefresh();
+        } else
+            messageLog.log("FAILED TO LOAD " + path);
+    }
 }

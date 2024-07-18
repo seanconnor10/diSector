@@ -1,7 +1,9 @@
 package com.disector.editor;
 
 class PropertiesPanel extends Panel {
-    public PropertiesPanel(Editor editor) {
+
+    PropertiesPanel(Editor editor) {
         super(editor);
     }
+
 }

@@ -35,10 +35,8 @@ public class Editor {
     private final NewEditorMapRenderer mapRenderer;
     private final SoftwareRenderer viewRenderer;
 
-    private final Stack<EditAction> undoStack = new Stack<>();
-
-    private final int max3DViewWidth = 400;
-    private final int max3DViewHeight = 225;
+    private final int MAX_RENDER_WIDTH = 400;
+    private final int MAX_RENDER_HEIGHT = 225;
     private static final int MENU_BAR_HEIGHT = 32;
 
     private final Panel mapPanel        = new MapPanel(this);
@@ -57,6 +55,10 @@ public class Editor {
     private Button clickedButton = null;
 
     private Layouts layout = Layouts.DEFAULT;
+
+    private final Stack<EditAction> undoStack = new Stack<>();
+
+    private EditorState state;
 
     private float mouseX, mouseY;
     private int width, height;
@@ -99,7 +101,7 @@ public class Editor {
 
         if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT))
             onMouseClick();
-        else if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT) && clickedButton != null)
+        else if (clickedButton != null && !Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             onMouseRelease();
 
         temporaryControls(dt);
@@ -241,8 +243,8 @@ public class Editor {
             default:        resizeDEFAULT();    break;
         }
 
-        int view3DviewWidth = Math.min( max3DViewWidth, Math.round(viewPanel.rect.width));
-        int view3DviewHeight = Math.min( max3DViewHeight, Math.round(viewPanel.rect.height));
+        int view3DviewWidth = Math.min( MAX_RENDER_WIDTH, Math.round(viewPanel.rect.width));
+        int view3DviewHeight = Math.min( MAX_RENDER_HEIGHT, Math.round(viewPanel.rect.height));
 
         mapRenderer.refreshPanelSize(mapPanel.rect);
         viewRenderer.resizeFrame(view3DviewWidth, view3DviewHeight);
@@ -460,16 +462,16 @@ public class Editor {
     private void moveMapWithKeyBoard(float dt) {
         //Temporary Movement
         float mapZoom = mapRenderer.zoom;
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
             mapRenderer.camY += 200.f * dt / (float)Math.sqrt(mapZoom);
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
             mapRenderer.camX += 200.f * dt / (float)Math.sqrt(mapZoom);
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
             mapRenderer.camY -= 200.f * dt / (float)Math.sqrt(mapZoom);
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             mapRenderer.camX -= 200.f * dt / (float)Math.sqrt(mapZoom);
         }
 

@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Config.Config;
 import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;
+import com.disector.console.CommandExecutor;
 import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
@@ -205,6 +206,11 @@ public class Application extends ApplicationAdapter {
     }
 
     private void game() {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
+            CommandExecutor commandExecutor = new CommandExecutor(this);
+            commandExecutor.execute("setGameFrameSize 640 480");
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) //Toggle Mouse Locking
             Gdx.input.setCursorCatched( !Gdx.input.isCursorCatched() );
 
@@ -354,5 +360,12 @@ public class Application extends ApplicationAdapter {
             w.matUpper = (int) Math.round(Math.random()*lastIndex);
         }
     }
+
+    // ------ CONSOLE COMMANDS HELPERS --------------------------
+
+    public void setGameRenderFrameSize(int w, int h) {
+        renderer.resizeFrame(w, h);
+    }
+
 
 }

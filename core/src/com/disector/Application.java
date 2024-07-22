@@ -3,6 +3,7 @@ package com.disector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -15,6 +16,7 @@ import com.disector.Config.Config;
 import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;
 import com.disector.console.CommandExecutor;
+import com.disector.console.Console;
 import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
@@ -31,12 +33,15 @@ public class Application extends ApplicationAdapter {
     public static Config config;
 
     private boolean printFPS;
+    private boolean vsyncEnabled;
 
     public GameWorld gameWorld;
 
     private DimensionalRenderer renderer;
     private GameMapRenderer gameMapRenderer;
     private Editor editor;
+
+    private Console console;
 
     private AppFocusTarget focus;
 
@@ -57,11 +62,10 @@ public class Application extends ApplicationAdapter {
 
     @Override
     public void create () {
-        config = new Config( Gdx.files.local("diSector.config") );
+        console = new Console( new CommandExecutor(this) );
+        Gdx.input.setInputProcessor(console.getInputAdapter());
 
-        printFPS = config.printFps;
-        frameWidth = config.frameWidth;
-        frameHeight = config.frameHeight;
+        loadConfig("disector.config");
 
         focus = AppFocusTarget.GAME;
 
@@ -92,6 +96,8 @@ public class Application extends ApplicationAdapter {
 
         functionKeyInputs();
 
+
+
         //Run Screen
         switch(focus) {
             case MENU: menu(); break;
@@ -104,6 +110,8 @@ public class Application extends ApplicationAdapter {
                 break;
             default: break;
         }
+
+        console.updateAndDraw(deltaTime);
 
     }
 
@@ -149,7 +157,7 @@ public class Application extends ApplicationAdapter {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-        if (editor != null) editor.forceViewRefresh();
+        if (editor != null) editor.shouldUpdateViewRenderer = true;
         return success;
     }
 
@@ -157,12 +165,20 @@ public class Application extends ApplicationAdapter {
         MapLoader mapLoader = new OldTextFormatMapLoader(this);
         try {
             mapLoader.load(filePath);
-            if (editor != null) editor.forceViewRefresh();
+            if (editor != null) editor.shouldUpdateViewRenderer = true;
             return true;
         } catch (Exception e) {
             System.out.println(e.getMessage());
             return  false;
         }
+    }
+
+    private void loadConfig(String filePath) {
+        config = new Config( Gdx.files.local(filePath) );
+        printFPS = config.printFps;
+        vsyncEnabled = config.vsync; Gdx.graphics.setVSync(vsyncEnabled);
+        frameWidth = config.frameWidth;
+        frameHeight = config.frameHeight;
     }
 
     // --------------------------------------------------------
@@ -207,8 +223,9 @@ public class Application extends ApplicationAdapter {
 
     private void game() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-            CommandExecutor commandExecutor = new CommandExecutor(this);
-            commandExecutor.execute("setGameFrameSize 640 480");
+            CommandExecutor cExe = new CommandExecutor(this);
+            cExe.getCommandList();
+            cExe.execute("setGameFrameSize 960 540");
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) //Toggle Mouse Locking
@@ -367,5 +384,10 @@ public class Application extends ApplicationAdapter {
         renderer.resizeFrame(w, h);
     }
 
+    public boolean toggleVsync() {
+        vsyncEnabled = !vsyncEnabled;
+        Gdx.graphics.setVSync(vsyncEnabled);
+        return vsyncEnabled;
+    }
 
 }

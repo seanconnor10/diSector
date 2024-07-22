@@ -1,20 +1,27 @@
 package com.disector.inputrecorder;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.HashMap;
 
 public class InputRecorder {
+    public static boolean ignoreInput;
     public static Map<String, Integer> keyBinds = new HashMap<>();
     public static Map<Integer, keyPressData> keyPressMap = new HashMap<>();
+
     public static int keyCount;
+
     public static float mouseDeltaX, mouseDeltaY;
 
     public static void updateKeys() {
         mouseDeltaX = Gdx.input.getDeltaX();
         mouseDeltaY = Gdx.input.getDeltaY();
+
+        if (ignoreInput)
+            return;
 
         for (Map.Entry<Integer, keyPressData> keyEntry : keyPressMap.entrySet()) {
             keyEntry.getValue().justReleased = keyEntry.getValue().isDown && !Gdx.input.isKeyPressed(keyEntry.getKey());
@@ -34,8 +41,9 @@ public class InputRecorder {
                 keyBinds.put(fieldName, field.getInt(InputRecorder.class));
             } catch (Exception e) {
                 System.out.println(" -=== ERROR ===-");
-                System.out.println("InputRecorder failed to repopulate KeyCodeMap via Reflection");
-                System.out.println("  Exception Type: " + e.getClass().getName() );
+                System.out.println(" InputRecorder failed to repopulate KeyCodeMap via Reflection");
+                System.out.println(" Exception Type: " + e.getClass().getName() );
+                System.out.println(" " + e.getMessage());
                 System.out.println(" -=============-");
                 System.exit(1);
             }

@@ -13,18 +13,21 @@ import com.disector.Wall;
 
 class NewEditorMapRenderer {
     private final Application app;
+    private final Editor editor;
 
     private final ShapeRenderer shape = new ShapeRenderer();
     FrameBuffer frame;
-    
+
+    CameraMapDraw viewCamPosition = new CameraMapDraw(0,0,0,0);
     float camX = 0, camY = 0;
     float zoom = 1f;
 
     float halfWidth, halfHeight;
     int gridSize = 32;
 
-    NewEditorMapRenderer(Application app, Rectangle startDimensions) {
+    NewEditorMapRenderer(Application app, Editor editor, Rectangle startDimensions) {
         this.app = app;
+        this.editor = editor;
         frame = new FrameBuffer(app.pixelFormat, 1, 1, false);
         refreshPanelSize(startDimensions);
     }
@@ -38,7 +41,7 @@ class NewEditorMapRenderer {
         frame = new FrameBuffer(app.pixelFormat, w, h, false);
         halfWidth = w/2f;
         halfHeight = h/2f;
-        shape.setProjectionMatrix(new Matrix4().setToOrtho2D(camX, camY, w, h));
+        shape.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, w, h));
     }
 
     // --------Draw Methods---------------------------
@@ -57,7 +60,8 @@ class NewEditorMapRenderer {
         drawCircle(playerPos.x, playerPos.y, app.gameWorld.getPlayerRadius());
 
         //Draw Editor-ViewRenderer Camera Position
-
+        if ( editor.layout != Layouts.MAP )
+            drawCameraWidget();
 
         shape.end();
         frame.end();
@@ -95,6 +99,24 @@ class NewEditorMapRenderer {
         shape.setColor(0.1f, 0.2f, 0.3f, 0.8f);
         drawLine(-10000,0, 10000, 0);
         drawLine(0, -10000, 0, 10000);
+    }
+
+    public void drawCameraWidget() {
+        float x = viewCamPosition.x;
+        float y = viewCamPosition.y;
+        float r = viewCamPosition.r;
+        float hFov = (float) Math.toRadians(viewCamPosition.halfFov);
+        final float LENGTH = 150.f;
+        float sideLength = LENGTH / (float) Math.cos(hFov);
+        float lx = x + sideLength * (float) Math.cos(r+hFov);
+        float ly = y + sideLength * (float) Math.sin(r+hFov);
+        float rx = x + sideLength * (float) Math.cos(r-hFov);
+        float ry = y + sideLength * (float) Math.sin(r-hFov);
+        shape.setColor(Color.CYAN);
+        drawCircle(viewCamPosition.x, viewCamPosition.y, 3);
+        shape.getColor().a = 0.5f;
+        drawLine(x, y, lx, ly);
+        drawLine(x, y, rx, ry);drawLine(lx, ly, rx, ry);
     }
 
     // ----- Draw Primitives -----------------------------

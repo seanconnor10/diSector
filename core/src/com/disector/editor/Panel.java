@@ -42,22 +42,36 @@ class Panel {
     }
 
     Button getButtonByText(String text) {
-        //Needing .toArray() makes this first method probably slower?
-        /*return Arrays.stream(buttons.toArray())
-                .filter( b -> b.text.equals(text) ).findFirst().orElse(null);*/
         for (Button b : buttons) {
             if (b.text.equalsIgnoreCase(text))
                 return b;
         }
         return null;
+        //Needing .toArray() makes this second method probably slower?
+        /*return Arrays.stream(buttons.toArray())
+                .filter( b -> b.text.equals(text) ).findFirst().orElse(null);*/
     }
 
     void clickedIn() {
-
+        for (Button b : buttons) {
+            if (editor.mouseIn(b)) {
+                editor.clickedButton = b;
+                b.pressed = true;
+                break;
+            }
+        }
     }
 
     void step() {
 
+    }
+
+    float relX() {
+        return editor.mouseX - rect.x;
+    }
+
+    float relY() {
+        return editor.mouseY - rect.y;
     }
 
 }

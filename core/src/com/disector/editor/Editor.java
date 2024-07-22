@@ -32,38 +32,38 @@ public class Editor {
     final ShapeRenderer shape;
     final SpriteBatch batch;
 
-    private final NewEditorMapRenderer mapRenderer;
-    private final SoftwareRenderer viewRenderer;
+    final NewEditorMapRenderer mapRenderer;
+    final SoftwareRenderer viewRenderer;
 
-    private final int MAX_RENDER_WIDTH = 400;
-    private final int MAX_RENDER_HEIGHT = 225;
-    private static final int MENU_BAR_HEIGHT = 32;
+    final int MAX_RENDER_WIDTH = 400;
+    final int MAX_RENDER_HEIGHT = 225;
+    static final int MENU_BAR_HEIGHT = 32;
 
-    private final Panel mapPanel        = new MapPanel(this);
-    private final Panel viewPanel       = new ViewPanel(this);
-    private final Panel menuPanel       = new MenuPanel(this);
-    private final Panel propertiesPanel = new PropertiesPanel(this);
+    final Panel mapPanel        = new MapPanel(this);
+    final Panel viewPanel       = new ViewPanel(this);
+    final Panel menuPanel       = new MenuPanel(this);
+    final Panel propertiesPanel = new PropertiesPanel(this);
 
     final EditorMessageLog messageLog = new EditorMessageLog();
     Panel logPanel = mapPanel;
 
-    private Panel focusedPanel = mapPanel;
-    private final Panel[] panels = new Panel[] {
+    Panel focusedPanel = mapPanel;
+    final Panel[] panels = new Panel[] {
             mapPanel, viewPanel, menuPanel, propertiesPanel
     };
 
-    private Button clickedButton = null;
+    Button clickedButton = null;
 
-    private Layouts layout = Layouts.DEFAULT;
+    Layouts layout = Layouts.DEFAULT;
 
-    private final Stack<EditAction> undoStack = new Stack<>();
+    final Stack<EditAction> undoStack = new Stack<>();
 
-    private EditorState state;
+    EditorState state;
 
-    private float mouseX, mouseY;
+    float mouseX, mouseY;
     private int width, height;
 
-    private boolean shouldUpdateViewRenderer;
+    public boolean shouldUpdateViewRenderer;
 
     public Editor(Application app) {
         this.app = app;
@@ -72,7 +72,7 @@ public class Editor {
         this.materials = app.materials;
         this.shape = app.shape;
         this.batch = app.batch;
-        this.mapRenderer = new NewEditorMapRenderer(app, mapPanel.rect);
+        this.mapRenderer = new NewEditorMapRenderer(app, this, mapPanel.rect);
         this.viewRenderer = new SoftwareRenderer(app);
         this.viewRenderer.placeCamera(100, 30, -(float)Math.PI/4f);
         this.viewRenderer.camZ = 20;
@@ -90,12 +90,14 @@ public class Editor {
 
         updateMouse();
 
+        if (state != null) state.step();
+
         focusedPanel.step();
 
         if (focusedPanel.isForcingMouseFocus) {
             constrainMouseToRect(focusedPanel.rect);
         } else {
-            if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+            if (state == null && !Gdx.input.isButtonPressed(Input.Buttons.LEFT))
                 focusedPanel = getPanelUnderMouse();
         }
 
@@ -106,16 +108,19 @@ public class Editor {
 
         temporaryControls(dt);
 
-        if (shouldUpdateViewRenderer)
+        if (shouldUpdateViewRenderer) {
             viewRenderer.renderWorld();
+            mapRenderer.viewCamPosition = new CameraMapDraw(
+                (int) viewRenderer.camX,
+                (int) viewRenderer.camY,
+                viewRenderer.camR,
+                viewRenderer.getDegFromFov() / 2.0f
+            );
+        }
 
         mapRenderer.render();
 
         shouldUpdateViewRenderer = false;
-    }
-
-    public void forceViewRefresh() {
-        shouldUpdateViewRenderer = true;
     }
 
     public void draw() {
@@ -179,16 +184,11 @@ public class Editor {
     private void onMouseClick() {
         Panel panelClicked = getPanelUnderMouse();
 
-        panelClicked.clickedIn();
-
-        for (Button b : panelClicked.buttons) {
-            if (mouseIn(b)) {
-                clickedButton = b;
-                b.pressed = true;
-                break;
-            }
+        if (state == null || !state.ignoreEditorClick) {
+            panelClicked.clickedIn();
+        } else {
+            state.click();
         }
-
     }
 
     private void onMouseRelease() {
@@ -217,11 +217,11 @@ public class Editor {
 
     // -----------------------------------------------
 
-    private boolean mouseIn(Panel p) {
+    boolean mouseIn(Panel p) {
         return /*p != null &&*/ p.rect.contains(mouseX, mouseY);
     }
 
-    private boolean mouseIn(Button b) {
+    boolean mouseIn(Button b) {
         return /*b != null && b.panelRect != null &&*/ new Rectangle(
                 b.panelRect.x + b.rect.x,
                 b.panelRect.y + b.rect.y,
@@ -560,12 +560,22 @@ public class Editor {
 
     }
 
+    public void placeViewCamera(float x, float y) {
+        viewRenderer.placeCamera(x, y);
+        viewRenderer.camCurrentSector = Physics.findCurrentSectorBranching(
+                viewRenderer.camCurrentSector,
+                viewRenderer.camX,
+                viewRenderer.camY
+        );
+        shouldUpdateViewRenderer = true;
+    }
+
     // -----------------------------------------------
 
     void loadMap(String path) {
         if (app.loadMap(path)) {
             messageLog.log("Loaded from " + path);
-            forceViewRefresh();
+            shouldUpdateViewRenderer = true;
         } else
             messageLog.log("FAILED TO LOAD " + path);
     }

@@ -9,6 +9,7 @@ import java.util.Scanner;
 
 public class Config {
     public boolean printFps = false;
+    public boolean vsync = false;
     public int frameWidth = 320;
     public int frameHeight = 180;
 

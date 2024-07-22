@@ -304,11 +304,6 @@ public class Application extends ApplicationAdapter {
 			else
 				Gdx.graphics.setFullscreenMode( Gdx.graphics.getDisplayMode() );
 		}
-
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F10))
-            Gdx.graphics.setUndecorated( true );
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F11))
-            Gdx.graphics.setUndecorated( false );
     }
 
     // --------------------------------------------------------
@@ -388,6 +383,19 @@ public class Application extends ApplicationAdapter {
         vsyncEnabled = !vsyncEnabled;
         Gdx.graphics.setVSync(vsyncEnabled);
         return vsyncEnabled;
+    }
+
+    public void toggleEditor() {
+        if (focus == AppFocusTarget.EDITOR) {
+            swapFocus(AppFocusTarget.GAME);
+        }
+        else {
+            swapFocus(AppFocusTarget.EDITOR);
+        }
+    }
+
+    public void destroyEditor() {
+        editor = null;
     }
 
 }

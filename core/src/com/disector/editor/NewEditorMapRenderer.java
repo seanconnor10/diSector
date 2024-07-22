@@ -23,7 +23,6 @@ class NewEditorMapRenderer {
     float zoom = 1f;
 
     float halfWidth, halfHeight;
-    int gridSize = 32;
 
     NewEditorMapRenderer(Application app, Editor editor, Rectangle startDimensions) {
         this.app = app;
@@ -87,7 +86,11 @@ class NewEditorMapRenderer {
     }
 
     public void drawGrid() {
+        if (!editor.isGridSnapping) return;
+
         shape.setColor(0, 0.2f, 0.1f, 0.5f);
+
+        int gridSize = editor.gridSize;
 
         for (float worldX = gridSize*(int)((camX-(halfWidth/zoom))/gridSize); worldX<camX+( (halfWidth+gridSize) /zoom); worldX+=gridSize) {
             drawLine(worldX, camY-halfHeight/zoom, worldX, camY+halfHeight/zoom);

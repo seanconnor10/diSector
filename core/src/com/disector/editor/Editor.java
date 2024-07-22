@@ -39,10 +39,10 @@ public class Editor {
     final int MAX_RENDER_HEIGHT = 225;
     static final int MENU_BAR_HEIGHT = 32;
 
-    final Panel mapPanel        = new MapPanel(this);
-    final Panel viewPanel       = new ViewPanel(this);
-    final Panel menuPanel       = new MenuPanel(this);
-    final Panel propertiesPanel = new PropertiesPanel(this);
+    final MapPanel mapPanel               = new MapPanel(this);
+    final ViewPanel viewPanel             = new ViewPanel(this);
+    final MenuPanel menuPanel             = new MenuPanel(this);
+    final PropertiesPanel propertiesPanel = new PropertiesPanel(this);
 
     final EditorMessageLog messageLog = new EditorMessageLog();
     Panel logPanel = mapPanel;
@@ -64,6 +64,9 @@ public class Editor {
     private int width, height;
 
     public boolean shouldUpdateViewRenderer;
+
+    boolean isGridSnapping = true;
+    int gridSize = 32;
 
     public Editor(Application app) {
         this.app = app;
@@ -90,6 +93,10 @@ public class Editor {
 
         updateMouse();
 
+        if (state != null && state.shouldFinish) {
+            state.finish();
+            state = null;
+        }
         if (state != null) state.step();
 
         focusedPanel.step();
@@ -105,6 +112,9 @@ public class Editor {
             onMouseClick();
         else if (clickedButton != null && !Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             onMouseRelease();
+
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT))
+            onMouseRightClick();
 
         temporaryControls(dt);
 
@@ -141,7 +151,6 @@ public class Editor {
         //Switch from shapeRenderer to SpriteBatch
         shape.end();
         batch.begin();
-
 
         //Draw Renderers' frames
         TextureRegion viewTex = viewRenderer.copyPixels();;
@@ -188,6 +197,12 @@ public class Editor {
             panelClicked.clickedIn();
         } else {
             state.click();
+        }
+    }
+
+    private void onMouseRightClick() {
+        if (state != null) {
+            state.rightClick();
         }
     }
 
@@ -415,6 +430,13 @@ public class Editor {
         else if (focusedPanel == viewPanel)
             moveViewWithKeyBoard(dt);
 
+        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            app.gameWorld.player1.snagPosition().set(
+                mapPanel.getMouseWorldX(),
+                mapPanel.getMouseWorldY()
+            );
+        }
+
         //Temporary Load and Save
         if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
@@ -449,13 +471,18 @@ public class Editor {
 
         //GridSize
         if (Gdx.input.isKeyJustPressed(Input.Keys.G)) {
-            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
-                mapRenderer.gridSize /= 2;
-            else
-                mapRenderer.gridSize *= 2;
-            if (mapRenderer.gridSize < 4)
-                mapRenderer.gridSize = 4;
-            messageLog.log("GridSize " + mapRenderer.gridSize);
+            if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT)) {
+                isGridSnapping = !isGridSnapping;
+                messageLog.log("Snapping " + (isGridSnapping ? "Enabled" : "Disabled"));
+            } else {
+                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                    gridSize /= 2;
+                else
+                    gridSize *= 2;
+                if (gridSize < 4)
+                    gridSize = 4;
+                messageLog.log("GridSize " + gridSize);
+            }
         }
     }
 
@@ -560,7 +587,17 @@ public class Editor {
 
     }
 
-    public void placeViewCamera(float x, float y) {
+    // -----------------------------------------------
+
+    void loadMap(String path) {
+        if (app.loadMap(path)) {
+            messageLog.log("Loaded from " + path);
+            shouldUpdateViewRenderer = true;
+        } else
+            messageLog.log("FAILED TO LOAD " + path);
+    }
+
+    void placeViewCamera(float x, float y) {
         viewRenderer.placeCamera(x, y);
         viewRenderer.camCurrentSector = Physics.findCurrentSectorBranching(
                 viewRenderer.camCurrentSector,
@@ -570,13 +607,11 @@ public class Editor {
         shouldUpdateViewRenderer = true;
     }
 
-    // -----------------------------------------------
+    int snap(int val) {
+        return snap( (float) val );
+    }
 
-    void loadMap(String path) {
-        if (app.loadMap(path)) {
-            messageLog.log("Loaded from " + path);
-            shouldUpdateViewRenderer = true;
-        } else
-            messageLog.log("FAILED TO LOAD " + path);
+    int snap(float val) {
+        return Math.round(val/(float)gridSize) * gridSize;
     }
 }

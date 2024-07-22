@@ -8,17 +8,18 @@ abstract class EditorState {
     final Panel panel;
 
     boolean ignoreEditorClick;
+    boolean shouldFinish;
 
     EditorState(Editor editor, Panel panel) {
         this.editor = editor;
         this.panel = panel;
     }
 
-    abstract void init();
-
     abstract void step();
 
     abstract void click();
+
+    abstract void rightClick();
 
     abstract EditAction[] finish(); //Maybe return the EditAction for the undo stack here?
 }

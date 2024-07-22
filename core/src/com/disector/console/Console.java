@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Arrays;
+
 public class Console {
     private final SpriteBatch batch;
     private final ShapeRenderer shape;
@@ -31,7 +33,7 @@ public class Console {
     private CommandExecutor executor;
 
     BitmapFont font = new BitmapFont( Gdx.files.local("assets/font/fira.fnt") );
-    private Color backgroundColor;
+    private final Color backgroundColor = new Color(0.9f, 1.0f, 0.95f, 0.8f);
 
     public Console(CommandExecutor executor) {
         active = false;
@@ -40,11 +42,10 @@ public class Console {
         lineHeight = font.getLineHeight()+8;
         lineScroll = 0;
 
-        backgroundColor = new Color(0.05f, 0.f, 0.10f, 0.7f);
-
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
         renderTransform = new Matrix4();
+        font.setColor(Color.DARK_GRAY);
 
         textLines = new Array<>(25);
         currentIn = "";
@@ -84,6 +85,8 @@ public class Console {
 
                 if (character == '\b') { //Backspace
                     currentIn = currentIn.substring(0, Math.max( 0, (currentIn+"MARK!MARK%MARK?").indexOf("MARK!MARK%MARK?")-1) );
+                } else if (character == '\t') {
+                    currentIn = autoComplete(currentIn);
                 }
 
                 return true;
@@ -210,10 +213,9 @@ public class Console {
 
         batch.begin();
         batch.setProjectionMatrix(renderTransform);
-        font.setColor(Color.WHITE);
 
         //Draw Fps
-        font.draw(batch, "FPS: " + String.valueOf((int)(1.0f/Gdx.graphics.getDeltaTime()) ), Gdx.graphics.getWidth()-175.0f, y+lineHeight-10.0f);
+        font.draw(batch, "FPS: " + (int)(1.0f/Gdx.graphics.getDeltaTime()), Gdx.graphics.getWidth()-175.0f, y+lineHeight-10.0f);
 
         //Draw Console Input
         font.draw(batch, currentIn, xBorder, y - 5 + lineHeight);
@@ -225,4 +227,33 @@ public class Console {
         batch.end();
     }
 
+    private String autoComplete(String str) {
+        if (str == null || str.replaceAll("\n|\t|\b|\r", "").isEmpty() )
+            return "";
+        String[] names = executor.getCommandNames();
+        final String finalizedStr = str;
+        Object[] filteredNames = Arrays.stream(names).filter(
+                (String name) -> (!name.equalsIgnoreCase(finalizedStr) && name.toLowerCase().startsWith( finalizedStr.toLowerCase() ))
+        ).toArray();
+
+        int size = filteredNames.length;
+        if (size == 0)
+            return "";
+        else if (size == 1)
+            return (String) filteredNames[0];
+
+        String current = str;
+        while (size > 1) {
+            int strLength = current.length()+1;
+            if (strLength >= ((String)filteredNames[0]).length())
+                return (String) filteredNames[0];
+            current = ((String) filteredNames[0]).substring(0, current.length()+1);
+            final String currentFinal = current;
+            filteredNames = Arrays.stream(names).filter(
+                (String name) -> (!name.equalsIgnoreCase(currentFinal) && name.toLowerCase().startsWith( currentFinal.toLowerCase() ))
+            ).toArray();
+            size = filteredNames.length;
+        }
+        return current.substring(0, current.length()-1);
+    }
 }

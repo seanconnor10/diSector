@@ -7,9 +7,19 @@ class MenuPanel extends Panel {
     public MenuPanel(Editor editor) {
         super(editor);
 
+        Button newMapButton = new Button(editor, this, "NEW");
+        newMapButton.releaseAction = (Void) -> {
+            editor.app.walls.clear();
+            editor.app.sectors.clear();
+            editor.shouldUpdateViewRenderer = true;
+          return Void;
+        };
+        buttons.add(newMapButton);
+
         Button loadButton = new Button(editor, this, "LOAD");
         loadButton.releaseAction = (Void) -> {
             editor.loadMap("MAPS/test.txt");
+            editor.shouldUpdateViewRenderer = true;
             return Void;
         };
         buttons.add(loadButton);

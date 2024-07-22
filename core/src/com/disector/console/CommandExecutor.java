@@ -14,6 +14,7 @@ public class CommandExecutor {
 
     private final Map<String, Method> methods = new HashMap<>();
     private String commandList;
+    private String[] commandNames;
 
     public CommandExecutor(Application app) {
         this.app = app;
@@ -28,8 +29,13 @@ public class CommandExecutor {
                 (o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.getName(), o2.getName())
         );
 
+        commandNames = new String[commands.size()];
+
+        int i=0;
         for (Method m : commands) {
             methods.put(m.getName().toLowerCase(), m);
+            commandNames[i] = m.getName();
+            i++;
         }
 
         StringBuilder str = new StringBuilder();
@@ -37,11 +43,11 @@ public class CommandExecutor {
             str.append(m.getName());
 
             for (Parameter p : m.getParameters()) {
-                str.append(" (").append(p.getType().getName()).append(") ");
+                str.append(" (").append(p.getType().getName()).append(")");
             }
             String helpText = m.getAnnotation(ConsoleCommand.class).helpText();
             if (helpText != null && !helpText.isEmpty()) {
-                str.append("- ").append(helpText);
+                str.append(" - ").append(helpText);
             }
             str.append("\n");
         }
@@ -106,6 +112,10 @@ public class CommandExecutor {
         return commandList;
     }
 
+    public String[] getCommandNames() {
+        return commandNames;
+    }
+
     // -------------------------------------------------------------------
 
     private Object stringToObject(String argStr, Parameter p) {
@@ -132,9 +142,7 @@ public class CommandExecutor {
 
     private String removeInvalid(String str) {
         return str.replaceAll("\n|\t|\b|\r", "");
-
     }
-
 
     // -------------------------------------------------------------------
 
@@ -163,6 +171,16 @@ public class CommandExecutor {
     @ConsoleCommand(helpText = "Return to Desktop")
     public void quit() {
         Gdx.app.exit();
+    }
+
+    @ConsoleCommand(helpText = "Toggle Editor")
+    public void edit() {
+        app.toggleEditor();
+    }
+
+    @ConsoleCommand(helpText = "Restart Editor if Malfunctioning")
+    public void editor_destroy() {
+        app.destroyEditor();
     }
 
 }

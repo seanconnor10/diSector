@@ -13,17 +13,10 @@ class STATE_PlacingCamera extends EditorState{
         init();
     }
 
-    @Override
     void init() {
         cameraX = x();
         cameraY = y();
-        editor.viewRenderer.placeCamera(cameraX, cameraY);
-        editor.viewRenderer.camCurrentSector = Physics.findCurrentSectorBranching(
-                editor.viewRenderer.camCurrentSector,
-                cameraX,
-                cameraY
-        );
-        editor.shouldUpdateViewRenderer = true;
+        editor.placeViewCamera(cameraX, cameraY);
     }
 
     @Override
@@ -38,6 +31,11 @@ class STATE_PlacingCamera extends EditorState{
     @Override
     void click() {
         finish();
+    }
+
+    @Override
+    void rightClick() {
+
     }
 
     @Override

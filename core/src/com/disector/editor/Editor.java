@@ -437,18 +437,6 @@ public class Editor {
             );
         }
 
-        //Temporary Load and Save
-        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
-            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT)) {
-                MapLoader mapLoader = new OldTextFormatMapLoader(app);
-                mapLoader.load("MAPS/OLD-BANK");
-                shouldUpdateViewRenderer = true;
-                messageLog.log("Loaded Old-Format Map");
-            } else {
-                loadMap("MAPS/test.txt");
-            }
-        }
-
         //Cycle Layout
         if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
@@ -475,7 +463,7 @@ public class Editor {
                 isGridSnapping = !isGridSnapping;
                 messageLog.log("Snapping " + (isGridSnapping ? "Enabled" : "Disabled"));
             } else {
-                if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
+                if (!Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
                     gridSize /= 2;
                 else
                     gridSize *= 2;

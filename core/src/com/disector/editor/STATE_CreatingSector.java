@@ -37,6 +37,7 @@ public class STATE_CreatingSector extends EditorState {
 
         Wall newestWall = createdWalls.get(createdWalls.size-1);
         int x = x(), y = y();
+
         if (newestWall.x2 != x || newestWall.y2 != y) {
             newestWall.x2 = x();
             newestWall.y2 = y();
@@ -61,16 +62,7 @@ public class STATE_CreatingSector extends EditorState {
     @Override
     void rightClick() {
         if (shouldFinish) return;
-
-        int i = createdWallIndices.size-1;
-        int wallIndex = createdWallIndices.get(i);
-        createdWallIndices.removeIndex(i);
-        createdWalls.removeIndex(i);
-        sector.walls.removeValue(wallIndex);
-        editor.app.walls.removeIndex(wallIndex);
-
-        if (createdWalls.isEmpty())
-            shouldFinish = true;
+        deleteWall();
     }
 
     @Override
@@ -98,6 +90,18 @@ public class STATE_CreatingSector extends EditorState {
         createdWalls.add(newWall);
         sector.walls.add(newIndex);
         editor.app.walls.add(newWall);
+    }
+
+    private void deleteWall() {
+        int i = createdWallIndices.size-1;
+        int wallIndex = createdWallIndices.get(i);
+        createdWallIndices.removeIndex(i);
+        createdWalls.removeIndex(i);
+        sector.walls.removeValue(wallIndex);
+        editor.app.walls.removeIndex(wallIndex);
+
+        if (createdWalls.isEmpty())
+            shouldFinish = true;
     }
 
     private void setSector() {

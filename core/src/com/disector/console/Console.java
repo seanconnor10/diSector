@@ -33,7 +33,7 @@ public class Console {
     private CommandExecutor executor;
 
     BitmapFont font = new BitmapFont( Gdx.files.local("assets/font/fira.fnt") );
-    private final Color backgroundColor = new Color(0.9f, 1.0f, 0.95f, 0.8f);
+    private final Color backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.7f);
 
     public Console(CommandExecutor executor) {
         active = false;
@@ -45,7 +45,7 @@ public class Console {
         batch = new SpriteBatch();
         shape = new ShapeRenderer();
         renderTransform = new Matrix4();
-        font.setColor(Color.DARK_GRAY);
+        font.setColor(Color.WHITE);
 
         textLines = new Array<>(25);
         currentIn = "";
@@ -54,10 +54,6 @@ public class Console {
         this.executor = executor;
 
         createInputProcessor();
-    }
-
-    public Matrix4 getRenderTransform() {
-        return renderTransform;
     }
 
     public void insertText(String str) {
@@ -170,10 +166,6 @@ public class Console {
 
     public void updateTransform() {
         renderTransform.setToOrtho2D(0.0f,0.0f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() );
-    }
-
-    public void setBackgroundColor(float r, float g, float b) {
-        backgroundColor.set(r,g,b, backgroundColor.a);
     }
 
     private void processInput() {

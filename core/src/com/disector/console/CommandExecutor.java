@@ -1,8 +1,12 @@
 package com.disector.console;
 
+import com.badlogic.gdx.Files;
+import com.badlogic.gdx.files.FileHandle;
+import com.disector.AppFocusTarget;
 import com.disector.Application;
 import com.badlogic.gdx.Gdx;
 
+import java.io.FileReader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -13,8 +17,8 @@ public class CommandExecutor {
     private final Application app;
 
     private final Map<String, Method> methods = new HashMap<>();
-    private String commandList;
-    private String[] commandNames;
+    private final String commandList;
+    private final String[] commandNames;
 
     public CommandExecutor(Application app) {
         this.app = app;
@@ -43,7 +47,8 @@ public class CommandExecutor {
             str.append(m.getName());
 
             for (Parameter p : m.getParameters()) {
-                str.append(" (").append(p.getType().getName()).append(")");
+                String typeName = p.getType() == String.class ? "text" : p.getType().getName();
+                str.append(" (").append(typeName).append(")");
             }
             String helpText = m.getAnnotation(ConsoleCommand.class).helpText();
             if (helpText != null && !helpText.isEmpty()) {
@@ -122,7 +127,7 @@ public class CommandExecutor {
         switch (p.getType().getName()) {
             case "int":
                 return Integer.parseInt(argStr);
-            case "String":
+            case "java.lang.String":
                 return argStr;
             case "double":
                 return Double.parseDouble(argStr);
@@ -183,4 +188,38 @@ public class CommandExecutor {
         app.destroyEditor();
     }
 
+    @ConsoleCommand(helpText = "Save Map Data to MAPS/")
+    public void map_save(String path) {
+        app.saveMap(path);
+    }
+
+    @ConsoleCommand(helpText = "Load Map Data from MAPS/")
+    public void map(String path) {
+        app.loadMap("MAPS/" + path);
+    }
+
+    @ConsoleCommand(helpText = "Load Old File Format Map from MAPS/")
+    public void map_old_format(String path) {
+        app.loadMapOldFormat("MAPS/" + path);
+    }
+
+    @ConsoleCommand(helpText = "Show files in MAPS folder")
+    public String[] map_list() {
+        StringBuilder output = new StringBuilder();
+        FileHandle[] files = Gdx.files.local("MAPS/").list();
+        for (FileHandle f : files) {
+            output
+                .append("  ")
+                .append( f.path().replace("MAPS/", "") )
+                .append('\n');
+        }
+        String[] returnValues = new String[1];
+        returnValues[0] = output.toString();
+        return  returnValues;
+    }
+
+    @ConsoleCommand(helpText = "Return to game")
+    public void play() {
+        app.swapFocus(AppFocusTarget.GAME);
+    }
 }

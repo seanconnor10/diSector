@@ -144,7 +144,7 @@ public class Application extends ApplicationAdapter {
     // --------------------------------------------------------
 
     public boolean loadMap(String filePath) {
-        MapLoader mapLoader = new TextFileMapLoader(this);
+        TextFileMapLoader mapLoader = new TextFileMapLoader(this);
         boolean success = false;
         try {
             mapLoader.load(filePath);
@@ -159,6 +159,11 @@ public class Application extends ApplicationAdapter {
         }
         if (editor != null) editor.shouldUpdateViewRenderer = true;
         return success;
+    }
+
+    public boolean saveMap(String filePath) {
+        if (!filePath.contains(".")) filePath += ".txt";
+        return new TextFileMapLoader(this).save("MAPS/" + filePath);
     }
 
     public boolean loadMapOldFormat(String filePath) {
@@ -222,12 +227,6 @@ public class Application extends ApplicationAdapter {
     }
 
     private void game() {
-        if (Gdx.input.isKeyJustPressed(Input.Keys.C)) {
-            CommandExecutor cExe = new CommandExecutor(this);
-            cExe.getCommandList();
-            cExe.execute("setGameFrameSize 960 540");
-        }
-
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) //Toggle Mouse Locking
             Gdx.input.setCursorCatched( !Gdx.input.isCursorCatched() );
 
@@ -290,8 +289,7 @@ public class Application extends ApplicationAdapter {
     private void functionKeyInputs() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             swapFocus(AppFocusTarget.GAME);
-        }
-        else if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+        } else if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
             if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT))
                 editor = null;
             else

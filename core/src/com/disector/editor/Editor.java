@@ -16,8 +16,6 @@ import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.assets.Material;
 import com.disector.editor.actions.EditAction;
-import com.disector.maploader.MapLoader;
-import com.disector.maploader.OldTextFormatMapLoader;
 import com.disector.renderer.SoftwareRenderer;
 
 import java.util.Stack;

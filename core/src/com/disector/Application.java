@@ -49,10 +49,11 @@ public class Application extends ApplicationAdapter {
 
     public final Array<Wall> walls = new Array<>();
     public final Array<Sector> sectors = new Array<>();
+    public final Array<Material> materials = new Array<>();
 
     public PixmapContainer textures;
-    public final Pixmap.Format pixelFormat = Pixmap.Format.RGBA4444;
-    public final Array<Material> materials = new Array<>();
+
+    public Pixmap.Format pixelFormat;
 
     public int frameWidth = 400;  //Actual default in Config class
     public int frameHeight = 225;
@@ -184,6 +185,7 @@ public class Application extends ApplicationAdapter {
         vsyncEnabled = config.vsync; Gdx.graphics.setVSync(vsyncEnabled);
         frameWidth = config.frameWidth;
         frameHeight = config.frameHeight;
+        pixelFormat = config.use32bitColor ? Pixmap.Format.RGBA8888 : Pixmap.Format.RGBA4444;
     }
 
     // --------------------------------------------------------

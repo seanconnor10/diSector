@@ -33,7 +33,7 @@ public class Console {
     private CommandExecutor executor;
 
     BitmapFont font = new BitmapFont( Gdx.files.local("assets/font/fira.fnt") );
-    private final Color backgroundColor = new Color(0.2f, 0.4f, 0.8f, 0.7f);
+    private final Color backgroundColor = new Color(0.2f, 0.6f, 0.8f, 0.7f);
 
     public Console(CommandExecutor executor) {
         active = false;
@@ -222,15 +222,16 @@ public class Console {
     private String autoComplete(String str) {
         if (str == null || str.replaceAll("\n|\t|\b|\r", "").isEmpty() )
             return "";
+
         String[] names = executor.getCommandNames();
-        final String finalizedStr = str;
+
         Object[] filteredNames = Arrays.stream(names).filter(
-                (String name) -> (!name.equalsIgnoreCase(finalizedStr) && name.toLowerCase().startsWith( finalizedStr.toLowerCase() ))
+                (String name) -> (!name.equalsIgnoreCase(str) && name.toLowerCase().startsWith( str.toLowerCase() ))
         ).toArray();
 
         int size = filteredNames.length;
         if (size == 0)
-            return "";
+            return str;
         else if (size == 1)
             return (String) filteredNames[0];
 
@@ -240,9 +241,9 @@ public class Console {
             if (strLength >= ((String)filteredNames[0]).length())
                 return (String) filteredNames[0];
             current = ((String) filteredNames[0]).substring(0, current.length()+1);
-            final String currentFinal = current;
+            final String currentFinalized = current;
             filteredNames = Arrays.stream(names).filter(
-                (String name) -> (!name.equalsIgnoreCase(currentFinal) && name.toLowerCase().startsWith( currentFinal.toLowerCase() ))
+                (String name) -> (!name.equalsIgnoreCase(currentFinalized) && name.toLowerCase().startsWith( currentFinalized.toLowerCase() ))
             ).toArray();
             size = filteredNames.length;
         }

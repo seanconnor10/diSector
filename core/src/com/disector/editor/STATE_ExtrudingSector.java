@@ -9,7 +9,7 @@ import com.disector.Wall;
 
 import com.disector.editor.actions.EditAction;
 
-class STATE_CreatingSector extends EditorState {
+class STATE_ExtrudingSector extends EditorState {
 
     boolean isNewSector = false;
     int sectorIndex;
@@ -18,7 +18,7 @@ class STATE_CreatingSector extends EditorState {
     IntArray createdWallIndices = new IntArray();
     float firstWallX, firstWallY;
 
-    public STATE_CreatingSector(Editor editor, Panel panel) {
+    public STATE_ExtrudingSector(Editor editor, Panel panel) {
         super(editor, panel);
         ignoreEditorClick = true;
         init();

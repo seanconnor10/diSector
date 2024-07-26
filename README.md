@@ -7,7 +7,7 @@ Uses LibGDX for basic window setup, input, and other miscellaneous things.
 
 Requires Lightweight Java Game Library to build.
 
-<a href="https://github.com/seanconnor10/diSector/tree/main/core/src/com/disector">Most Code Here in core/src/...</a>
+<div>Most Code <a href="https://github.com/seanconnor10/diSector/tree/main/core/src/com/disector">Here</a> in core/src/...</div>
 
 <p>
   <img src="documents/readme-screenshots/sector_game_screenshot.jpg" width="800" title="Screenshot">

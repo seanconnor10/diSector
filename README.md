@@ -10,7 +10,7 @@ Requires Lightweight Java Game Library to build.
 <div>Most Code <a href="https://github.com/seanconnor10/diSector/tree/main/core/src/com/disector">HERE</a> in core/src/...</div>
 
 <br>
-
+...
 <p>
   <img src="documents/readme-screenshots/sector_game_screenshot.jpg" width="800" title="Screenshot">
   <br><br><br>

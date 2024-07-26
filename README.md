@@ -2,13 +2,12 @@
 
 ### 2.5 Dimensional Software Render and Game imitating Ken Silverman's Build Engine.
 
-<div>Most Code <a href="https://github.com/seanconnor10/diSector/tree/main/core/src/com/disector" color="limegreen" >Here</a> in core/src/...</div>
-
 Custom Rendering and Physics
 Uses LibGDX for basic window setup, input, and other miscellaneous things.
 
 Requires Lightweight Java Game Library to build.
 
+<div>Most Code <a href="https://github.com/seanconnor10/diSector/tree/main/core/src/com/disector">Here</a> in core/src/...</div>
 
 <br>
 

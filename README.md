@@ -9,8 +9,10 @@ Requires Lightweight Java Game Library to build.
 
 <div>Most Code <a href="https://github.com/seanconnor10/diSector/tree/main/core/src/com/disector">Here</a> in core/src/...</div>
 
+<br><br><br>
+
 <p>
   <img src="documents/readme-screenshots/sector_game_screenshot.jpg" width="800" title="Screenshot">
-  <br><br>
+  <br><br><br>
   <img src="documents/readme-screenshots/editor_screen.png" width="800" title="Editor Screenshot">
 </p>

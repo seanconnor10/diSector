@@ -6,8 +6,11 @@ import com.badlogic.gdx.utils.IntArray;
 import com.disector.Sector;
 import com.disector.Wall;
 
+import java.util.Arrays;
+
 class EditorActiveSelection {
-    private final Array<Wall>
+    private final Array<Wall> allWalls;
+    private final Array<Sector> allSectors;
 
     private final IntArray sectorIndices;
     private final Array<Sector> selectedSectors;
@@ -19,11 +22,13 @@ class EditorActiveSelection {
     private int highlightedWallIndex;
     private Wall highlightedWall;
 
-    EditorActiveSelection() {
-        sectors = new Array<>();
-        walls = new Array<>();
+    EditorActiveSelection(Array<Sector> sectors, Array<Wall> walls) {
+        selectedSectors = new Array<>();
+        selectedWalls = new Array<>();
         sectorIndices = new IntArray();
         wallIndices = new IntArray();
+        allWalls = walls;
+        allSectors = sectors;
     }
 
     void clear() {
@@ -32,17 +37,61 @@ class EditorActiveSelection {
     }
 
     void clearWalls() {
-        walls.clear();
+        selectedWalls.clear();
         wallIndices.clear();
     }
 
     void clearSectors() {
         sectorIndices.clear();
-        sectors.clear();
+        selectedSectors.clear();
     }
 
-    void setWallHighlight(int wInd) {
+    Array<Wall> getWalls() {
+        return new Array<Wall>(selectedWalls);
+    }
 
+    Array<Sector> getSectors() {
+        return new Array<Sector>(selectedSectors);
+    }
+
+    int getWallHighlightIndex() {
+        return highlightedWallIndex;
+    }
+
+    Wall getWallHighlight() {
+        return highlightedWall;
+    }
+
+    int getSectorHighlightIndex() {
+        return highlightedSectorIndex;
+    }
+
+    Sector getSectorHighlight() {
+        return highlightedSector;
+    }
+
+    void setWallHighlight(int wallIndex) {
+        if (wallIndex >= allWalls.size)
+            return;
+        if (wallIndex < 0) {
+            highlightedWallIndex = -1;
+            highlightedWall = null;
+        } else {
+            highlightedWallIndex = wallIndex;
+            highlightedWall = allWalls.get(wallIndex);
+        }
+    }
+
+    void setSectorHighlight(int sectorIndex) {
+        if (sectorIndex >= allSectors.size)
+            return;
+        if (sectorIndex < 0) {
+            highlightedSectorIndex = -1;
+            highlightedSector = null;
+        } else {
+            highlightedSectorIndex = sectorIndex;
+            highlightedSector = allSectors.get(sectorIndex);
+        }
     }
 
     void addHighlightedWallToSelection() {

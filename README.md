@@ -7,5 +7,6 @@ Requires Lightweight Java Game Library to build.
 
 <p>
   <img src="documents/readme-screenshots/sector_game_screenshot.jpg" width="800" title="Screenshot">
+  <br><br>
   <img src="documents/readme-screenshots/editor_screen.png" width="800" title="Editor Screenshot">
 </p>

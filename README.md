@@ -10,6 +10,6 @@ Requires Lightweight Java Game Library to build.
 </p>
 
 
-<p>
-  <img align="center" src="sector_game_screenshot.jpg" width="800" title="">
+<p align="center">
+  <img src="sector_game_screenshot.jpg" width="800" title="">
 </p>

@@ -1,4 +1,4 @@
-<p display="block" align="center" width="600">
+<p display="block" align="center" width="400">
 
 2.5 Dimensional Software Render and Game imitating Ken Silverman's Build Engine.
 

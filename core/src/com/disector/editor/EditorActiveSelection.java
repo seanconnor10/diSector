@@ -70,6 +70,10 @@ class EditorActiveSelection {
         return highlightedSector;
     }
 
+    void setHighlights(int mouseWorldX, int mouseWorldY) {
+        
+    }
+
     void setWallHighlight(int wallIndex) {
         if (wallIndex >= allWalls.size)
             return;

@@ -15,17 +15,26 @@ public class Config {
     public int frameHeight = 180;
 
     public Config(FileHandle file) {
+        load(file);
+    }
+
+    private void load(FileHandle file) {
         System.out.println("Loading Config at " + file.path());
         Scanner fileScan = new Scanner(file.readString());
 
         Field[] fields = Config.class.getFields();
         Map<String, String> fileValues = new HashMap<>();
-        
+
         while(fileScan.hasNextLine()) {
             String line = fileScan.nextLine();
+
             int equalsPosition = line.indexOf('=');
+            if (equalsPosition == -1)  //Skip this line of the file is no '=' present
+                continue;
+
             String varName = line.substring(0, equalsPosition);
             String varValue = line.substring(equalsPosition+1);
+
             boolean nameFound = false;
             for (Field field : fields) {
                 if (varName.equals(field.getName())) {
@@ -33,6 +42,7 @@ public class Config {
                     break;
                 }
             }
+
             if (nameFound)
                 fileValues.put(varName, varValue);
             else
@@ -74,7 +84,6 @@ public class Config {
         } catch (IllegalAccessException | NumberFormatException e) {
             System.out.printf("    PARSING ERROR FOR %s %s WHEN GIVEN %s\n", fieldType.toUpperCase(), fieldName, valueStr );
         }
-
     }
 
 }

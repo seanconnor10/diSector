@@ -379,7 +379,7 @@ public class Editor {
     }
 
     private void drawLog() {
-        int logSize = messageLog.messages.size();
+        int logSize = messageLog.size();
         int lineSpace = (int) font.getLineHeight();
 
         for (int i=logSize-1; i>=0; i--) {
@@ -387,7 +387,7 @@ public class Editor {
             font.setColor(Color.TEAL);
             font.getColor().lerp(Color.CLEAR, (logSize-1-i) * (1.f/(logSize+1)) );
             //font.getColor().lerp(Color.CLEAR, messageLog.messageLifetime.get(i) / EditorMessageLog.MAX_LIFE );
-            font.draw(batch, messageLog.messages.get(i),
+            font.draw(batch, messageLog.get(i),
                     logPanel.rect.x+9,
                     logPanel.rect.y+logPanel.rect.height-15-lineSpace*(logSize-1-i)
             );
@@ -395,7 +395,7 @@ public class Editor {
             font.setColor(Color.GOLDENROD);
             font.getColor().lerp(Color.CLEAR, (logSize-1-i) * (1.f/(logSize+1)) );
             //font.getColor().lerp(Color.CLEAR, messageLog.messageLifetime.get(i) / EditorMessageLog.MAX_LIFE );
-            font.draw(batch, messageLog.messages.get(i),
+            font.draw(batch, messageLog.get(i),
                     logPanel.rect.x+12,
                     logPanel.rect.y+logPanel.rect.height-12-lineSpace*(logSize-1-i)
             );

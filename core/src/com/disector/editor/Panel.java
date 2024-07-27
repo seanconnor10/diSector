@@ -48,8 +48,8 @@ class Panel {
         }
         return null;
         //Needing .toArray() makes this second method probably slower?
-        /*return Arrays.stream(buttons.toArray())
-                .filter( b -> b.text.equals(text) ).findFirst().orElse(null);*/
+        //return Arrays.stream(buttons.toArray())
+        //        .filter( b -> b.text.equals(text) ).findFirst().orElse(null);
     }
 
     void clickedIn() {

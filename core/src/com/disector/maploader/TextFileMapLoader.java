@@ -223,7 +223,7 @@ public class TextFileMapLoader implements MapLoader {
         sectors.clear();
         for (Sector s : newSectors) {
             s.removeDuplicateIndices();
-            sectors.add(new Sector(s));
+            sectors.add(new Sector(s, true));
         }
 
         walls.clear();

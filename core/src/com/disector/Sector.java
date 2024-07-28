@@ -13,10 +13,12 @@ public class Sector {
     public Sector() {
     }
 
-    public Sector(Sector s) {
-        this.walls = new IntArray(s.walls.size);
-        for (int wInd : s.walls.toArray()) {
-            this.walls.add(wInd);
+    public Sector(Sector s, boolean copyWalls) {
+        if (copyWalls) {
+            this.walls = new IntArray(s.walls.size);
+            for (int wInd : s.walls.toArray()) {
+                this.walls.add(wInd);
+            }
         }
         this.floorZ     =   s.floorZ;
         this.ceilZ      =   s.ceilZ;

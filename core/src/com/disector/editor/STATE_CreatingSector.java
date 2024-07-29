@@ -29,6 +29,11 @@ class STATE_CreatingSector extends EditorState {
         makeNextWall();
         firstWallX = createdWalls.get(0).x1;
         firstWallY = createdWalls.get(0).y1;
+        if (isNewSector) {
+            editor.messageLog.log("Creating New Detached Sector");
+        } else {
+            editor.messageLog.log("Creating Walls in Sector " + sectorIndex);
+        }
     }
 
     @Override
@@ -50,6 +55,11 @@ class STATE_CreatingSector extends EditorState {
     void click() {
         if (shouldFinish) return;
 
+        Wall newestWall = createdWalls.get(createdWalls.size-1);
+
+        if (newestWall.x2 == newestWall.x1 && newestWall.y2 == newestWall.y1)
+            return;
+
         //If Clicking On Beginning of first wall, finish
         if ( Math.abs(x() - firstWallX) < 0.05f && Math.abs(y() - firstWallY) < 0.05f ) {
             shouldFinish = true;
@@ -68,18 +78,6 @@ class STATE_CreatingSector extends EditorState {
     @Override
     EditAction[] finish() {
         return new EditAction[0];
-    }
-
-    private int x(){
-        int x = ((MapPanel) panel).getMouseWorldX();
-        if (editor.isGridSnapping) x = editor.snap(x);
-        return x;
-    }
-
-    private int y(){
-        int y = ((MapPanel) panel).getMouseWorldY();
-        if (editor.isGridSnapping) y = editor.snap(y);
-        return y;
     }
 
     private void makeNextWall() {

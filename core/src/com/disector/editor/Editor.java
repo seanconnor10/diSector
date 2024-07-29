@@ -42,29 +42,30 @@ public class Editor {
     final MenuPanel menuPanel             = new MenuPanel(this);
     final PropertiesPanel propertiesPanel = new PropertiesPanel(this);
 
-    final EditorMessageLog messageLog = new EditorMessageLog();
-    Panel logPanel = mapPanel;
-
+    Layouts layout = Layouts.DEFAULT;
+    Button clickedButton = null;
     Panel focusedPanel = mapPanel;
+
     final Panel[] panels = new Panel[] {
             mapPanel, viewPanel, menuPanel, propertiesPanel
     };
 
-    Button clickedButton = null;
-
-    Layouts layout = Layouts.DEFAULT;
-
     final Stack<EditAction> undoStack = new Stack<>();
 
-    EditorState state;
+    final EditorMessageLog messageLog = new EditorMessageLog();
+    Panel logPanel = mapPanel;
 
+    final ActiveSelection selection;
+
+    EditorState state;
     float mouseX, mouseY;
     private int width, height;
-
     public boolean shouldUpdateViewRenderer;
-
     boolean isGridSnapping = true;
     int gridSize = 32;
+
+    private float animationCycle = 0f;
+    float animationFactor = 0f;
 
     public Editor(Application app) {
         this.app = app;
@@ -77,6 +78,7 @@ public class Editor {
         this.viewRenderer = new SoftwareRenderer(app);
         this.viewRenderer.placeCamera(100, 30, -(float)Math.PI/4f);
         this.viewRenderer.camZ = 20;
+        this.selection = new ActiveSelection(sectors, walls, this);
 
         resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
@@ -89,46 +91,20 @@ public class Editor {
     public void step(float dt) {
         messageLog.stepLifeTime(dt);
 
+        cycleAnimation(dt);
+
         updateMouse();
 
-        if (state != null && state.shouldFinish) {
-            state.finish();
-            state = null;
-        }
-        if (state != null) state.step();
+        stepStateObject();
 
-        focusedPanel.step();
+        updatePanel(dt);
 
-        if (focusedPanel.isForcingMouseFocus) {
-            constrainMouseToRect(focusedPanel.rect);
-        } else {
-            if (state == null && !Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-                focusedPanel = getPanelUnderMouse();
-        }
-
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT))
-            onMouseClick();
-        else if (clickedButton != null && !Gdx.input.isButtonPressed(Input.Buttons.LEFT))
-            onMouseRelease();
-
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT))
-            onMouseRightClick();
+        callMouseClickActions();
 
         temporaryControls(dt);
 
-        if (shouldUpdateViewRenderer) {
-            viewRenderer.renderWorld();
-            mapRenderer.viewCamPosition = new CameraMapDraw(
-                (int) viewRenderer.camX,
-                (int) viewRenderer.camY,
-                viewRenderer.camR,
-                viewRenderer.getDegFromFov() / 2.0f
-            );
-        }
+        updateRenderers();
 
-        mapRenderer.render();
-
-        shouldUpdateViewRenderer = false;
     }
 
     public void draw() {
@@ -191,11 +167,10 @@ public class Editor {
     private void onMouseClick() {
         Panel panelClicked = getPanelUnderMouse();
 
-        if (state == null || !state.ignoreEditorClick) {
+        if (state == null || !state.ignoreEditorClick )
             panelClicked.clickedIn();
-        } else {
+        if (state != null)
             state.click();
-        }
     }
 
     private void onMouseRightClick() {
@@ -422,6 +397,57 @@ public class Editor {
 
     // -----------------------------------------------
 
+    private void stepStateObject() {
+        if (state != null && state.shouldFinish) {
+            state.finish();
+            state = null;
+        }
+        if (state != null) state.step();
+    }
+
+    private void updateRenderers() {
+        if (shouldUpdateViewRenderer) {
+            viewRenderer.renderWorld();
+            mapRenderer.viewCamPosition = new CameraMapDraw(
+                (int) viewRenderer.camX,
+                (int) viewRenderer.camY,
+                viewRenderer.camR,
+                viewRenderer.getDegFromFov() / 2.0f
+            );
+        }
+        mapRenderer.render();
+        shouldUpdateViewRenderer = false;
+    }
+
+    private void updatePanel(float dt) {
+        focusedPanel.step(dt);
+
+        if (focusedPanel.isForcingMouseFocus) {
+            constrainMouseToRect(focusedPanel.rect);
+        } else {
+            if (state == null && !Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+                focusedPanel = getPanelUnderMouse();
+        }
+    }
+
+    private void cycleAnimation(float dt) {
+        animationCycle += 2*dt;
+        while (animationCycle > Math.PI) {
+            animationCycle -= (float) Math.PI;
+        }
+        animationFactor = (float) Math.sin(animationCycle);
+    }
+
+    private void callMouseClickActions() {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT))
+            onMouseClick();
+        else if (clickedButton != null && !Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+            onMouseRelease();
+
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT))
+            onMouseRightClick();
+    }
+
     private void temporaryControls(float dt) {
         if (focusedPanel == mapPanel)
             moveMapWithKeyBoard(dt);
@@ -473,19 +499,22 @@ public class Editor {
     }
 
     private void moveMapWithKeyBoard(float dt) {
+        boolean shift = Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT);
+        float speed = shift ? 1000 : 300;
+
         //Temporary Movement
         float mapZoom = mapRenderer.zoom;
         if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            mapRenderer.camY += 200.f * dt / (float)Math.sqrt(mapZoom);
+            mapRenderer.camY += speed * dt / (float)Math.sqrt(mapZoom);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            mapRenderer.camX += 200.f * dt / (float)Math.sqrt(mapZoom);
+            mapRenderer.camX += speed * dt / (float)Math.sqrt(mapZoom);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            mapRenderer.camY -= 200.f * dt / (float)Math.sqrt(mapZoom);
+            mapRenderer.camY -= speed * dt / (float)Math.sqrt(mapZoom);
         }
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            mapRenderer.camX -= 200.f * dt / (float)Math.sqrt(mapZoom);
+            mapRenderer.camX -= speed * dt / (float)Math.sqrt(mapZoom);
         }
 
         //Temporary Zoom

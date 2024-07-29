@@ -4,16 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 
 class MapPanel extends Panel {
-
     public MapPanel(Editor editor) {
         super(editor);
     }
 
     @Override
-    void step() {
-        super.step();
+    void step(float dt) {
+        super.step(dt);
 
         keyActions();
+
+        editor.selection.setHighlights(getMouseWorldX(), getMouseWorldY());
     }
 
     @Override
@@ -46,5 +47,11 @@ class MapPanel extends Panel {
             editor.state = new STATE_ExtrudingSector(editor, this);
             return;
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+            editor.state = new STATE_SplittingWall(editor, this);
+            return;
+        }
+
     }
+
 }

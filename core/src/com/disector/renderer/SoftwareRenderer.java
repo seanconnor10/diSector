@@ -20,7 +20,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     public SoftwareRenderer(Application app) {
         super(app);
-        setFovFromDeg(110);
+        setFovFromDeg(Application.config.fov);
     }
 
     @Override
@@ -38,6 +38,11 @@ public class SoftwareRenderer extends DimensionalRenderer {
         super.resizeFrame(w, h);
         setFovFromDeg(fovDeg);
         reInitDrawData(w);
+    }
+
+    @Override
+    public void setFov(float val) {
+        setFovFromDeg(val);
     }
 
     public void setFovFromDeg(float deg) {

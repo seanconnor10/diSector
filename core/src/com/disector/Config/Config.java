@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class Config {
+    public int fov = 100;
     public boolean printFps = false;
     public boolean vsync = false;
     public boolean use32bitColor = false;

@@ -67,8 +67,16 @@ class NewEditorMapRenderer {
     }
 
     public void drawWalls() {
-        for (Wall wall : app.walls) {
-            shape.setColor(wall.isPortal ? Color.CORAL : Color.WHITE);
+        int highlightedWall = editor.selection.getWallHighlightIndex();
+        for (int i=0; i<app.walls.size; i++) {
+            Wall wall = app.walls.get(i);
+
+            if (i == highlightedWall) {
+                shape.setColor(new Color(1f, 0f, 0f, 1f).lerp(Color.LIME, editor.animationFactor));
+            } else {
+                shape.setColor(wall.isPortal ? Color.CORAL : Color.WHITE);
+            }
+
             drawLine(wall.x1, wall.y1, wall.x2, wall.y2);
 
             if (wall.isPortal) continue;

@@ -398,4 +398,9 @@ public class Application extends ApplicationAdapter {
         editor = null;
     }
 
+    public void setRenderFov(int fov) {
+        if (renderer != null)
+            renderer.setFov(fov);
+    }
+
 }

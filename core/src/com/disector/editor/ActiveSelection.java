@@ -1,14 +1,15 @@
 package com.disector.editor;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import com.badlogic.gdx.utils.IntArray;
 import com.disector.Sector;
 import com.disector.Wall;
+import com.disector.WallInfoPack;
 
-import java.util.Arrays;
-
-class EditorActiveSelection {
+class ActiveSelection {
+    private final Editor editor;
     private final Array<Wall> allWalls;
     private final Array<Sector> allSectors;
 
@@ -22,13 +23,14 @@ class EditorActiveSelection {
     private int highlightedWallIndex;
     private Wall highlightedWall;
 
-    EditorActiveSelection(Array<Sector> sectors, Array<Wall> walls) {
+    ActiveSelection(Array<Sector> sectors, Array<Wall> walls, Editor editor) {
         selectedSectors = new Array<>();
         selectedWalls = new Array<>();
         sectorIndices = new IntArray();
         wallIndices = new IntArray();
-        allWalls = walls;
-        allSectors = sectors;
+        this.editor = editor;
+        this.allWalls = walls;
+        this.allSectors = sectors;
     }
 
     void clear() {
@@ -71,7 +73,19 @@ class EditorActiveSelection {
     }
 
     void setHighlights(int mouseWorldX, int mouseWorldY) {
-        
+        final float maxSelectionDistance = 5;
+        if (allWalls.size == 0)
+            return;
+        Vector2 worldPosition = new Vector2(mouseWorldX, mouseWorldY);
+        Array<WallInfoPack> wallDistances = new Array<>();
+        WallInfoPack closestWall = new WallInfoPack(allWalls.get(0), 0, worldPosition);
+        for (int i = 1; i < allWalls.size; i++) {
+            WallInfoPack wall = new WallInfoPack(allWalls.get(i), i, worldPosition);
+            if (wall.distToNearest < closestWall.distToNearest)
+                closestWall = wall;
+        }
+
+        setWallHighlight(closestWall.distToNearest>maxSelectionDistance ? -1 : closestWall.wInd);
     }
 
     void setWallHighlight(int wallIndex) {

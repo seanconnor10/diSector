@@ -3,7 +3,6 @@ package com.disector.editor;
 import com.badlogic.gdx.utils.IntArray;
 import com.badlogic.gdx.utils.Array;
 
-import com.disector.Physics;
 import com.disector.Sector;
 import com.disector.Wall;
 
@@ -11,24 +10,44 @@ import com.disector.editor.actions.EditAction;
 
 class STATE_ExtrudingSector extends EditorState {
 
-    boolean isNewSector = false;
-    int sectorIndex;
-    Sector sector;
+    int previousSectorIndex;
+    Sector previousSector;
+    int newSectorIndex;
+    Sector newSector;
+    final int initialWallIndex;
+    Wall initialWall;
     Array<Wall> createdWalls = new Array<>();
     IntArray createdWallIndices = new IntArray();
-    float firstWallX, firstWallY;
 
     public STATE_ExtrudingSector(Editor editor, Panel panel) {
         super(editor, panel);
         ignoreEditorClick = true;
+        initialWallIndex = editor.selection.getWallHighlightIndex();
+        if (initialWallIndex == -1) {
+            shouldFinish = true;
+            return;
+        }
+        initialWall = editor.selection.getWallHighlight();
+        if (initialWall.isPortal) {
+            shouldFinish = true;
+            return;
+        }
         init();
     }
 
     void init() {
-        setSector();
+
+        setPreviousSector();
+        newSectorIndex = editor.sectors.size;
+        newSector = new Sector(previousSector, false);
+        newSector.walls.add(initialWallIndex);
+        editor.sectors.add(newSector);
+
+        initialWall.isPortal = true;
+        initialWall.linkA = previousSectorIndex;
+        initialWall.linkB = newSectorIndex;
         makeNextWall();
-        firstWallX = createdWalls.get(0).x1;
-        firstWallY = createdWalls.get(0).y1;
+        editor.messageLog.log("Extruding New Sector from Wall " + initialWallIndex);
     }
 
     @Override
@@ -50,8 +69,12 @@ class STATE_ExtrudingSector extends EditorState {
     void click() {
         if (shouldFinish) return;
 
+        Wall newestWall = createdWalls.get(createdWalls.size-1);
+        if (newestWall.x2 == newestWall.x1 && newestWall.y2 == newestWall.y1)
+            return;
+
         //If Clicking On Beginning of first wall, finish
-        if ( Math.abs(x() - firstWallX) < 0.05f && Math.abs(y() - firstWallY) < 0.05f ) {
+        if ( Math.abs(x() - initialWall.x2) < 0.05f && Math.abs(y() - initialWall.y2) < 0.05f ) {
             shouldFinish = true;
             return;
         }
@@ -70,25 +93,30 @@ class STATE_ExtrudingSector extends EditorState {
         return new EditAction[0];
     }
 
-    private int x(){
-        int x = ((MapPanel) panel).getMouseWorldX();
-        if (editor.isGridSnapping) x = editor.snap(x);
-        return x;
-    }
-
-    private int y(){
-        int y = ((MapPanel) panel).getMouseWorldY();
-        if (editor.isGridSnapping) y = editor.snap(y);
-        return y;
-    }
-
     private void makeNextWall() {
         int x = x(), y = y();
-        Wall newWall = new Wall( x, y, x, y);
+        Wall previous, newWall;
+        if (createdWalls.size == 0) {
+            previous = initialWall;
+            newWall = new Wall(previous);
+            newWall.x2 = x;
+            newWall.y2 = y;
+        } else {
+            previous = createdWalls.get(createdWalls.size-1);
+            newWall = new Wall(previous);
+            newWall.x1 = previous.x2;
+            newWall.y1 = previous.y2;
+            newWall.x2 = x;
+            newWall.y2 = y;
+        }
+        newWall.isPortal = false;
+        newWall.linkA = 0;
+        newWall.linkB = 0;
+
         int newIndex = editor.app.walls.size;
         createdWallIndices.add(newIndex);
         createdWalls.add(newWall);
-        sector.walls.add(newIndex);
+        newSector.walls.add(newIndex);
         editor.app.walls.add(newWall);
     }
 
@@ -97,20 +125,22 @@ class STATE_ExtrudingSector extends EditorState {
         int wallIndex = createdWallIndices.get(i);
         createdWallIndices.removeIndex(i);
         createdWalls.removeIndex(i);
-        sector.walls.removeValue(wallIndex);
+        newSector.walls.removeValue(wallIndex);
         editor.app.walls.removeIndex(wallIndex);
 
         if (createdWalls.isEmpty())
             shouldFinish = true;
     }
 
-    private void setSector() {
-        sectorIndex = Physics.findCurrentSectorBranching(-1, x(), y());
-        if (sectorIndex == -1) {
-            isNewSector = true;
-            sectorIndex = editor.sectors.size;
-            editor.sectors.add(new Sector());
+    private void setPreviousSector() {
+        for (int i=0; i<editor.sectors.size; i++) {
+            Sector sector = editor.sectors.get(i);
+            if (sector.walls.contains(initialWallIndex)) {
+                previousSector = sector;
+                previousSectorIndex = i;
+                break;
+            }
         }
-        sector = editor.sectors.get(sectorIndex);
     }
+
 }

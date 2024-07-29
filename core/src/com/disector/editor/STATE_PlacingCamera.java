@@ -44,11 +44,4 @@ class STATE_PlacingCamera extends EditorState{
         return new EditAction[0];
     }
 
-    private int x(){
-        return ((MapPanel) panel).getMouseWorldX();
-    }
-
-    private int y(){
-        return ((MapPanel) panel).getMouseWorldY();
-    }
 }

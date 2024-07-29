@@ -3,7 +3,6 @@ package com.disector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -26,8 +25,6 @@ import com.disector.renderer.GameMapRenderer;
 import com.disector.renderer.SoftwareRenderer;
 import com.disector.maploader.MapLoader;
 import com.disector.maploader.TextFileMapLoader;
-
-import java.util.function.Function;
 
 public class Application extends ApplicationAdapter {
     public static Config config;
@@ -78,7 +75,7 @@ public class Application extends ApplicationAdapter {
         shape.setColor(Color.WHITE);
 
         textures = new PixmapContainer();
-        textures.loadImages();
+        textures.loadFolder("");
 
         swapFocus(AppFocusTarget.GAME);
 
@@ -97,17 +94,13 @@ public class Application extends ApplicationAdapter {
 
         functionKeyInputs();
 
-
-
         //Run Screen
         switch(focus) {
             case MENU: menu(); break;
             case GAME: game(); break;
             case EDITOR:
-                if (editor != null)
-                    editor();
-                else
-                    ScreenUtils.clear(Color.SLATE);
+                if (editor != null) editor();
+                    else ScreenUtils.clear(Color.SLATE);
                 break;
             default: break;
         }
@@ -156,7 +149,7 @@ public class Application extends ApplicationAdapter {
                 gameWorld.player1.setZ(newFloorZ);
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.out.println("Error when loading map! " +e.getMessage());
         }
         if (editor != null) editor.shouldUpdateViewRenderer = true;
         return success;
@@ -355,7 +348,8 @@ public class Application extends ApplicationAdapter {
 
     private void createTestMaterial() {
         materials.clear();
-        materials.add(new Material(textures.pixmaps2.get("WOOD2"), false));
+        String texName = "WOOD2";
+        materials.add(new Material( textures.get(texName), texName, false));
     }
 
     private void randomizeTextures() {

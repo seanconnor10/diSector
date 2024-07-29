@@ -153,7 +153,7 @@ public class TextFileMapLoader implements MapLoader {
                                         wallBuild.mat = Integer.parseInt(next);
                                     } else {
                                         wallBuild.mat =
-                                            newMaterialsNameToIndexMap.getOrDefault(next.toUpperCase(), null);
+                                            newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
                                     }
                                     subMode = "NONE";
                                     break;

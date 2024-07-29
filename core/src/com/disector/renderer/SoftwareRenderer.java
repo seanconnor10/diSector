@@ -1,14 +1,19 @@
 package com.disector.renderer;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.disector.*;
+import com.disector.assets.PixmapContainer;
 
 import java.util.Stack;
 
 public class SoftwareRenderer extends DimensionalRenderer {
+    private Pixmap[] ERROR_TEXTURE;
+
     private int[] occlusionBottom;
     private int[] occlusionTop;
     private final Stack<Integer> drawnPortals = new Stack<>();
@@ -20,6 +25,12 @@ public class SoftwareRenderer extends DimensionalRenderer {
 
     public SoftwareRenderer(Application app) {
         super(app);
+
+        Texture temp = new Texture(Gdx.files.local("assets/img/error_tex.png"));
+        temp.getTextureData().prepare();
+        ERROR_TEXTURE = PixmapContainer.makeMipMapSeries(temp);
+        temp.dispose();
+
         setFovFromDeg(Application.config.fov);
     }
 
@@ -176,7 +187,12 @@ public class SoftwareRenderer extends DimensionalRenderer {
         float destCeiling = 100.f, destFloor = 0.f, upperWallCutoffV = 1.001f, lowerWallCutoffV = -0.001f;
 
         Pixmap[] textures, texturesLow, texturesHigh;
-        textures = materials.get(w.mat).tex;
+        try {
+            textures = materials.get(w.mat).tex;
+        } catch (Exception e) {
+            System.out.println("SoftwareRenderer: Caught Exception When grabbing texture");
+            textures = ERROR_TEXTURE;
+        }
         texturesLow = textures;
         texturesHigh = textures;
 

@@ -149,7 +149,7 @@ public class Application extends ApplicationAdapter {
                 gameWorld.player1.setZ(newFloorZ);
             }
         } catch (Exception e) {
-            System.out.println("Error when loading map! " +e.getMessage());
+            System.out.println( "Error when loading map! " + e.getCause() + " " + e.getMessage() );
         }
         if (editor != null) editor.shouldUpdateViewRenderer = true;
         return success;

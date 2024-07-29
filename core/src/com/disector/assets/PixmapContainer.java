@@ -76,19 +76,14 @@ public class PixmapContainer {
             Texture temp = new Texture(file, Pixmap.Format.RGBA8888, false);
             if (!temp.getTextureData().isPrepared()) temp.getTextureData().prepare();
 
-            pixmaps[i][0] = temp.getTextureData().consumePixmap();
-            for (int k=1; k<MipMapNumber; k++) {
-                pixmaps[i][k] = halvePixmap(pixmaps[i][k-1]);
-            }
+            pixmaps[i] = makeMipMapSeries(temp);
+
             mat.tex = pixmaps[i];
             pixmapsByName.put(file.nameWithoutExtension().toUpperCase(), pixmaps[i]);
 
             temp.dispose();
-
             loadedImages.add(file.toString());
-
             System.out.println("    " + file + " to index " + i);
-
             i++;
         }
 
@@ -98,15 +93,16 @@ public class PixmapContainer {
         return pixmapsByName.getOrDefault(name, null);
     }
 
-    private boolean handleIsImage(FileHandle handle) {
-        if (handle.isDirectory())
-            return false;
-
-        String str = handle.toString().toLowerCase(Locale.ROOT);
-        return str.endsWith(".png") || str.endsWith(".jpg") || str.endsWith(".bmp");
+    public static Pixmap[] makeMipMapSeries(Texture tex) {
+        Pixmap[] pixmaps = new Pixmap[MipMapNumber];
+        pixmaps[0] = tex.getTextureData().consumePixmap();
+        for (int i=1; i<MipMapNumber; i++) {
+            pixmaps[i] = halvePixmap(pixmaps[i-1]);
+        }
+        return pixmaps;
     }
 
-    private Pixmap halvePixmap(Pixmap pix) {
+    private static  Pixmap halvePixmap(Pixmap pix) {
         Pixmap newPix = new Pixmap(pix.getWidth()/2, pix.getHeight(), pix.getFormat());
         newPix.setFilter(Pixmap.Filter.BiLinear);
         newPix.drawPixmap(
@@ -114,6 +110,14 @@ public class PixmapContainer {
             0, 0, newPix.getWidth(), newPix.getHeight() //Destination Pixmap
         );
         return newPix;
+    }
+
+    private boolean handleIsImage(FileHandle handle) {
+        if (handle.isDirectory())
+            return false;
+
+        String str = handle.toString().toLowerCase(Locale.ROOT);
+        return str.endsWith(".png") || str.endsWith(".jpg") || str.endsWith(".bmp");
     }
 
     private FileHandle getFileHandleFromName(String name) {

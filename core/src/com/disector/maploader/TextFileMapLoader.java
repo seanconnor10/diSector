@@ -13,6 +13,9 @@ import com.disector.assets.PixmapContainer;
 import com.disector.gameworld.GameWorld;
 
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -43,10 +46,12 @@ public class TextFileMapLoader implements MapLoader {
         Array<Wall> newWalls = new Array<>();
         Array<Sector> newSectors = new Array<>();
         Array<Material> newMaterials = new Array<>();
+        HashMap<String, Integer> newMaterialsNameToIndexMap = new HashMap<>();
 
         Sector sectorBuild = null;
         Wall wallBuild = null;
         Material materialBuild = null;
+        String materialName = null;
 
         while (in.hasNext()) {
             next = in.next().trim().toUpperCase();
@@ -62,8 +67,10 @@ public class TextFileMapLoader implements MapLoader {
                         wallBuild = null;
                         break;
                     case "MATERIAL":
+                        newMaterialsNameToIndexMap.put(materialName.toUpperCase(), newMaterials.size);
                         newMaterials.add(materialBuild);
                         materialBuild = null;
+                        materialName = null;
                         break;
                     default:
                         break;
@@ -146,7 +153,12 @@ public class TextFileMapLoader implements MapLoader {
                                     subMode = "NONE";
                                     break;
                                 case "MAT":
-                                    wallBuild.mat = Integer.parseInt(next);
+                                    if (canParseAsNumber(next)) {
+                                        wallBuild.mat = Integer.parseInt(next);
+                                    } else {
+                                        wallBuild.mat =
+                                            newMaterialsNameToIndexMap.getOrDefault(next.toUpperCase(), null);
+                                    }
                                     subMode = "NONE";
                                     break;
                                 case "UPPERMAT":
@@ -179,6 +191,7 @@ public class TextFileMapLoader implements MapLoader {
                             switch(subMode) {
                                 case "IMG":
                                     materialBuild.tex = pixmapContainer.pixmaps2.get(next.toUpperCase());
+                                    materialName = next;
                                     subMode = "NONE";
                                     break;
                                 case "SKY":
@@ -389,6 +402,19 @@ public class TextFileMapLoader implements MapLoader {
 
     private boolean isWallKeyword(String str) {
         return enumContains(str, WallKeyword.class);
+    }
+
+    private boolean canParseAsNumber(String str) {
+        boolean success;
+
+        try {
+            Double.parseDouble(str);
+            success = true;
+        } catch(NumberFormatException e) {
+            success = false;
+        }
+
+        return success;
     }
 
     private <E extends Enum<E>> boolean enumContains(String str, Class<E> enumClass) {

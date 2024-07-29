@@ -42,13 +42,11 @@ public class Editor {
     final MenuPanel menuPanel             = new MenuPanel(this);
     final PropertiesPanel propertiesPanel = new PropertiesPanel(this);
 
+    final Panel[] panels = new Panel[] { mapPanel, viewPanel, menuPanel, propertiesPanel };
+
     Layouts layout = Layouts.DEFAULT;
     Button clickedButton = null;
     Panel focusedPanel = mapPanel;
-
-    final Panel[] panels = new Panel[] {
-            mapPanel, viewPanel, menuPanel, propertiesPanel
-    };
 
     final Stack<EditAction> undoStack = new Stack<>();
 
@@ -97,8 +95,8 @@ public class Editor {
 
         stepStateObject();
 
-        updatePanel(dt);
-
+        updatePanel(dt);    //Update Panel before StateObject so the StateObject's onClick() isn't
+                            //called immediately if clicking created the StateObject
         callMouseClickActions();
 
         temporaryControls(dt);
@@ -111,6 +109,7 @@ public class Editor {
         //Draw Backgrounds of Panels and Buttons
         shape.begin(ShapeRenderer.ShapeType.Filled);
         Color col = new Color(0x100508FF);
+        //Color col = new Color(0x050608FF);
         for (Panel panel : panels) {
             col = col.mul(1.5f);
             shape.setColor(col);
@@ -143,6 +142,9 @@ public class Editor {
         //DrawLogText
         drawLog();
 
+        //Draw Name of active state if any
+        drawStateName();
+
         //End Batch and clear frame Textures
         batch.end();
         viewTex.getTexture().dispose();
@@ -155,7 +157,7 @@ public class Editor {
         }
 
         if (focusedPanel != null) {
-            shape.setColor(Color.PINK);
+            shape.setColor(Color.WHITE);
             shape.rect(focusedPanel.rect.x+1, focusedPanel.rect.y, focusedPanel.rect.width-1, focusedPanel.rect.height-1);
         }
 
@@ -167,10 +169,10 @@ public class Editor {
     private void onMouseClick() {
         Panel panelClicked = getPanelUnderMouse();
 
-        if (state == null || !state.ignoreEditorClick )
-            panelClicked.clickedIn();
         if (state != null)
             state.click();
+        if (state == null || !state.ignoreEditorClick )
+            panelClicked.clickedIn();
     }
 
     private void onMouseRightClick() {
@@ -375,6 +377,28 @@ public class Editor {
                     logPanel.rect.y+logPanel.rect.height-12-lineSpace*(logSize-1-i)
             );
         }
+    }
+
+    private void drawStateName() {
+        int lineSpace = (int) font.getLineHeight();
+
+        if (state == null)
+            return;
+
+        String text = state.visibleName;
+
+        //Draw Text-Shadow
+        font.setColor(Color.TEAL);
+        font.draw(batch, text,
+                logPanel.rect.x+9,
+                logPanel.rect.y+lineSpace+4
+        );
+        //Draw Main-Text
+        font.setColor(Color.GOLDENROD);
+        font.draw(batch, text,
+                logPanel.rect.x+12,
+                logPanel.rect.y+lineSpace
+        );
     }
 
     private Rectangle offsetRectBy(Rectangle rect, Rectangle offset) {

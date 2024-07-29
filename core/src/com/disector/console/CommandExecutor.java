@@ -149,6 +149,12 @@ public class CommandExecutor {
         return str.replaceAll("\n|\t|\b|\r", "");
     }
 
+    private String[] bundleString(String str) {
+        String[] bundle = new String[1];
+        bundle[0] = str;
+        return bundle;
+    }
+
     // -------------------------------------------------------------------
 
     @ConsoleCommand(helpText = "Toggle Fullscreen")
@@ -226,5 +232,19 @@ public class CommandExecutor {
     @ConsoleCommand(helpText = "")
     public void fov(int fov) {
         app.setRenderFov(fov);
+    }
+
+    @ConsoleCommand(helpText = "Reload current working map file")
+    public String[] reload() {
+        FileHandle file = app.activeMapFile;
+        String response = "";
+        if (file == null) {
+            response = "No Active Map File";
+            return bundleString(response);
+        }
+
+        app.loadMap(file.path());
+
+        return bundleString(response);
     }
 }

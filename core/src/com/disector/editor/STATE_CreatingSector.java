@@ -21,6 +21,7 @@ class STATE_CreatingSector extends EditorState {
     public STATE_CreatingSector(Editor editor, Panel panel) {
         super(editor, panel);
         ignoreEditorClick = true;
+        visibleName = "Creating Walls";
         init();
     }
 

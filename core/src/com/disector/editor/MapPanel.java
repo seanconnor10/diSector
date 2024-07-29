@@ -22,8 +22,8 @@ class MapPanel extends Panel {
         super.clickedIn();
 
         if (editor.state == null) {
-            //editor.state = new STATE_PlacingCamera(editor, this);
-            editor.state = new STATE_CreatingSector(editor, this);
+            editor.state = new STATE_PlacingCamera(editor, this);
+            //editor.state = new STATE_CreatingSector(editor, this);
         }
     }
 
@@ -49,6 +49,10 @@ class MapPanel extends Panel {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
             editor.state = new STATE_SplittingWall(editor, this);
+            return;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            editor.state = new STATE_CreatingSector(editor, this);
             return;
         }
 

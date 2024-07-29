@@ -3,6 +3,7 @@ package com.disector.editor;
 import com.disector.editor.actions.EditAction;
 
 abstract class EditorState {
+    String visibleName = "MISSING STATE NAME";
 
     final Editor editor;
     final Panel panel;
@@ -23,16 +24,16 @@ abstract class EditorState {
 
     abstract EditAction[] finish(); //Maybe return the EditAction for the undo stack here?
 
-    int x(){
-        int x = editor.mapPanel.getMouseWorldX();
-        if (editor.isGridSnapping) x = editor.snap(x);
-        return x;
-    }
+    int x(){return editor.isGridSnapping ? xSnapped() : xUnSnapped();}
 
-    int y(){
-        int y = editor.mapPanel.getMouseWorldY();
-        if (editor.isGridSnapping) y = editor.snap(y);
-        return y;
-    }
- 
+    int y(){return editor.isGridSnapping ? ySnapped() : yUnSnapped();}
+
+    int xUnSnapped() {return editor.mapPanel.getMouseWorldX();}
+
+    int yUnSnapped() {return editor.mapPanel.getMouseWorldY();}
+
+    int xSnapped() {return editor.snap(xUnSnapped());}
+
+    int ySnapped() {return editor.snap(yUnSnapped());}
+
 }

@@ -11,6 +11,7 @@ import com.disector.editor.actions.EditAction;
 public class STATE_SplittingWall extends EditorState {
     public STATE_SplittingWall(Editor editor, Panel panel) {
         super(editor, panel);
+        visibleName = "Splitting Walls";
         editor.messageLog.log("  Left Click to Perform Split");
         editor.messageLog.log("Splitting Walls");
     }

@@ -3,6 +3,7 @@ package com.disector;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -37,6 +38,7 @@ public class Application extends ApplicationAdapter {
     private DimensionalRenderer renderer;
     private GameMapRenderer gameMapRenderer;
     private Editor editor;
+    public FileHandle activeMapFile;
 
     private Console console;
 
@@ -151,7 +153,11 @@ public class Application extends ApplicationAdapter {
         } catch (Exception e) {
             System.out.println( "Error when loading map! " + e.getCause() + " " + e.getMessage() );
         }
+
         if (editor != null) editor.shouldUpdateViewRenderer = true;
+
+        activeMapFile = Gdx.files.local(filePath);
+
         return success;
     }
 

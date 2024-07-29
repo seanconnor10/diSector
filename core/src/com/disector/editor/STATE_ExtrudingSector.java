@@ -16,11 +16,13 @@ class STATE_ExtrudingSector extends EditorState {
     Sector newSector;
     final int initialWallIndex;
     Wall initialWall;
+    Wall initialWallCopy;
     Array<Wall> createdWalls = new Array<>();
     IntArray createdWallIndices = new IntArray();
 
     public STATE_ExtrudingSector(Editor editor, Panel panel) {
         super(editor, panel);
+        visibleName = "Extruding Wall as Portal";
         ignoreEditorClick = true;
         initialWallIndex = editor.selection.getWallHighlightIndex();
         if (initialWallIndex == -1) {
@@ -28,6 +30,7 @@ class STATE_ExtrudingSector extends EditorState {
             return;
         }
         initialWall = editor.selection.getWallHighlight();
+        initialWallCopy = new Wall(initialWall);
         if (initialWall.isPortal) {
             shouldFinish = true;
             return;
@@ -36,7 +39,6 @@ class STATE_ExtrudingSector extends EditorState {
     }
 
     void init() {
-
         setPreviousSector();
         newSectorIndex = editor.sectors.size;
         newSector = new Sector(previousSector, false);
@@ -128,8 +130,10 @@ class STATE_ExtrudingSector extends EditorState {
         newSector.walls.removeValue(wallIndex);
         editor.app.walls.removeIndex(wallIndex);
 
-        if (createdWalls.isEmpty())
+        if (createdWalls.isEmpty()) {
             shouldFinish = true;
+            initialWall.setFromCopy(initialWallCopy);
+        }
     }
 
     private void setPreviousSector() {

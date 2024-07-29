@@ -13,9 +13,7 @@ import com.disector.assets.PixmapContainer;
 import com.disector.gameworld.GameWorld;
 
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -23,14 +21,14 @@ public class TextFileMapLoader implements MapLoader {
     private final Array<Sector> sectors;
     private final Array<Wall> walls;
     private final GameWorld world;
-    private final PixmapContainer pixmapContainer;
+    private final PixmapContainer appTextures;
     private final Array<Material> materials;
 
     public TextFileMapLoader(Application app) {
         this.sectors = app.sectors;
         this.walls = app.walls;
         this.world = app.gameWorld;
-        this.pixmapContainer = app.textures;
+        this.appTextures = app.textures;
         this.materials = app.materials;
     }
 
@@ -51,7 +49,6 @@ public class TextFileMapLoader implements MapLoader {
         Sector sectorBuild = null;
         Wall wallBuild = null;
         Material materialBuild = null;
-        String materialName = null;
 
         while (in.hasNext()) {
             next = in.next().trim().toUpperCase();
@@ -67,10 +64,9 @@ public class TextFileMapLoader implements MapLoader {
                         wallBuild = null;
                         break;
                     case "MATERIAL":
-                        newMaterialsNameToIndexMap.put(materialName.toUpperCase(), newMaterials.size);
+                        newMaterialsNameToIndexMap.put( materialBuild.nameReference, newMaterials.size);
                         newMaterials.add(materialBuild);
                         materialBuild = null;
-                        materialName = null;
                         break;
                     default:
                         break;
@@ -190,8 +186,8 @@ public class TextFileMapLoader implements MapLoader {
                         } else {
                             switch(subMode) {
                                 case "IMG":
-                                    materialBuild.tex = pixmapContainer.pixmaps2.get(next.toUpperCase());
-                                    materialName = next;
+                                    //materialBuild.tex = appTextures.get(next.toUpperCase());
+                                    materialBuild.nameReference = next.toUpperCase();
                                     subMode = "NONE";
                                     break;
                                 case "SKY":
@@ -243,6 +239,8 @@ public class TextFileMapLoader implements MapLoader {
         for (Wall w : newWalls) {
             walls.add(new Wall(w));
         }
+
+        appTextures.loadArray(newMaterials);
 
         materials.clear();
         for (Material m : newMaterials) {
@@ -360,16 +358,8 @@ public class TextFileMapLoader implements MapLoader {
         }
         str.append(":: ");
 
-        //Seek out name of image that the material references
         str.append("IMG ");
-        String matOrigTexName = "ERROR";
-        for (Map.Entry<String, Pixmap[]> entry : pixmapContainer.pixmaps2.entrySet()) {
-            if (m.tex == entry.getValue()) {
-                matOrigTexName = entry.getKey().toLowerCase();
-                break;
-            }
-        }
-        str.append(matOrigTexName).append(" :: ");
+        str.append(m.nameReference).append(" :: ");
 
         if (m.isSky)
             str.append("SKY :: ");

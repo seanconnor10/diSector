@@ -6,25 +6,23 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 
-import java.sql.Time;
-import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TreeMap;
 
 public class PixmapContainer {
-    public Pixmap[][] pixmaps;
-    public TreeMap<String, Pixmap[]> pixmaps2;
-
-    public static final int MipMapNumber = 5;
     private static final FileHandle imgDir = Gdx.files.local("assets/img");
+    public static final int MipMapNumber = 5;
 
-    public void loadImages() {
+    public Pixmap[][] pixmaps;
+    private TreeMap<String, Pixmap[]> pixmapsByName;
+
+    public void loadFolder(String path) {
         Array<FileHandle> imgFiles = new Array<>();
 
-        System.out.println("Pixmap Container Loading Images...");
+        System.out.println("Pixmap Container Loading  All Images In " + imgDir);
 
-        for (FileHandle file : imgDir.list()) {
+        for (FileHandle file : imgDir.child(path) .list()) {
             if (handleIsImage(file))
                 imgFiles.add(file);
             System.out.println(handleIsImage(file) ? "    " + file : "    REJECTED " + file);
@@ -43,7 +41,7 @@ public class PixmapContainer {
         }
 
         //Make 'pixmaps2' String/Img Map
-        pixmaps2 = new TreeMap<>();
+        pixmapsByName = new TreeMap<>();
         for (int i=0; i<imgFiles.size; i++) {
             Texture temp = new Texture(imgFiles.get(i), Pixmap.Format.RGBA8888, false);
             if (!temp.getTextureData().isPrepared()) temp.getTextureData().prepare();
@@ -52,9 +50,52 @@ public class PixmapContainer {
             for (int k=1; k<MipMapNumber; k++) {
                 thisImgMips[k] = halvePixmap(thisImgMips[k-1]);
             }
-            pixmaps2.put(imgFiles.get(i).nameWithoutExtension().toUpperCase(), thisImgMips);
+            pixmapsByName.put(imgFiles.get(i).nameWithoutExtension().toUpperCase(), thisImgMips);
             temp.dispose();
         }
+    }
+
+    public void loadArray(Array<Material> blankMaterials) {
+        //Takes an Array of Materials without the Texture loaded,
+        //Loads the texture and adds reference to this PixmapContainer
+        System.out.println("Loading Textures from Materials Array");
+        pixmaps = new Pixmap[blankMaterials.size][MipMapNumber];
+        pixmapsByName = new TreeMap<>();
+
+        HashSet<String> loadedImages = new HashSet<>();
+
+        int i = 0;
+        for (Material mat : blankMaterials) {
+            FileHandle file = getFileHandleFromName(mat.nameReference);
+
+            if (loadedImages.contains(mat.nameReference)) {
+                mat.tex = get( mat.nameReference );
+                continue; //Avoid loading same image twice, even if two different
+            }
+
+            Texture temp = new Texture(file, Pixmap.Format.RGBA8888, false);
+            if (!temp.getTextureData().isPrepared()) temp.getTextureData().prepare();
+
+            pixmaps[i][0] = temp.getTextureData().consumePixmap();
+            for (int k=1; k<MipMapNumber; k++) {
+                pixmaps[i][k] = halvePixmap(pixmaps[i][k-1]);
+            }
+            mat.tex = pixmaps[i];
+            pixmapsByName.put(file.nameWithoutExtension().toUpperCase(), pixmaps[i]);
+
+            temp.dispose();
+
+            loadedImages.add(file.toString());
+
+            System.out.println("    " + file + " to index " + i);
+
+            i++;
+        }
+
+    }
+
+    public Pixmap[] get(String name) {
+        return pixmapsByName.getOrDefault(name, null);
     }
 
     private boolean handleIsImage(FileHandle handle) {
@@ -73,6 +114,19 @@ public class PixmapContainer {
             0, 0, newPix.getWidth(), newPix.getHeight() //Destination Pixmap
         );
         return newPix;
+    }
+
+    private FileHandle getFileHandleFromName(String name) {
+        FileHandle handle = null;
+
+        for (FileHandle file : imgDir.list()) {
+            if (handleIsImage(file) && file.nameWithoutExtension().equalsIgnoreCase(name)) {
+                handle = file;
+                break;
+            }
+        }
+
+        return handle;
     }
 
 }

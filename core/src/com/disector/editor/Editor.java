@@ -494,7 +494,7 @@ public class Editor {
         }
 
         //Temporary Toggle FullBright
-        if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.CONTROL_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.I)) {
             viewRenderer.fullBright = !viewRenderer.fullBright;
             messageLog.log("Full-Bright " + (viewRenderer.fullBright ? "ON" : "OFF"));
             shouldUpdateViewRenderer = true;

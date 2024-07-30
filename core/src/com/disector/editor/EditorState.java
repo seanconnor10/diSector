@@ -36,4 +36,16 @@ abstract class EditorState {
 
     int ySnapped() {return editor.snap(yUnSnapped());}
 
+    private boolean mouseOutsidePanel() {
+    int x = xUnSnapped();
+    int y = yUnSnapped();
+
+    return (
+        x < 0 ||
+        x >= panel.rect.width ||
+        y < 0 ||
+        y >= panel.rect.height
+    );
+    }
+
 }

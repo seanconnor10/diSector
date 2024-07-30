@@ -108,8 +108,19 @@ public class TextFileMapLoader implements MapLoader {
                                     sectorBuild.walls.add(Integer.parseInt(next));
                                     break;
                                 case "MAT":
-                                    sectorBuild.matFloor = Integer.parseInt(next);
-                                    sectorBuild.matCeil = Integer.parseInt(in.next());
+                                    if (canParseAsNumber(next)) {
+                                        sectorBuild.matFloor = Integer.parseInt(next);
+                                    } else {
+                                        sectorBuild.matFloor =
+                                            newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
+                                    }
+                                    next = in.next();
+                                    if (canParseAsNumber(next)) {
+                                        sectorBuild.matCeil = Integer.parseInt(next);
+                                    } else {
+                                        sectorBuild.matCeil =
+                                            newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
+                                    }
                                     subMode = "NONE";
                                     break;
                                 case "HEIGHT":
@@ -158,11 +169,21 @@ public class TextFileMapLoader implements MapLoader {
                                     subMode = "NONE";
                                     break;
                                 case "UPPERMAT":
-                                    wallBuild.matUpper = Integer.parseInt(next);
+                                    if (canParseAsNumber(next)) {
+                                        wallBuild.matUpper = Integer.parseInt(next);
+                                    } else {
+                                        wallBuild.matUpper =
+                                            newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
+                                    }
                                     subMode = "NONE";
                                     break;
                                 case "LOWERMAT":
-                                    wallBuild.matLower = Integer.parseInt(next);
+                                    if (canParseAsNumber(next)) {
+                                        wallBuild.matLower = Integer.parseInt(next);
+                                    } else {
+                                        wallBuild.matLower =
+                                            newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
+                                    }
                                     subMode = "NONE";
                                     break;
                                 case "LIGHT":

@@ -95,7 +95,7 @@ public class CommandExecutor {
         args = new Object[params.length];
 
         try {
-            for (int i = 0; i < params.length; i++) {
+            for (int i = 0; i<params.length && i<commandParts.length-1; i++) {
                 args[i] = stringToObject(commandParts[i+1], params[i]);
             }
         } catch (NumberFormatException e) {
@@ -104,10 +104,10 @@ public class CommandExecutor {
         }
 
         try {
-            Object returnArrayObject = method.invoke(this, args);
-            response = returnArrayObject == null ? null : ( (String[]) returnArrayObject ) [0];
+            String returnArrayObject = (String) method.invoke(this, args);
+            response = returnArrayObject; //== null ? null : ( (String[]) returnArrayObject ) [0];
         } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-            response = "Exception: " + e.getClass().getName();
+            response = "Exception: " + e.getCause() + e.getMessage();
         }
 
         return response;
@@ -149,12 +149,6 @@ public class CommandExecutor {
         return str.replaceAll("\n|\t|\b|\r", "");
     }
 
-    private String[] bundleString(String str) {
-        String[] bundle = new String[1];
-        bundle[0] = str;
-        return bundle;
-    }
-
     // -------------------------------------------------------------------
 
     @ConsoleCommand(helpText = "Toggle Fullscreen")
@@ -173,10 +167,8 @@ public class CommandExecutor {
     }
 
     @ConsoleCommand(helpText = "Toggle Vsync")
-    public String[] vsync() {
-        String[] response = new String[1];
-        response[0] = "Vsync " + (app.toggleVsync() ? "Enabled" : "Disabled");
-        return response;
+    public String Stringvsync() {
+        return "Vsync " + (app.toggleVsync() ? "Enabled" : "Disabled");
     }
 
     @ConsoleCommand(helpText = "Return to Desktop")
@@ -196,12 +188,29 @@ public class CommandExecutor {
 
     @ConsoleCommand(helpText = "Save Map Data to MAPS/")
     public void map_save(String path) {
-        app.saveMap(path);
+        if (path == null) {
+            app.saveMap(app.activeMapFile.path());
+        } else {
+            app.saveMap(path);
+        }
     }
 
-    @ConsoleCommand(helpText = "Load Map Data from MAPS/")
-    public void map(String path) {
-        app.loadMap("MAPS/" + path);
+    @ConsoleCommand(helpText = "Load Map Data from MAPS/ or Start New Map if not Found" )
+    public String map(String path) {
+        if (path == null || path.isEmpty()) return "Missing Argument";
+
+        FileHandle handle = Gdx.files.local("MAPS/" + path);
+        boolean loadSuccessful = app.loadMap(handle.path());
+
+        if (loadSuccessful)
+            return null;
+
+        if (!handle.exists()) {
+            app.activeMapFile = Gdx.files.local(handle.path().replaceFirst("MAPS/", ""));
+            return "File Not Found\n" + "Setting Working Path to " + handle;
+        } else {
+            return "File Found but Failed to Load";
+        }
     }
 
     @ConsoleCommand(helpText = "Load Old File Format Map from MAPS/")
@@ -210,7 +219,7 @@ public class CommandExecutor {
     }
 
     @ConsoleCommand(helpText = "Show files in MAPS folder")
-    public String[] map_list() {
+    public String map_list() {
         StringBuilder output = new StringBuilder();
         FileHandle[] files = Gdx.files.local("MAPS/").list();
         for (FileHandle f : files) {
@@ -219,9 +228,7 @@ public class CommandExecutor {
                 .append( f.path().replace("MAPS/", "") )
                 .append('\n');
         }
-        String[] returnValues = new String[1];
-        returnValues[0] = output.toString();
-        return  returnValues;
+        return output.toString();
     }
 
     @ConsoleCommand(helpText = "Return to game")
@@ -235,16 +242,12 @@ public class CommandExecutor {
     }
 
     @ConsoleCommand(helpText = "Reload current working map file")
-    public String[] reload() {
+    public String reload() {
         FileHandle file = app.activeMapFile;
-        String response = "";
         if (file == null) {
-            response = "No Active Map File";
-            return bundleString(response);
+            return "No Active Map File";
         }
-
         app.loadMap(file.path());
-
-        return bundleString(response);
+        return null;
     }
 }

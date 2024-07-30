@@ -97,7 +97,7 @@ public class Console {
                             break;
                         case Input.Keys.ENTER:
                             lineScroll = 0;
-                            processInput();
+                            executeEntry();
                             break;
                         case Input.Keys.PAGE_DOWN:
                             lineScroll = Math.max(0, lineScroll - (int) (Gdx.graphics.getHeight()*screenPercentage/lineHeight) );
@@ -168,7 +168,7 @@ public class Console {
         renderTransform.setToOrtho2D(0.0f,0.0f, Gdx.graphics.getWidth(), Gdx.graphics.getHeight() );
     }
 
-    private void processInput() {
+    private void executeEntry() {
         insertText(">> " + currentIn);
 
         String response = executor.execute(currentIn);

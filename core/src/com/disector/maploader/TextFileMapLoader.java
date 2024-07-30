@@ -108,19 +108,16 @@ public class TextFileMapLoader implements MapLoader {
                                     sectorBuild.walls.add(Integer.parseInt(next));
                                     break;
                                 case "MAT":
-                                    if (canParseAsNumber(next)) {
-                                        sectorBuild.matFloor = Integer.parseInt(next);
-                                    } else {
-                                        sectorBuild.matFloor =
-                                            newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
-                                    }
+                                    sectorBuild.matFloor = canParseAsNumber(next) ?
+                                        Integer.parseInt(next) :
+                                        newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
+
                                     next = in.next();
-                                    if (canParseAsNumber(next)) {
-                                        sectorBuild.matCeil = Integer.parseInt(next);
-                                    } else {
-                                        sectorBuild.matCeil =
-                                            newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
-                                    }
+
+                                    sectorBuild.matCeil = canParseAsNumber(next) ?
+                                        Integer.parseInt(next) :
+                                        newMaterialsNameToIndexMap.getOrDefault( next.toUpperCase(), -1);
+
                                     subMode = "NONE";
                                     break;
                                 case "HEIGHT":
@@ -390,14 +387,33 @@ public class TextFileMapLoader implements MapLoader {
         return str.toString();
     }
 
+    // ------------------------------------------------------
+
     private String form(double num) {
         //Prints a double as integer if no partial value
         return num % 1 == 0 ? ("" + (int) num) : ("" + num);
     }
 
     private String form2(double num) {
+        //Prints a double with two fractional digit
         return new DecimalFormat("#0.00").format(num);
     }
+
+    // ------------------------------------------------------
+
+    private <E extends Enum<E>> boolean enumContains(String str, Class<E> enumClass) {
+    E[] keywords = enumClass.getEnumConstants();
+
+    // Alternative method
+    // return Arrays.toString(keywords).toUpperCase().contains(str.toUpperCase());
+
+    for (E word : keywords) {
+        String wordName = word.toString();
+        if (wordName.equals(str)) return true;
+    }
+
+    return false;
+}
 
     private boolean isObjectKeyword(String str) {
         return enumContains(str, ObjectKeyword.class);
@@ -415,31 +431,45 @@ public class TextFileMapLoader implements MapLoader {
         return enumContains(str, WallKeyword.class);
     }
 
+    // ------------------------------------------------------
+
     private boolean canParseAsNumber(String str) {
         boolean success;
-
         try {
             Double.parseDouble(str);
             success = true;
         } catch(NumberFormatException e) {
             success = false;
         }
-
         return success;
     }
 
-    private <E extends Enum<E>> boolean enumContains(String str, Class<E> enumClass) {
-        E[] keywords = enumClass.getEnumConstants();
-
-        // Alternative method
-        // return Arrays.toString(keywords).toUpperCase().contains(str.toUpperCase());
-
-        for (E word : keywords) {
-            String wordName = word.toString();
-            if (wordName.equals(str)) return true;
+    private int parseIntOrDefault(String str, int defaultValue) {
+        try {
+            int value = Integer.parseInt(str);
+            return value;
+        } catch(NumberFormatException e) {
+            return defaultValue;
         }
-
-        return false;
     }
+
+    private int parseInt(String str) {
+        return parseIntOrDefault(str, -1);
+    }
+
+    private float parseFloatOrDefault(String str, float defaultValue) {
+        try {
+            float value = Float.parseFloat(str);
+            return value;
+        } catch(NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private float parseFloat(String str) {
+        return parseFloatOrDefault(str, 0f);
+    }
+
+    // ------------------------------------------------------
 
 }

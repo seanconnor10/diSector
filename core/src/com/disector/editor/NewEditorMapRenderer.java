@@ -48,6 +48,7 @@ class NewEditorMapRenderer {
     public void render() {
         frame.begin();
         ScreenUtils.clear(Color.BLACK);
+
         shape.begin(ShapeRenderer.ShapeType.Line);
 
         drawGrid();
@@ -63,6 +64,10 @@ class NewEditorMapRenderer {
             drawCameraWidget();
 
         shape.end();
+        shape.begin(ShapeRenderer.ShapeType.Filled);
+        drawVertices();
+        shape.end();
+
         frame.end();
     }
 
@@ -90,6 +95,14 @@ class NewEditorMapRenderer {
                     centerX + (float) ( Math.cos(wall.normalAngle) * Math.min(15.0f/zoom, 15.f) ),
                     centerY + (float) ( Math.sin(wall.normalAngle) * Math.min(15.0f/zoom, 15.f) )
             );
+        }
+    }
+
+    public void drawVertices() {
+        shape.setColor(Color.RED);
+        for (Wall wall : editor.walls) {
+            drawSquarePoint(wall.x1, wall.y1, 8);
+            drawSquarePoint(wall.x2, wall.y2, 8);
         }
     }
 
@@ -142,6 +155,15 @@ class NewEditorMapRenderer {
                 halfHeight+zoom*(y-camY),
                 halfWidth+zoom*(x2-camX),
                 halfHeight+zoom*(y2-camY)
+        );
+    }
+
+    private void drawSquarePoint(float x, float y, float length) {
+        shape.rect(
+                halfWidth+zoom*(x-camX)-(length/2f),
+                halfHeight+zoom*(y-camY)-(length/2f),
+                length,
+                length
         );
     }
 }

@@ -83,7 +83,7 @@ public class PixmapContainer {
 
             temp.dispose();
             loadedImages.add(file.toString());
-            System.out.println("    " + file + " to index " + i);
+            System.out.println("    " + i + ") " + file);
             i++;
         }
 

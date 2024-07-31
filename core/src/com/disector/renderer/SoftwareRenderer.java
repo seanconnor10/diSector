@@ -190,7 +190,7 @@ public class SoftwareRenderer extends DimensionalRenderer {
         try {
             textures = materials.get(w.mat).tex;
         } catch (Exception e) {
-            System.out.println("SoftwareRenderer: Caught Exception When grabbing texture");
+            //System.out.println("SoftwareRenderer: Caught Exception When grabbing texture");
             textures = ERROR_TEXTURE;
         }
         texturesLow = textures;

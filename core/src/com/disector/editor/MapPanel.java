@@ -56,6 +56,11 @@ class MapPanel extends Panel {
         }
         if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
             editor.state = new STATE_MovingVertices(editor, this);
+            return;
+        }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.N)) {
+            editor.state = new STATE_MakeInnerSubSector(editor, this);
+            return;
         }
 
     }

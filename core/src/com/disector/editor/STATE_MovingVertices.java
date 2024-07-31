@@ -21,6 +21,7 @@ public class STATE_MovingVertices extends EditorState {
     @Override
     void step() {
         if (grabbing) {
+            editor.shouldUpdateViewRenderer = true;
             if (!Gdx.input.isButtonPressed(Input.Buttons.LEFT))
                 letGo();
             else

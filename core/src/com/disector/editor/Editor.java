@@ -236,6 +236,8 @@ public class Editor {
         int view3DviewWidth = Math.min( MAX_RENDER_WIDTH, Math.round(viewPanel.rect.width));
         int view3DviewHeight = Math.min( MAX_RENDER_HEIGHT, Math.round(viewPanel.rect.height));
 
+        propertiesPanel.refreshPanelSize(propertiesPanel.rect);
+
         mapRenderer.refreshPanelSize(mapPanel.rect);
         viewRenderer.resizeFrame(view3DviewWidth, view3DviewHeight);
         mapRenderer.render();

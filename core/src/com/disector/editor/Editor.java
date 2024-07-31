@@ -126,9 +126,10 @@ public class Editor {
         batch.begin();
 
         //Draw Renderers' frames
-        TextureRegion viewTex = viewRenderer.copyPixels();;
+        TextureRegion viewTex = viewRenderer.copyPixels();
         drawFrameBuffer(mapPanel.rect, new TextureRegion(mapRenderer.frame.getColorBufferTexture()));
         drawFrameBuffer(viewPanel.rect, viewTex);
+        drawFrameBuffer(propertiesPanel.rect, new TextureRegion(propertiesPanel.frame.getColorBufferTexture()));
 
         //Draw Button Text
         for (Panel panel : panels) {
@@ -442,6 +443,7 @@ public class Editor {
             );
         }
         mapRenderer.render();
+        propertiesPanel.render();
         shouldUpdateViewRenderer = false;
     }
 

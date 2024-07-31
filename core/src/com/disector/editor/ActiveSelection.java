@@ -9,19 +9,19 @@ import com.disector.Wall;
 import com.disector.WallInfoPack;
 
 class ActiveSelection {
-    private final Editor editor;
-    private final Array<Wall> allWalls;
-    private final Array<Sector> allSectors;
+    final Editor editor;
+    final Array<Wall> allWalls;
+    final Array<Sector> allSectors;
 
-    private final IntArray sectorIndices;
-    private final Array<Sector> selectedSectors;
-    private final IntArray wallIndices;
-    private final Array<Wall> selectedWalls;
+    final IntArray sectorIndices;
+    final Array<Sector> selectedSectors;
+    final IntArray wallIndices;
+    final Array<Wall> selectedWalls;
 
-    private int highlightedSectorIndex;
-    private Sector highlightedSector;
-    private int highlightedWallIndex;
-    private Wall highlightedWall;
+    int highlightedSectorIndex;
+    Sector highlightedSector;
+    int highlightedWallIndex;
+    Wall highlightedWall;
 
     ActiveSelection(Array<Sector> sectors, Array<Wall> walls, Editor editor) {
         selectedSectors = new Array<>();
@@ -84,8 +84,9 @@ class ActiveSelection {
             if (wall.distToNearest < closestWall.distToNearest)
                 closestWall = wall;
         }
-
         setWallHighlight(closestWall.distToNearest>maxSelectionDistance ? -1 : closestWall.wInd);
+
+        setSectorHighlight(0);
     }
 
     void setWallHighlight(int wallIndex) {

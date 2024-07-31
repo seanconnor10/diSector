@@ -143,7 +143,7 @@ class NewEditorMapRenderer {
         drawLine(x, y, rx, ry);drawLine(lx, ly, rx, ry);
     }
 
-    // ----- Draw Primitives -----------------------------
+    // ----- Draw Primitives From World Coordinates -------------------
 
     private void drawCircle(float x, float y, float r) {
         shape.circle(halfWidth+zoom*(x-camX), halfHeight+zoom*(y-camY), r*zoom);

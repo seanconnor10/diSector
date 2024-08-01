@@ -10,8 +10,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
-
 import com.badlogic.gdx.utils.ScreenUtils;
+
 import com.disector.Config.Config;
 import com.disector.assets.Material;
 import com.disector.assets.PixmapContainer;

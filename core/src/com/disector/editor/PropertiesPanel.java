@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Matrix4;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.disector.Application;
 import com.disector.Sector;
 import com.disector.Wall;
+import com.disector.gui.Stage;
 
 class PropertiesPanel extends Panel {
     private final static Pixmap.Format pixelFormat = Pixmap.Format.RGBA8888;
@@ -26,6 +28,8 @@ class PropertiesPanel extends Panel {
     FrameBuffer frame;
     ShapeRenderer shape = new ShapeRenderer();
     SpriteBatch batch = new SpriteBatch();
+
+    Stage sectorFieldsStage = new Stage();
 
     PROPERTIES_PANEL_STATES state = PROPERTIES_PANEL_STATES.SHOW_SECTOR_FIELDS;
 
@@ -43,20 +47,13 @@ class PropertiesPanel extends Panel {
         frame = new FrameBuffer(pixelFormat, w, h, false);
         shape.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, w, h));
         batch.setProjectionMatrix(shape.getProjectionMatrix());
-    }
 
-    private void choseSectorByIndex(int sInd) {
-        if (sInd >= editor.sectors.size || sInd < 0) {
-            chosenSector = null;
-            chosenSectorIndex = -1;
-            return;
-        }
-        chosenSectorIndex = sInd;
-        chosenSector = editor.sectors.get(chosenSectorIndex);
+        sectorFieldsStage.refreshPanelSize(r.width, r.height);
     }
-
 
     void render() {
+        sectorFieldsStage.render();
+
         frame.begin();
         ScreenUtils.clear(Color.CLEAR);
         drawByState();
@@ -82,7 +79,12 @@ class PropertiesPanel extends Panel {
 
         if (sec == null) return;
 
-        final float LH = font.getLineHeight() + 6;
+        TextureRegion reg = sectorFieldsStage.getTexture();
+        batch.begin();
+        batch.draw(sectorFieldsStage.getTexture(), 0, 0 );
+        batch.end();
+
+        /*final float LH = font.getLineHeight() + 6;
         final float ST = rect.height - LH;
 
         batch.begin();
@@ -98,7 +100,7 @@ class PropertiesPanel extends Panel {
                  "Ceiling Z: " + sec.ceilZ,
                 30, ST - LH*2
             );
-        batch.end();
+        batch.end();*/
 
     }
 

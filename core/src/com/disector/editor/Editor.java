@@ -130,6 +130,7 @@ public class Editor {
         drawFrameBuffer(mapPanel.rect, new TextureRegion(mapRenderer.frame.getColorBufferTexture()));
         drawFrameBuffer(viewPanel.rect, viewTex);
         drawFrameBuffer(propertiesPanel.rect, new TextureRegion(propertiesPanel.frame.getColorBufferTexture()));
+        drawFrameBuffer(propertiesPanel.rect, new TextureRegion(propertiesPanel.frame.getColorBufferTexture()));
 
         //Draw Button Text
         for (Panel panel : panels) {

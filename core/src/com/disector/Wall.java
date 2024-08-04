@@ -4,8 +4,8 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Wall {
     //When adding more members, add to
-    //  complete constructor, copy constructor
-    //  copy setter, MapLoaders' save() and load()
+    //complete constructor, copy constructor
+    //copy setter, MapLoaders' save() and load()
     public float x1, y1, x2, y2;
     public boolean isPortal;
     public int linkA, linkB;

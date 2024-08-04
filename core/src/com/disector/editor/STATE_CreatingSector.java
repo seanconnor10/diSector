@@ -104,7 +104,15 @@ class STATE_CreatingSector extends EditorState {
     }
 
     private void setSector() {
-        sectorIndex = Physics.findCurrentSectorBranching(-1, x(), y());
+        /*sectorIndex = Physics.findCurrentSectorBranching(-1, x(), y());
+        if (sectorIndex == -1) {
+            isNewSector = true;
+            sectorIndex = editor.sectors.size;
+            editor.sectors.add(new Sector());
+        }
+        sector = editor.sectors.get(sectorIndex);*/
+
+        sectorIndex = editor.selection.highlightedSectorIndex;
         if (sectorIndex == -1) {
             isNewSector = true;
             sectorIndex = editor.sectors.size;

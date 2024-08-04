@@ -31,7 +31,7 @@ public class STATE_SplittingWall extends EditorState {
         WallInfoPack highlightedWall = new WallInfoPack(
                 editor.selection.getWallHighlight(),
                 editor.selection.getWallHighlightIndex(),
-                new Vector2(x(), y())
+                new Vector2( round(x()), round(y()) )
         );
 
         if (highlightedWall.distToNearest < editor.gridSize) {
@@ -62,17 +62,23 @@ public class STATE_SplittingWall extends EditorState {
 
         if (wall.w.isPortal) {
             editor.sectors.get(wall.w.linkA).addWallSafely(newWallIndex);
+            editor.sectors.get(wall.w.linkB).addWallSafely(newWallIndex);
         } else {
             Sector sector = findSectorHavingWallIndx(wall.wInd);
             if (sector != null)
                 sector.addWallSafely(newWallIndex);
         }
     }
+
     private Sector findSectorHavingWallIndx(int wallIndex) {
         for (Sector sector : editor.sectors) {
             if ( sector.walls.contains(wallIndex) )
                 return sector;
         }
         return null;
+    }
+
+    private float round(float val) {
+        return Math.round(val*100f)/100f;
     }
 }

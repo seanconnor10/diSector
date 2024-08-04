@@ -75,10 +75,12 @@ public class STATE_MovingVertices extends EditorState {
         for (Wall w : grabbedPointOnes) {
             w.x1 = x;
             w.y1 = y;
+            w.setNormalAngle();
         }
         for (Wall w : grabbedPointTwos) {
             w.x2 = x;
             w.y2 = y;
+            w.setNormalAngle();
         }
     }
 

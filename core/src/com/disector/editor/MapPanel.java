@@ -2,6 +2,7 @@ package com.disector.editor;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.utils.Null;
 
 class MapPanel extends Panel {
     public MapPanel(Editor editor) {
@@ -11,6 +12,10 @@ class MapPanel extends Panel {
     @Override
     void step(float dt) {
         super.step(dt);
+
+        if (editor.state == null) {
+            editor.selection.setHighlights(getMouseWorldX(), getMouseWorldY());
+        }
 
         keyActions();
 

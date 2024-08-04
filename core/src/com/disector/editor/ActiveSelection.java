@@ -4,6 +4,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 import com.badlogic.gdx.utils.IntArray;
+import com.disector.Physics;
 import com.disector.Sector;
 import com.disector.Wall;
 import com.disector.WallInfoPack;
@@ -73,6 +74,20 @@ class ActiveSelection {
     }
 
     void setHighlights(int mouseWorldX, int mouseWorldY) {
+        setWallHighlightAtPos(
+                mouseWorldX,
+                mouseWorldY
+        );
+
+        setSectorHighlight(
+                Physics.findCurrentSectorBranching(
+                        highlightedSectorIndex,
+                        mouseWorldX,
+                        mouseWorldY)
+        );
+    }
+
+    void setWallHighlightAtPos(int mouseWorldX, int mouseWorldY) {
         final float maxSelectionDistance = 5;
         if (allWalls.size == 0)
             return;
@@ -85,8 +100,6 @@ class ActiveSelection {
                 closestWall = wall;
         }
         setWallHighlight(closestWall.distToNearest>maxSelectionDistance ? -1 : closestWall.wInd);
-
-        setSectorHighlight(0);
     }
 
     void setWallHighlight(int wallIndex) {

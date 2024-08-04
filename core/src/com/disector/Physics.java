@@ -17,7 +17,12 @@ public class Physics {
          */
         int intersections = 0;
         for (Integer wInd : sec.walls.toArray()) {
-            Vector2 intersect = rayWallIntersection(walls.get(wInd), 0.f, x, y, false);
+            /*
+                Giving rayWallIntersection a non-zero angle fixing containsPoint failing
+                This all worked correctly in the previous SectorGame where a Wall's
+                Points were Integers not Floats... Fix at some point..
+             */
+            Vector2 intersect = rayWallIntersection(walls.get(wInd), 0, x, y, false);
             if (intersect != null && intersect.x > x)
                 intersections++;
         }
@@ -96,13 +101,14 @@ public class Physics {
          * Returns the position of an intersection between a ray and a Wall
          * If allowBehind is enabled, the ray is cast backwards as well
          */
-        float raySlope = (float) ( Math.sin(angle) / Math.cos(angle) );
+
+        float raySlope = angle == 0.0 ? 0.f : (float) ( Math.sin(angle) / Math.cos(angle) );
 
         //If wall is horizontal
         if (w.y1 == w.y2) {
             if (!allowBehind) {
-                if (Math.sin(angle) > 0 && rayY > w.y1) return null;
-                if (Math.sin(angle) < 0 && rayY < w.y1) return null;
+                if (Math.sin(angle) > 0.0 && rayY > w.y1) return null;
+                if (Math.sin(angle) < 0.0 && rayY < w.y1) return null;
             }
             float deltaY = w.y1-rayY;
             float intersectX = rayX + deltaY/raySlope;
@@ -111,7 +117,7 @@ public class Physics {
         }
 
         //Is wall is vertical
-        if (w.x1 == w.x2) {
+        if (w.x1 == w.x2){
             if (!allowBehind) {
                 if (Math.cos(angle) > 0.0 && rayX > w.x1) return null;
                 if (Math.cos(angle) < 0.0 && rayY < w.x1) return null;
@@ -145,9 +151,14 @@ public class Physics {
     }
 
     public static boolean isBetween(float var, float bound1, float bound2) {
+        /*
+            Including only the second bound is ESSENTIAL for ensuring
+            a ray does not collide at the join of the walls and think
+            it is hitting two separate walls!
+         */
         if (bound2 > bound1)
-            return (var > bound1 && var < bound2);
-        return (var > bound2 && var < bound1);
+            return (var > bound1 && var <= bound2);
+        return (var >= bound2 && var < bound1);
         //return (var > bound1) ^ (var > bound2); //May or may not include bounds
     }
 
@@ -207,4 +218,7 @@ public class Physics {
         objPos.y += (float) Math.sin(collisionInfo.w.normalAngle) * resolutionDistance;
     }
 
+    private static boolean almostSame(float n, float m) {
+        return (Math.abs(n - m) < 0.1f);
+    }
 }

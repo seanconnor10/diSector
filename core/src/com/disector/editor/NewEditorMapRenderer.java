@@ -84,8 +84,8 @@ class NewEditorMapRenderer {
 
             drawLine(wall.x1, wall.y1, wall.x2, wall.y2);
 
-            if (wall.isPortal) continue;
             //Draw Normal Notch
+            //if (wall.isPortal) continue;
             shape.getColor().a *= 0.6f;
             float centerX = (wall.x1 + wall.x2) / 2f;
             float centerY = (wall.y1 + wall.y2) / 2f;

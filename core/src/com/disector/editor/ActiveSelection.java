@@ -81,7 +81,7 @@ class ActiveSelection {
 
         setSectorHighlight(
                 Physics.findCurrentSectorBranching(
-                        highlightedWallIndex,
+                        highlightedSectorIndex,
                         mouseWorldX,
                         mouseWorldY)
         );

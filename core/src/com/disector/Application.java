@@ -19,6 +19,7 @@ import com.disector.console.CommandExecutor;
 import com.disector.console.Console;
 import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
+import com.disector.inputrecorder.InputBranch;
 import com.disector.inputrecorder.InputRecorder;
 import com.disector.maploader.OldTextFormatMapLoader;
 import com.disector.renderer.DimensionalRenderer;
@@ -41,6 +42,9 @@ public class Application extends ApplicationAdapter {
     public FileHandle activeMapFile;
 
     private Console console;
+
+    private InputBranch appInputListener;
+    private InputBranch consoleInputListener;
 
     private AppFocusTarget focus;
 
@@ -83,6 +87,9 @@ public class Application extends ApplicationAdapter {
 
         InputRecorder.repopulateKeyCodeMap();
         Gdx.input.setCursorCatched(true);
+
+        appInputListener = InputRecorder.instance.addChild();
+        consoleInputListener = InputRecorder.instance.addChild();
 
         createTestMap();
         createTestMaterial();

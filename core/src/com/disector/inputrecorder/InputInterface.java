@@ -9,4 +9,8 @@ public interface InputInterface {
     Array<InputInterface> getChildren();
     InputInterface getParent();
     InputBranch addChild();
+    boolean isLowestActiveListener();
+    boolean isActive();
+    void disable();
+    void enable();
 }

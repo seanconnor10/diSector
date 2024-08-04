@@ -3,7 +3,6 @@ package com.disector.inputrecorder;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.InputMultiplexer;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -17,7 +16,7 @@ public class InputRecorder extends InputAdapter implements InputInterface {
     public static int keyCount;
     public static float mouseDeltaX, mouseDeltaY;
 
-    private static final InputRecorder instance = new InputRecorder();
+    public static final InputRecorder instance = new InputRecorder();
 
     private InputRecorder() {} //Disallow outside instantiation beyond InputRecorder::instance..
     private final Array<InputInterface> children = new Array<>();
@@ -35,6 +34,51 @@ public class InputRecorder extends InputAdapter implements InputInterface {
     @Override
     public boolean isKeyDown(int keyCode) {
         return Gdx.input.isKeyPressed(keyCode);
+    }
+
+    @Override
+    public Array<InputInterface> getChildren() {
+        return children;
+    }
+
+    @Override
+    public InputInterface getParent() {
+        return null;
+    }
+
+    @Override
+    public InputBranch addChild() {
+        InputBranch newBranch = new InputBranch(this);
+        children.add(newBranch);
+        return newBranch;
+    }
+
+    @Override
+    public boolean isLowestActiveListener() {
+        if (children.isEmpty()) return true;
+
+        for (InputInterface i : children) {
+            if (i.isActive())
+                return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean isActive() {
+        return true;
+    }
+
+    @Override
+    public void disable() {
+
+    }
+
+    @Override
+    public void enable() {
+        for (InputInterface child : children) {
+            child.disable();
+        }
     }
 
     public static void updateKeys() {

@@ -45,15 +45,25 @@ public class InputBranch implements InputInterface {
         return parent;
     }
 
+    @Override
     public boolean isActive() {
         return isActive;
     }
 
+    @Override
     public void disable() {
         isActive = false;
+        for (InputInterface child : children) {
+            child.disable();
+        }
     }
 
+    @Override
     public void enable() {
         isActive = true;
+        parent.enable();
+        for (InputInterface child : children) {
+            child.disable();
+        }
     }
 }

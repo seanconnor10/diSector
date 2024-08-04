@@ -147,9 +147,14 @@ public class Editor {
         //Draw Name of active state if any
         drawStateName();
 
+        //Draw Current Highlighted Sector and Wall
         font.draw(batch, "" + selection.highlightedWallIndex,
             mapPanel.rect.x + mapPanel.rect.width - 48,
             mapPanel.rect.y + mapPanel.rect.height - 24
+        );
+        font.draw(batch, "" + selection.highlightedSectorIndex,
+            mapPanel.rect.x + mapPanel.rect.width - 48,
+            mapPanel.rect.y + mapPanel.rect.height - 72
         );
 
         //End Batch and clear frame Textures

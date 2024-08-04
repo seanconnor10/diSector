@@ -21,6 +21,7 @@ import com.disector.editor.Editor;
 import com.disector.gameworld.GameWorld;
 import com.disector.inputrecorder.InputRecorder;
 import com.disector.maploader.OldTextFormatMapLoader;
+import com.disector.renderer.AnimationSavingSoftwareRenderer;
 import com.disector.renderer.DimensionalRenderer;
 import com.disector.renderer.GameMapRenderer;
 import com.disector.renderer.SoftwareRenderer;
@@ -204,7 +205,7 @@ public class Application extends ApplicationAdapter {
         switch (target) {
             case GAME:
                 if (gameWorld==null) gameWorld = new GameWorld(this);
-                if (renderer==null) renderer = new SoftwareRenderer(this);
+                if (renderer==null) renderer = new AnimationSavingSoftwareRenderer(this);
                 if (gameMapRenderer==null) gameMapRenderer = new GameMapRenderer(this, gameWorld);
                 Gdx.input.setCursorCatched(true);
                 break;

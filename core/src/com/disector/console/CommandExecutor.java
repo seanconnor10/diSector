@@ -251,4 +251,8 @@ public class CommandExecutor {
         return null;
     }
 
+    @ConsoleCommand(helpText = "Prints Current Working Map File of Editor")
+    public String file() {
+        return app.activeMapFile.path();
+    }
 }

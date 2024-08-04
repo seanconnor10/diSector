@@ -147,6 +147,11 @@ public class Editor {
         //Draw Name of active state if any
         drawStateName();
 
+        font.draw(batch, "" + selection.highlightedWallIndex,
+            mapPanel.rect.x + mapPanel.rect.width - 48,
+            mapPanel.rect.y + mapPanel.rect.height - 24
+        );
+
         //End Batch and clear frame Textures
         batch.end();
         viewTex.getTexture().dispose();

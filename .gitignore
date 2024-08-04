@@ -1,5 +1,8 @@
-## Java
+## My Things
+OUTPUT/*
+ScreenDrawingAnimation.gif
 
+## Java
 *.class
 *.war
 *.ear

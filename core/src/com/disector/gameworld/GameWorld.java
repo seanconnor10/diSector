@@ -36,7 +36,7 @@ public class GameWorld {
     public void step(float dt) {
         this.dt = dt;
 
-        if (InputRecorder.getKeyInfo("DISPLAY_MAP").justPressed)
+        if (InputRecorder.getAbsoluteKeyInfo("DISPLAY_MAP").justPressed)
             shouldDisplayMap = !shouldDisplayMap;
 
         player1.movementInput(dt);

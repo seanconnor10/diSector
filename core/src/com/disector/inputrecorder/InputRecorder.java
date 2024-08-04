@@ -1,20 +1,27 @@
 package com.disector.inputrecorder;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputProcessor;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.HashMap;
 
-public class InputRecorder {
+public class InputRecorder implements InputInterface {
     public static boolean ignoreInput;
     public static Map<String, Integer> keyBinds = new HashMap<>();
-    public static Map<Integer, keyPressData> keyPressMap = new HashMap<>();
+    public static Map<Integer, KeyPressData> keyPressMap = new HashMap<>();
 
     public static int keyCount;
-
     public static float mouseDeltaX, mouseDeltaY;
+
+    private static final InputRecorder instance = new InputRecorder();
+
+    private InputRecorder() {} //Disallow outside instantiation beyond InputRecorder::instance..
+
+    @Override
+    public KeyPressData getKeyInfo(String actionName) {
+        return InputRecorder.getAbsoluteKeyInfo(actionName);
+    }
 
     public static void updateKeys() {
         mouseDeltaX = Gdx.input.getDeltaX();
@@ -23,7 +30,7 @@ public class InputRecorder {
         if (ignoreInput)
             return;
 
-        for (Map.Entry<Integer, keyPressData> keyEntry : keyPressMap.entrySet()) {
+        for (Map.Entry<Integer, KeyPressData> keyEntry : keyPressMap.entrySet()) {
             keyEntry.getValue().justReleased = keyEntry.getValue().isDown && !Gdx.input.isKeyPressed(keyEntry.getKey());
             keyEntry.getValue().isDown = Gdx.input.isKeyPressed(keyEntry.getKey());
             keyEntry.getValue().justPressed = Gdx.input.isKeyJustPressed(keyEntry.getKey());
@@ -53,15 +60,15 @@ public class InputRecorder {
 
         keyPressMap.clear(); //Map of keyCodes assigned to an action and a keyPressData for each
         for (Integer code : keyBinds.values() ) {
-            keyPressMap.put(code, new keyPressData() );
+            keyPressMap.put(code, new KeyPressData() );
         }
         //System.out.println("InputRecorder::KeyPressMap = " + keyPressMap.entrySet().toString());
 
         keyCount = keyPressMap.size();
     }
 
-    public static keyPressData getKeyInfo(String actionName) {
-        keyPressData data = keyPressMap.getOrDefault( keyBinds.getOrDefault(actionName, -1), null );
+    public static KeyPressData getAbsoluteKeyInfo(String actionName) {
+        KeyPressData data = keyPressMap.getOrDefault( keyBinds.getOrDefault(actionName, -1), null );
         if (data == null) {
             throw new RuntimeException("Action: " + actionName + " not found in KeyBind map.");
         }
@@ -70,17 +77,6 @@ public class InputRecorder {
 
     public static String mapToString() {
         return "InputRecorder::KeyCodeMap = " + keyBinds.toString().replace("}", "\n}").replace("{", "{\n    ").replace(", ", ", \n    ");
-    }
-
-    public static class keyPressData {
-        public boolean isDown, justPressed, justReleased;
-
-        @Override
-        public String toString() {
-            String str = (isDown ? "CurrentlyPressed " : "") + (justPressed ? "NewlyPressed " : "") + (justReleased ? "NewlyReleased " : "");
-            if (str.isEmpty()) str = "none";
-            return str;
-        }
     }
 
 }

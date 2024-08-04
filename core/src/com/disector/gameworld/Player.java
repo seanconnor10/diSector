@@ -39,14 +39,14 @@ public class Player implements Movable {
         Vector2 startingPosition = copyPosition();
 
         //Record needed button presses
-        boolean forwardDown = InputRecorder.getKeyInfo("FORWARD").isDown;
-        boolean leftDown = InputRecorder.getKeyInfo("LEFT").isDown;
-        boolean rightDown = InputRecorder.getKeyInfo("RIGHT").isDown;
-        boolean backwardDown = InputRecorder.getKeyInfo("BACKWARD").isDown;
-        boolean turnLeftDown = InputRecorder.getKeyInfo("TURN_LEFT").isDown;
+        boolean forwardDown   = InputRecorder.getKeyInfo("FORWARD")   .isDown;
+        boolean leftDown      = InputRecorder.getKeyInfo("LEFT")      .isDown;
+        boolean rightDown     = InputRecorder.getKeyInfo("RIGHT")     .isDown;
+        boolean backwardDown  = InputRecorder.getKeyInfo("BACKWARD")  .isDown;
+        boolean turnLeftDown  = InputRecorder.getKeyInfo("TURN_LEFT") .isDown;
         boolean turnRightDown = InputRecorder.getKeyInfo("TURN_RIGHT").isDown;
-        boolean lookUpDown = InputRecorder.getKeyInfo("LOOK_UP").isDown;
-        boolean lookDownDown = InputRecorder.getKeyInfo("LOOK_DOWN").isDown;
+        boolean lookUpDown    = InputRecorder.getKeyInfo("LOOK_UP")   .isDown;
+        boolean lookDownDown  = InputRecorder.getKeyInfo("LOOK_DOWN") .isDown;
 
         //Find input vector
         Vector2 inputVector = new Vector2(0.f, 0.f);

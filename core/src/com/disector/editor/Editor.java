@@ -130,6 +130,7 @@ public class Editor {
         drawFrameBuffer(mapPanel.rect, new TextureRegion(mapRenderer.frame.getColorBufferTexture()));
         drawFrameBuffer(viewPanel.rect, viewTex);
         drawFrameBuffer(propertiesPanel.rect, new TextureRegion(propertiesPanel.frame.getColorBufferTexture()));
+        drawFrameBuffer(propertiesPanel.rect, new TextureRegion(propertiesPanel.frame.getColorBufferTexture()));
 
         //Draw Button Text
         for (Panel panel : panels) {
@@ -145,6 +146,11 @@ public class Editor {
 
         //Draw Name of active state if any
         drawStateName();
+
+        font.draw(batch, "" + selection.highlightedWallIndex,
+            mapPanel.rect.x + mapPanel.rect.width - 48,
+            mapPanel.rect.y + mapPanel.rect.height - 24
+        );
 
         //End Batch and clear frame Textures
         batch.end();

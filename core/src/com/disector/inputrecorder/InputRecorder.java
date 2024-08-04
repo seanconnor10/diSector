@@ -1,12 +1,15 @@
 package com.disector.inputrecorder;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.InputMultiplexer;
 
 import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.HashMap;
 
-public class InputRecorder implements InputInterface {
+public class InputRecorder extends InputAdapter implements InputInterface {
     public static boolean ignoreInput;
     public static Map<String, Integer> keyBinds = new HashMap<>();
     public static Map<Integer, KeyPressData> keyPressMap = new HashMap<>();
@@ -17,10 +20,21 @@ public class InputRecorder implements InputInterface {
     private static final InputRecorder instance = new InputRecorder();
 
     private InputRecorder() {} //Disallow outside instantiation beyond InputRecorder::instance..
+    private final Array<InputInterface> children = new Array<>();
 
     @Override
     public KeyPressData getKeyInfo(String actionName) {
         return InputRecorder.getAbsoluteKeyInfo(actionName);
+    }
+
+    @Override
+    public boolean justPressed(int keyCode) {
+        return Gdx.input.isKeyJustPressed(keyCode);
+    }
+
+    @Override
+    public boolean isKeyDown(int keyCode) {
+        return Gdx.input.isKeyPressed(keyCode);
     }
 
     public static void updateKeys() {
